@@ -1,0 +1,2234 @@
+{
+  "actors": {
+    "R1": "Phòng Đào tạo",
+    "R2": "Ban lãnh đạo khoa",
+    "R3": "Giám đốc CTĐT",
+    "R4": "Trưởng nhóm chuyên môn",
+    "R5": "Giảng viên",
+    "R6": "Sinh viên",
+    "E1": "Hệ thống dữ liệu trường\n(nguồn chỉ đọc)",
+    "E2": "Dịch vụ email\n(tích hợp giả định)",
+    "E3": "Ứng dụng dDUT"
+  },
+  "usecases": {
+    "UC-01": {
+      "name": "Đăng nhập / kết thúc phiên",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "R6"
+      ],
+      "fr": [],
+      "detail": "Tài khoản nội bộ theo Q-13; hết phiên sau 60 phút không hoạt động (NFR-08). Tiền điều kiện chung của nghiệp vụ là phiên hợp lệ và quyền đúng phạm vi. Không suy diễn chức năng SSO hay quên mật khẩu.",
+      "level": "BS"
+    },
+    "UC-02": {
+      "name": "Quản lý cây đơn vị và nhóm chuyên môn",
+      "actors": [
+        "R1"
+      ],
+      "fr": [
+        1,
+        2
+      ],
+      "detail": "Thêm, sửa, ngừng hoạt động; cây Trường - Phòng/Khoa - Nhóm. Không xóa mất dấu vết lịch sử.",
+      "level": "BB"
+    },
+    "UC-03": {
+      "name": "Phân công thành viên nhóm chuyên môn",
+      "actors": [
+        "R1",
+        "R2"
+      ],
+      "fr": [
+        3
+      ],
+      "detail": "Một giảng viên có thể thuộc nhiều nhóm. R4 chỉ đề xuất thay đổi qua UC-09.",
+      "level": "BB"
+    },
+    "UC-04": {
+      "name": "Chỉ định trưởng nhóm chuyên môn",
+      "actors": [
+        "R1"
+      ],
+      "fr": [
+        4
+      ],
+      "detail": "Lưu thời gian hiệu lực. SRS không chỉ rõ quyền của R2 cho việc chỉ định trưởng nhóm; tạm dùng R1 theo quyền quản trị.",
+      "level": "BB"
+    },
+    "UC-05": {
+      "name": "Quản lý tài khoản người dùng",
+      "actors": [
+        "R1"
+      ],
+      "fr": [
+        6
+      ],
+      "detail": "Tạo, sửa, vô hiệu hóa. Cấm xóa cứng tài khoản đã phát sinh giao dịch; đề xuất đang xử lý tiếp tục tồn tại.",
+      "level": "BB"
+    },
+    "UC-06": {
+      "name": "Gán vai trò và phạm vi quyền",
+      "actors": [
+        "R1"
+      ],
+      "fr": [
+        7,
+        10
+      ],
+      "detail": "Một người nhiều vai trò; từng vai trò kèm phạm vi đối tượng, thời hạn; ghi nhật ký mọi thay đổi.",
+      "level": "BB"
+    },
+    "UC-07": {
+      "name": "Phân công Giám đốc CTĐT",
+      "actors": [
+        "R1"
+      ],
+      "fr": [
+        8,
+        26
+      ],
+      "detail": "Phân công một người phụ trách nhiều CTĐT và ghi nhận thời hạn. R2 đề xuất bằng UC-09.",
+      "level": "BB"
+    },
+    "UC-08": {
+      "name": "Ủy quyền phê duyệt có thời hạn",
+      "actors": [
+        "R1",
+        "R3",
+        "R4"
+      ],
+      "fr": [
+        9
+      ],
+      "detail": "Người có quyền duyệt ủy quyền trong phạm vi và thời hạn hợp lệ; tự hết hiệu lực khi hết hạn. Quyền thực hiện cụ thể cần xác nhận vì bảng 3.4 chưa có dòng ủy quyền.",
+      "level": "NC"
+    },
+    "UC-09": {
+      "name": "Đề xuất thay đổi tổ chức / phân công",
+      "actors": [
+        "R2",
+        "R4"
+      ],
+      "fr": [],
+      "detail": "R2: đề xuất đơn vị, nhóm, phân công GĐ; R4: chỉ đề xuất thành viên nhóm. Đây là quyền nêu tại mục 3.4; SRS chưa định nghĩa tuyến duyệt loại đề xuất này, tạm chuyển R1 xem xét.",
+      "level": "BB"
+    },
+    "UC-10": {
+      "name": "Tra cứu danh mục học phần",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "R6"
+      ],
+      "fr": [
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "detail": "Xem/tìm học phần dùng chung; tên Việt bắt buộc, Anh tùy chọn; loại HP, trạng thái, khoa/nhóm; tín chỉ thực không âm, gồm 0 và 2.5. R6 xem dữ liệu được công bố, không mở quyền xem nháp.",
+      "level": "BB"
+    },
+    "UC-11": {
+      "name": "Soạn thay đổi thông tin học phần",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4"
+      ],
+      "fr": [
+        5,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "detail": "Thêm/sửa mã, tên, tín chỉ, loại, đơn vị phụ trách; ghi nhận HP thuộc khoa khác. R1 quản trị dữ liệu chưa ban hành; R2-R4 chỉ soạn trong đề xuất. Không cho R5 sửa danh mục. Luôn xem phạm vi CTĐT bị ảnh hưởng trước khi sửa HP hiện có.",
+      "level": "BB"
+    },
+    "UC-12": {
+      "name": "Đổi trạng thái sử dụng học phần",
+      "actors": [
+        "R1"
+      ],
+      "fr": [
+        15
+      ],
+      "detail": "Đang sử dụng / Ngừng mở lớp / Đã hủy; ngừng mở phải có HP thay thế. Có người học thì không xóa cứng (EC-50). Dữ liệu đã ban hành vẫn phải qua đề xuất.",
+      "level": "BB"
+    },
+    "UC-13": {
+      "name": "Soạn quan hệ phụ thuộc / thay thế",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4"
+      ],
+      "fr": [
+        18,
+        19,
+        20
+      ],
+      "detail": "Học trước, tiên quyết có ngưỡng điểm, song hành, thay thế. Tương đương tách sang UC-14 vì quyền khác. Chặn chu trình học trước/tiên quyết khi lưu; HP ngoài khung cảnh báo.",
+      "level": "BB"
+    },
+    "UC-14": {
+      "name": "Soạn nhóm học phần tương đương",
+      "actors": [
+        "R1",
+        "R2",
+        "R3"
+      ],
+      "fr": [
+        18,
+        21
+      ],
+      "detail": "Quan hệ hai chiều và bắc cầu; nhóm dùng chung toàn trường, xuyên chương trình và phiên bản. R2/R3 chỉ đề xuất; R4 không có quyền khai báo tương đương theo 3.4.",
+      "level": "BB"
+    },
+    "UC-15": {
+      "name": "Xem đồ thị quan hệ học phần",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "R6"
+      ],
+      "fr": [
+        22
+      ],
+      "detail": "Hiển thị trực quan quan hệ; quyền tra cứu kế thừa phạm vi xem danh mục, SV chỉ xem dữ liệu công bố. Quyền xem đồ thị là diễn giải từ quyền xem danh mục.",
+      "level": "NC"
+    },
+    "UC-16": {
+      "name": "Xác định CTĐT bị ảnh hưởng",
+      "actors": [],
+      "fr": [
+        17
+      ],
+      "detail": "Hành vi hỗ trợ bắt buộc trước khi sửa học phần hiện có và đề cương dùng chung; chỉ rõ mọi CTĐT sử dụng HP. Không phải một tác nhân hệ thống.",
+      "level": "BB"
+    },
+    "UC-17": {
+      "name": "Kiểm tra chu trình phụ thuộc",
+      "actors": [],
+      "fr": [
+        20,
+        80
+      ],
+      "detail": "Kiểm tra đồ thị học trước/tiên quyết; từ chối lưu quan hệ gây chu trình và chỉ đường đi. Không suy diễn quy tắc này tự bao phủ chu trình song hành.",
+      "level": "BB"
+    },
+    "UC-18": {
+      "name": "Tra cứu chương trình và khung",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "R6"
+      ],
+      "fr": [
+        23,
+        24,
+        28,
+        32,
+        88,
+        89
+      ],
+      "detail": "Xem thông tin Kỹ sư/Cử nhân, khung nhóm theo học kỳ, tổng TC, lọc/tìm theo học kỳ, khối, bắt buộc/tự chọn. SV: đúng phiên bản được gắn, kèm trạng thái Đã đạt/Đang học/Chưa học/Không đạt.",
+      "level": "BB"
+    },
+    "UC-19": {
+      "name": "Soạn thông tin chương trình",
+      "actors": [
+        "R1",
+        "R2",
+        "R3"
+      ],
+      "fr": [
+        23,
+        24,
+        26
+      ],
+      "detail": "Mã/tên CTĐT, ngành, trình độ, khóa, số học kỳ, tổng TC/bắt buộc/tự chọn; liên kết GĐ được phân công. R3 chỉ CTĐT phụ trách; không khởi tạo chương trình mới từ đầu.",
+      "level": "BB"
+    },
+    "UC-20": {
+      "name": "Nhân bản CTĐT cho khóa mới",
+      "actors": [
+        "R1",
+        "R2",
+        "R3"
+      ],
+      "fr": [
+        25
+      ],
+      "detail": "Chọn CTĐT nền, sao chép nội dung thành bản làm việc cho khóa mới; không tự ban hành. R2/R3 chỉ đề xuất nhân bản, R3 trong phạm vi phụ trách.",
+      "level": "BB"
+    },
+    "UC-21": {
+      "name": "Soạn và bố trí khung chương trình",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4"
+      ],
+      "fr": [
+        27,
+        30
+      ],
+      "detail": "Đủ trường mục 4.3; thêm/sửa/bỏ dòng ở bản làm việc, đổi thứ tự/chuyển học kỳ. Chặn trùng HP, xung đột bắt buộc/tự chọn, học kỳ vượt số khai báo. Giữ cờ HT ĐA/TQ ĐA và Ký hiệu nguyên trạng.",
+      "level": "BB"
+    },
+    "UC-22": {
+      "name": "Khai báo nhóm học phần tự chọn",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4"
+      ],
+      "fr": [
+        29
+      ],
+      "detail": "Đặt TC tối thiểu hoặc số HP tối thiểu từng nhóm; danh sách lựa chọn có thể lớn hơn hạn mức. Là một phần soạn khung, không phải sửa trực tiếp bản công bố.",
+      "level": "BB"
+    },
+    "UC-23": {
+      "name": "Xuất khung ra Excel",
+      "actors": [
+        "R1",
+        "R3"
+      ],
+      "fr": [
+        36
+      ],
+      "detail": "Xuất định dạng giống bảng gốc; các cột suy diễn được tính theo ngữ cảnh SV nếu có. Quyền xuất chưa có trong 3.4; tạm giới hạn R1/R3 như nhập liệu, cần xác nhận.",
+      "level": "BB"
+    },
+    "UC-24": {
+      "name": "Xuất CTĐT ra PDF",
+      "actors": [
+        "R1",
+        "R3"
+      ],
+      "fr": [
+        37
+      ],
+      "detail": "Xuất bản chọn theo mẫu tổng quát khi chưa có mẫu quyết định trường (Q-14). Quyền xuất tạm R1/R3; không coi là quyền công khai.",
+      "level": "NC"
+    },
+    "UC-25": {
+      "name": "Tra cứu PLO, CLO và ma trận",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "R6"
+      ],
+      "fr": [
+        38,
+        39,
+        40
+      ],
+      "detail": "PLO theo CTĐT; CLO dùng chung theo đề cương HP; ma trận theo cặp CTĐT-HP. R6 chỉ xem dữ liệu công bố liên quan phiên bản áp dụng.",
+      "level": "BB"
+    },
+    "UC-26": {
+      "name": "Soạn PLO của chương trình",
+      "actors": [
+        "R1",
+        "R2",
+        "R3"
+      ],
+      "fr": [
+        38
+      ],
+      "detail": "Mã, mô tả Việt/Anh, nhóm năng lực; R3 theo CTĐT phụ trách, R2/R3 qua đề xuất.",
+      "level": "BB"
+    },
+    "UC-27": {
+      "name": "Soạn CLO của học phần",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5"
+      ],
+      "fr": [
+        39
+      ],
+      "detail": "CLO thuộc đề cương dùng chung; R4/R5 chỉ HP thuộc nhóm, R3 theo CTĐT phụ trách; mọi thay đổi bản công bố qua đề xuất.",
+      "level": "BB"
+    },
+    "UC-28": {
+      "name": "Soạn ma trận CLO - PLO",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5"
+      ],
+      "fr": [
+        40
+      ],
+      "detail": "Theo cặp CTĐT-HP, mức I/R/M hoặc 1-3; cùng HP có thể ánh xạ các PLO khác nhau. R3 trong CTĐT, R4/R5 trong HP được phân công.",
+      "level": "BB"
+    },
+    "UC-29": {
+      "name": "Xem ma trận HP - PLO suy diễn",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "R6"
+      ],
+      "fr": [
+        41
+      ],
+      "detail": "Tổng hợp từ CLO-PLO; chức năng nên có. Phạm vi xem suy ra từ quyền xem PLO/CLO; SV chỉ bản công bố.",
+      "level": "NC"
+    },
+    "UC-30": {
+      "name": "Ghi đè ma trận HP - PLO",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5"
+      ],
+      "fr": [
+        41
+      ],
+      "detail": "Mở rộng tùy chọn khi đang xem ma trận và người dùng có quyền soạn, cần điều chỉnh thủ công. R2-R5 thực hiện trong đề xuất; quyền này suy từ quyền sửa ma trận, cần xác nhận.",
+      "level": "NC"
+    },
+    "UC-31": {
+      "name": "Rà soát độ bao phủ chuẩn đầu ra",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4"
+      ],
+      "fr": [
+        42,
+        54
+      ],
+      "detail": "Xem PLO không HP đáp ứng, CLO không PLO, HP không đóng góp PLO, CLO thiếu thành phần đánh giá. R4 trong phạm vi nhóm; R5 nhận lỗi liên quan lúc soạn/gửi duyệt, không tự có quyền báo cáo toàn khoa.",
+      "level": "BB"
+    },
+    "UC-32": {
+      "name": "Tra cứu đề cương và công thức điểm",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "R6"
+      ],
+      "fr": [
+        44,
+        45,
+        93
+      ],
+      "detail": "Đọc đầy đủ thông tin, mô tả, mục tiêu, CLO, nội dung tuần/chương, phương pháp dạy/đánh giá, tài liệu. SV xem phiên bản áp dụng; dDUT có UC-69 riêng.",
+      "level": "BB"
+    },
+    "UC-33": {
+      "name": "Soạn nội dung đề cương",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5"
+      ],
+      "fr": [
+        44,
+        45,
+        46,
+        48
+      ],
+      "detail": "Rich text, một đề cương dùng chung mỗi HP; song ngữ tên/mô tả/CLO là phần nên có FR-48. Xem các CTĐT ảnh hưởng trước sửa; ghi ở bản làm việc/đề xuất.",
+      "level": "BB"
+    },
+    "UC-34": {
+      "name": "Đính kèm đề cương đã ký",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5"
+      ],
+      "fr": [
+        47
+      ],
+      "detail": "Tệp PDF/Word lưu theo phiên bản. Chỉ thêm trong bản làm việc được phép, không thay tệp của bản đã ban hành. Có thể thực hiện độc lập trước gửi duyệt nên không ép thành «extend» của soạn văn bản.",
+      "level": "NC"
+    },
+    "UC-35": {
+      "name": "Soạn công thức và điều kiện điểm",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5"
+      ],
+      "fr": [
+        49,
+        50,
+        51,
+        52
+      ],
+      "detail": "Thành phần, trọng số, điều kiện/ngưỡng; điểm liệt là phần nên có FR-52. Chặn lưu tổng khác 100%, từng trọng số ngoài (0,100]. Hiệu lực từ học kỳ kế tiếp; không nhập điểm SV.",
+      "level": "BB"
+    },
+    "UC-36": {
+      "name": "Ánh xạ thành phần đánh giá - CLO",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5"
+      ],
+      "fr": [
+        53,
+        54
+      ],
+      "detail": "Mỗi CLO được ít nhất một thành phần bao phủ; thiếu thì cảnh báo và chặn gửi duyệt. Không nhất thiết chặn mọi lần lưu nháp chưa hoàn thiện.",
+      "level": "BB"
+    },
+    "UC-37": {
+      "name": "Tạo / sửa / xóa đề xuất nháp",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5"
+      ],
+      "fr": [
+        55,
+        56,
+        68
+      ],
+      "detail": "Chọn đối tượng và loại thay đổi, lưu nội dung trước/sau. Chỉ chủ sở hữu sửa/xóa nháp (6.1.2); kiểm tra quyền từng loại tại 3.4. Cảnh báo CR đang mở cùng đối tượng; không cho R5 tạo loại sửa khung/PLO/danh mục.",
+      "level": "BB"
+    },
+    "UC-38": {
+      "name": "Gửi / gửi lại đề xuất",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5"
+      ],
+      "fr": [
+        55,
+        57,
+        61,
+        63,
+        68
+      ],
+      "detail": "Chủ sở hữu gửi nháp hợp lệ; xác định các nhóm/CTĐT bị tác động, người duyệt, kiểm tra xung đột và độ bao phủ. Gửi lại sau trả lại bắt đầu cấp 1; bỏ qua cấp trùng người tạo theo điều kiện đã ghi ở phần vấn đề SRS.",
+      "level": "BB"
+    },
+    "UC-39": {
+      "name": "Thu hồi đề xuất của mình",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5"
+      ],
+      "fr": [
+        60
+      ],
+      "detail": "Chỉ chủ sở hữu và chưa cấp nào phê duyệt. Sau thu hồi đề xuất chỉ đọc theo 6.1.2; không dùng «extend» gửi duyệt vì là mục tiêu độc lập ở thời điểm khác.",
+      "level": "BB"
+    },
+    "UC-40": {
+      "name": "Xem đề xuất, diff và lịch sử",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5"
+      ],
+      "fr": [
+        58,
+        62,
+        67
+      ],
+      "detail": "Xem nội dung trước/sau, ai/khi nào/ý kiến/cấp duyệt và tiến độ nhiều người. R2 toàn khoa; các vai trò khác theo chủ sở hữu, phạm vi và phân công.",
+      "level": "BB"
+    },
+    "UC-41": {
+      "name": "Bình luận trên đề xuất",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5"
+      ],
+      "fr": [
+        62
+      ],
+      "detail": "R2 xem/góp ý toàn khoa nhưng không chặn luồng; các vai trò khác theo phạm vi. Bình luận độc lập với quyết định đồng ý/trả lại/từ chối.",
+      "level": "BB"
+    },
+    "UC-42": {
+      "name": "Xem hàng đợi chờ duyệt",
+      "actors": [
+        "R1",
+        "R3",
+        "R4"
+      ],
+      "fr": [
+        65
+      ],
+      "detail": "Chỉ đề xuất cần người dùng xử lý trong phạm vi; hiển thị cả nhiệm vụ được ủy quyền hợp lệ.",
+      "level": "BB"
+    },
+    "UC-43": {
+      "name": "Xử lý đề xuất cấp chuyên môn",
+      "actors": [
+        "R1",
+        "R4"
+      ],
+      "fr": [
+        57,
+        58,
+        59,
+        61,
+        67
+      ],
+      "detail": "Xem diff, đồng ý/trả lại/từ chối; nhiều nhóm phải đủ tất cả trưởng nhóm. R1 có quyền can thiệp với nhật ký; không kế thừa toàn bộ vai trò R4.",
+      "level": "BB"
+    },
+    "UC-44": {
+      "name": "Xử lý đề xuất cấp chương trình",
+      "actors": [
+        "R1",
+        "R3"
+      ],
+      "fr": [
+        57,
+        58,
+        59,
+        61,
+        67
+      ],
+      "detail": "Xem diff và ảnh hưởng, đồng ý/trả lại/từ chối; nhiều CTĐT cần tất cả GĐ liên quan. R1 can thiệp có nhật ký.",
+      "level": "BB"
+    },
+    "UC-45": {
+      "name": "Trả lại / từ chối tại cấp cuối",
+      "actors": [
+        "R1"
+      ],
+      "fr": [
+        59,
+        67
+      ],
+      "detail": "Nhập lý do tối thiểu 20 ký tự. Trả lại về NHÁP và đi lại từ cấp 1; từ chối đóng đề xuất theo 6.1.1/2. EC-26 diễn đạt khác, được đánh dấu cần xác nhận.",
+      "level": "BB"
+    },
+    "UC-46": {
+      "name": "Chấp thuận cuối và ban hành phiên bản",
+      "actors": [
+        "R1"
+      ],
+      "fr": [
+        57,
+        59,
+        69,
+        70,
+        71
+      ],
+      "detail": "Chỉ quyết định đồng ý ở cấp cuối mới ban hành; kiểm tra điều kiện và metadata số QĐ/ngày ký/học kỳ/khóa/người ban hành. Tạo snapshot bất biến; chờ đầu học kỳ mới kích hoạt (diễn giải FR-69 + 6.2). Chặn thiếu đề cương EC-44.",
+      "level": "BB"
+    },
+    "UC-47": {
+      "name": "Nhận thông báo nghiệp vụ",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5"
+      ],
+      "fr": [
+        63,
+        64,
+        66
+      ],
+      "detail": "Trong ứng dụng khi chuyển cấp; email sự kiện quan trọng là NÊN CÓ; nhắc tồn đọng là TÙY CHỌN, kích hoạt nội bộ theo lịch. Không vẽ đồng hồ hay bản thân hệ thống làm tác nhân.",
+      "level": "BB"
+    },
+    "UC-48": {
+      "name": "Gửi email sự kiện quan trọng",
+      "actors": [
+        "E2"
+      ],
+      "fr": [
+        64
+      ],
+      "detail": "Hành vi hỗ trợ qua dịch vụ email bên ngoài, lựa chọn triển khai giả định; chỉ chạy khi kênh email được bật. FR-64 không bắt buộc có nhà cung cấp độc lập.",
+      "level": "NC"
+    },
+    "UC-49": {
+      "name": "Tạo snapshot toàn bộ CTĐT",
+      "actors": [],
+      "fr": [
+        69,
+        70,
+        71
+      ],
+      "detail": "Chụp thông tin, khung/quan hệ/nhóm tự chọn, PLO, đề cương, CLO/ma trận, metadata. Tất cả CTĐT bị ảnh hưởng được tạo bản tương ứng; giữ nguyên bản cũ. Được bao gồm trong chấp thuận cuối.",
+      "level": "BB"
+    },
+    "UC-50": {
+      "name": "So sánh hai phiên bản",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5"
+      ],
+      "fr": [
+        72
+      ],
+      "detail": "Chọn hai bản cùng CTĐT; xem thêm/xóa/sửa. R6 không có quyền so sánh theo 3.4.",
+      "level": "BB"
+    },
+    "UC-51": {
+      "name": "Xem lịch sử và timeline phiên bản",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5"
+      ],
+      "fr": [
+        73,
+        76
+      ],
+      "detail": "Xem đầy đủ phiên bản lịch sử trong phạm vi; timeline nên có FR-76. Sinh viên dùng UC-18/32 theo bản gắn với mình, không tự tra cứu mọi lịch sử.",
+      "level": "BB"
+    },
+    "UC-52": {
+      "name": "Gán phiên bản áp dụng cho khóa / SV",
+      "actors": [
+        "R1"
+      ],
+      "fr": [
+        74
+      ],
+      "detail": "Ánh xạ khóa - phiên bản; SV giữ bản lúc nhập học trừ quyết định chuyển đổi. Chuyển ngành/trình độ gắn lại theo quyết định, song ngành gắn hai CTĐT xét độc lập; bảo lưu giữ bản cũ (EC-33..37). Quyền quản lý ánh xạ tạm R1.",
+      "level": "BB"
+    },
+    "UC-53": {
+      "name": "Ban hành phiên bản đính chính",
+      "actors": [
+        "R1"
+      ],
+      "fr": [
+        75
+      ],
+      "detail": "Lý do ban hành nhầm, chuẩn bị thay đổi qua luồng duyệt rồi ban hành bản đính chính. Không xóa/sửa lịch sử; mục tiêu này sử dụng quy tắc ban hành của UC-46, không tự bỏ qua phê duyệt.",
+      "level": "BB"
+    },
+    "UC-54": {
+      "name": "Xem kết quả kiểm tra nhất quán",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4"
+      ],
+      "fr": [
+        77,
+        78,
+        79,
+        80,
+        81,
+        82
+      ],
+      "detail": "Tổng TC theo chương trình/học kỳ/khối/bắt buộc/tự chọn; so với khai báo, tiên quyết xếp sau, chu trình, trùng HP. Dashboard là phần nên có; cảnh báo/ràng buộc bắt buộc vẫn chạy khi ghi/gửi/ban hành.",
+      "level": "BB"
+    },
+    "UC-55": {
+      "name": "Chấp nhận chênh lệch tín chỉ có lý do",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4"
+      ],
+      "fr": [
+        78
+      ],
+      "detail": "Mở rộng tại EP-TC của UC-54 khi có chênh lệch, người dùng có quyền soạn khung và chọn ghi đè; lý do bắt buộc. Đây là chấp nhận ngoại lệ có dấu vết, không làm sai tổng được tính tự động. R2-R4 thao tác trong đề xuất.",
+      "level": "BB"
+    },
+    "UC-56": {
+      "name": "Tính tổng tín chỉ theo cấu trúc",
+      "actors": [],
+      "fr": [
+        77
+      ],
+      "detail": "Bắt buộc + tổng hạn mức tối thiểu từng nhóm tự chọn; không cộng toàn bộ danh sách ứng viên tự chọn. Hỗ trợ số thực, HP 0 TC. Tổng theo học kỳ/khối vẫn thể hiện đúng ngữ cảnh.",
+      "level": "BB"
+    },
+    "UC-57": {
+      "name": "Kiểm tra độ bao phủ đánh giá",
+      "actors": [],
+      "fr": [
+        53,
+        54
+      ],
+      "detail": "Rà mỗi CLO có thành phần đánh giá; thiếu thì trả danh sách lỗi và chặn gửi duyệt thay đổi đề cương. Có thể kiểm tra no-op nếu đề xuất không tác động đề cương.",
+      "level": "BB"
+    },
+    "UC-58": {
+      "name": "Kiểm tra trọng số và ngưỡng điểm",
+      "actors": [],
+      "fr": [
+        50,
+        51,
+        52
+      ],
+      "detail": "Tổng đúng 100%, mỗi trọng số >0 và <=100; thành phần điều kiện có ngưỡng. Điểm liệt nếu triển khai FR-52; lỗi chặn lưu công thức.",
+      "level": "BB"
+    },
+    "UC-59": {
+      "name": "Xem tiến độ học tập",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "R6"
+      ],
+      "fr": [
+        89,
+        90
+      ],
+      "detail": "Hiển thị trạng thái HP, TC tích lũy, tỷ lệ hoàn thành, TC thiếu. SV chỉ chính mình; cán bộ bị giới hạn phạm vi nghiệp vụ, không suy từ dấu X thành quyền xem mọi SV (NFR-11, mục 3.3).",
+      "level": "BB"
+    },
+    "UC-60": {
+      "name": "Xem điều kiện đăng ký học phần",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "R6"
+      ],
+      "fr": [
+        31,
+        83,
+        91,
+        92
+      ],
+      "detail": "Theo SV, học kỳ xét, phiên bản áp dụng: Được / Được nếu kèm song hành / Không được + lý do; Đã hoàn thành là trạng thái riêng ở 7.3. Chỉ tư vấn, không đăng ký thực tế.",
+      "level": "BB"
+    },
+    "UC-61": {
+      "name": "Xem kết quả xét tốt nghiệp",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R6"
+      ],
+      "fr": [
+        84,
+        85,
+        86
+      ],
+      "detail": "Kết luận và danh mục thiếu: HP bắt buộc, từng nhóm tự chọn, tổng TC, HP điều kiện; tương đương và thay thế. R3 theo CTĐT, R6 chính mình; R4/R5 không có quyền.",
+      "level": "BB"
+    },
+    "UC-62": {
+      "name": "Xét tốt nghiệp theo lô một khóa",
+      "actors": [
+        "R1",
+        "R3"
+      ],
+      "fr": [
+        87
+      ],
+      "detail": "Chọn khóa/CTĐT, tính từng SV và tổng hợp. Quyền tạm R1/R3 vì SRS chỉ quy định quyền xem kết quả, chưa phân quyền chạy lô; cần xác nhận R2.",
+      "level": "NC"
+    },
+    "UC-63": {
+      "name": "Tính điều kiện đăng ký",
+      "actors": [],
+      "fr": [
+        83
+      ],
+      "detail": "Lấy điểm cao nhất; đã hoàn thành, tiên quyết đủ ngưỡng thang 4, học trước có kết quả, song hành. Trả lý do thiếu. Cần chống chu trình song hành riêng, không chỉ dựa BR-11.",
+      "level": "BB"
+    },
+    "UC-64": {
+      "name": "Đánh giá điều kiện tốt nghiệp",
+      "actors": [],
+      "fr": [
+        84,
+        85,
+        86
+      ],
+      "detail": "Kiểm tra bắt buộc, hạn mức từng nhóm (TC hoặc số HP), tổng TC, điều kiện 0TC; công nhận tương đương theo tín chỉ thực học, không đếm đôi cùng yêu cầu. Dùng điểm cao nhất; trả hạng mục thiếu.",
+      "level": "BB"
+    },
+    "UC-65": {
+      "name": "Xác định phiên bản áp dụng",
+      "actors": [],
+      "fr": [
+        74,
+        88
+      ],
+      "detail": "Từ khóa và các quyết định chuyển đổi/SV; song ngành xác định từng CTĐT; không mặc định lấy bản mới nhất.",
+      "level": "BB"
+    },
+    "UC-66": {
+      "name": "Lấy CTĐT / phiên bản qua API",
+      "actors": [
+        "E3"
+      ],
+      "fr": [
+        88,
+        94
+      ],
+      "detail": "CTĐT đúng phiên bản SV và nội dung bản cụ thể; endpoint CTĐT của SV và endpoint phiên bản mục 8.3. Kiểm tra token, khóa ứng dụng và phạm vi dữ liệu, không tự mở mọi phiên bản.",
+      "level": "BB"
+    },
+    "UC-67": {
+      "name": "Lấy tiến độ học tập qua API",
+      "actors": [
+        "E3"
+      ],
+      "fr": [
+        90,
+        94
+      ],
+      "detail": "GET tiến độ của SV được phép truy cập; JSON, không cho thay đổi dữ liệu.",
+      "level": "BB"
+    },
+    "UC-68": {
+      "name": "Lấy điều kiện đăng ký qua API",
+      "actors": [
+        "E3"
+      ],
+      "fr": [
+        83,
+        91,
+        92,
+        94
+      ],
+      "detail": "Danh sách HP đủ điều kiện và lý do; cùng bộ quy tắc với cổng SV.",
+      "level": "BB"
+    },
+    "UC-69": {
+      "name": "Lấy đề cương qua API",
+      "actors": [
+        "E3"
+      ],
+      "fr": [
+        93,
+        94
+      ],
+      "detail": "Theo HP và ngữ cảnh phiên bản được phép. SRS endpoint chưa có tham số phiên bản; cần xác nhận cách chọn đề cương lịch sử.",
+      "level": "BB"
+    },
+    "UC-70": {
+      "name": "Lấy kết quả tốt nghiệp qua API",
+      "actors": [
+        "E3"
+      ],
+      "fr": [
+        84,
+        85,
+        86,
+        94
+      ],
+      "detail": "GET kết quả SV trong phạm vi token/ủy quyền. Không cho dDUT cập nhật hay ban hành dữ liệu.",
+      "level": "BB"
+    },
+    "UC-71": {
+      "name": "Tải tệp mẫu nhập liệu",
+      "actors": [
+        "R1",
+        "R3"
+      ],
+      "fr": [
+        97
+      ],
+      "detail": "Mẫu cho danh mục HP, khung, SV, kết quả học tập. R3 chỉ loại dữ liệu thuộc CTĐT được giao; chưa suy thành quyền nhập toàn trường.",
+      "level": "BB"
+    },
+    "UC-72": {
+      "name": "Chạy thử nhập Excel (dry-run)",
+      "actors": [
+        "R1",
+        "R3"
+      ],
+      "fr": [
+        33,
+        34,
+        96
+      ],
+      "detail": "Chọn loại dữ liệu và tệp; kiểm tra cột/kiểu, mã HP, dòng trùng, quan hệ và quy tắc. Báo lỗi từng dòng; không ghi dữ liệu nghiệp vụ. Không coi tệp Excel là actor.",
+      "level": "BB"
+    },
+    "UC-73": {
+      "name": "Xác nhận nhập dữ liệu Excel",
+      "actors": [
+        "R1",
+        "R3"
+      ],
+      "fr": [
+        33,
+        34,
+        35,
+        96,
+        101
+      ],
+      "detail": "Xác nhận tệp đã chạy thử thành công; kiểm tra lại dữ liệu còn hợp lệ để tránh thay đổi giữa hai bước. Ghi toàn bộ hoặc không ghi gì, lưu lịch sử phiên. Nhập vào bản công bố không được vượt FR-55.",
+      "level": "BB"
+    },
+    "UC-74": {
+      "name": "Xem lịch sử phiên nhập liệu",
+      "actors": [
+        "R1",
+        "R3"
+      ],
+      "fr": [
+        101
+      ],
+      "detail": "Ai nhập, loại dữ liệu, số dòng thành công/lỗi, kết quả; trong phạm vi được giao.",
+      "level": "BB"
+    },
+    "UC-75": {
+      "name": "Kiểm tra tệp và dữ liệu nhập",
+      "actors": [],
+      "fr": [
+        34,
+        35
+      ],
+      "detail": "Kiểm định định dạng/tham chiếu/trùng/chu trình; kết quả dry-run và trước commit dùng cùng quy tắc. Có lỗi: không ghi bất kỳ dòng nghiệp vụ nào.",
+      "level": "BB"
+    },
+    "UC-76": {
+      "name": "Cấu hình kết nối và lịch đồng bộ",
+      "actors": [
+        "R1"
+      ],
+      "fr": [
+        98,
+        99,
+        100
+      ],
+      "detail": "Nguồn SV/kết quả/lớp, kết nối chỉ đọc, lịch và quy tắc ưu tiên. Không cho ghi ngược dữ liệu trường. Quy tắc nguồn phải tôn trọng 8.2: DB ưu tiên SV/điểm, CMS ưu tiên HP/khung.",
+      "level": "BB"
+    },
+    "UC-77": {
+      "name": "Đồng bộ dữ liệu theo lịch",
+      "actors": [
+        "E1"
+      ],
+      "fr": [
+        98,
+        99,
+        100
+      ],
+      "detail": "Kích hoạt bởi lịch nội bộ (không vẽ actor Scheduler); E1 cung cấp dữ liệu. Ghi dữ liệu cục bộ theo giao dịch; mất kết nối rollback, ghi lỗi, thử theo lịch; mâu thuẫn ghi cảnh báo.",
+      "level": "BB"
+    },
+    "UC-78": {
+      "name": "Xem nhật ký và lỗi đồng bộ",
+      "actors": [
+        "R1"
+      ],
+      "fr": [
+        99,
+        100
+      ],
+      "detail": "Xem từng lần chạy, mâu thuẫn, lỗi kết nối. Quyền mặc định quản trị tích hợp R1; quyền tra cứu audit tổng quát theo UC-82.",
+      "level": "BB"
+    },
+    "UC-79": {
+      "name": "Đối sánh hai chương trình",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4"
+      ],
+      "fr": [
+        102
+      ],
+      "detail": "So sánh phần chung/khác của hai CTĐT, ví dụ Kỹ sư-Cử nhân. Giới hạn theo phạm vi báo cáo 3.4; R4 chỉ phần HP/nhóm được giao.",
+      "level": "NC"
+    },
+    "UC-80": {
+      "name": "Xem phân bổ tín chỉ",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4"
+      ],
+      "fr": [
+        103
+      ],
+      "detail": "Bảng/biểu đồ theo khối kiến thức; phân biệt danh sách HP tự chọn và hạn mức yêu cầu.",
+      "level": "NC"
+    },
+    "UC-81": {
+      "name": "Xuất ma trận phục vụ kiểm định",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4"
+      ],
+      "fr": [
+        43,
+        104
+      ],
+      "detail": "Excel PLO/CLO/HP theo bản lựa chọn, phục vụ AUN-QA/Bộ. Quyền suy từ báo cáo; R3/R4 theo phạm vi, cần xác nhận phạm vi xuất R4.",
+      "level": "NC"
+    },
+    "UC-82": {
+      "name": "Tra cứu nhật ký hệ thống",
+      "actors": [
+        "R1",
+        "R2",
+        "R3"
+      ],
+      "fr": [
+        10,
+        105,
+        106
+      ],
+      "detail": "Lọc người dùng/đối tượng/thời gian; người/hành động/giá trị trước-sau/thời điểm. R1 toàn hệ thống, R2 khoa, R3 CTĐT. Chỉ đọc log; lưu bất biến là ràng buộc toàn cục.",
+      "level": "BB"
+    },
+    "UC-83": {
+      "name": "Thống kê xử lý đề xuất",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4"
+      ],
+      "fr": [
+        107
+      ],
+      "detail": "Số CR theo trạng thái, thời gian trung bình từng cấp; theo quyền báo cáo. Chức năng tùy chọn.",
+      "level": "TC"
+    },
+    "UC-84": {
+      "name": "Xem CTĐT áp dụng cho bản thân",
+      "actors": [
+        "R6"
+      ],
+      "fr": [
+        88,
+        89
+      ],
+      "detail": "Chuyên biệt của UC-18 cho SV; xác định bản được gắn trước khi hiển thị khung/trạng thái. Không cấp quyền tra cứu các CTĐT ngoài phạm vi.",
+      "level": "BB"
+    },
+    "OV-01": {
+      "name": "Quản trị tổ chức và quyền",
+      "actors": [
+        "R1"
+      ],
+      "fr": [],
+      "detail": "UC-02..09",
+      "level": "TQ"
+    },
+    "OV-02": {
+      "name": "Chuẩn bị thay đổi dữ liệu đào tạo",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5"
+      ],
+      "fr": [],
+      "detail": "UC-11..14,19..22,26..28,33..38",
+      "level": "TQ"
+    },
+    "OV-03": {
+      "name": "Xem xét và quyết định đề xuất",
+      "actors": [
+        "R1",
+        "R3",
+        "R4"
+      ],
+      "fr": [],
+      "detail": "UC-40..46",
+      "level": "TQ"
+    },
+    "OV-04": {
+      "name": "Ban hành và theo dõi phiên bản",
+      "actors": [
+        "R1"
+      ],
+      "fr": [],
+      "detail": "UC-46,49..53",
+      "level": "TQ"
+    },
+    "OV-05": {
+      "name": "Tra cứu chương trình và học tập",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "R6"
+      ],
+      "fr": [],
+      "detail": "UC-10,15,18,25,29,32,59..61,84",
+      "level": "TQ"
+    },
+    "OV-06": {
+      "name": "Khai thác báo cáo / kiểm định",
+      "actors": [
+        "R1",
+        "R2",
+        "R3",
+        "R4"
+      ],
+      "fr": [],
+      "detail": "UC-79..83",
+      "level": "TQ"
+    },
+    "OV-07": {
+      "name": "Nhập và tích hợp dữ liệu",
+      "actors": [
+        "R1",
+        "R3",
+        "E1"
+      ],
+      "fr": [],
+      "detail": "UC-71..78",
+      "level": "TQ"
+    },
+    "OV-08": {
+      "name": "Khai thác dữ liệu qua API",
+      "actors": [
+        "E3"
+      ],
+      "fr": [],
+      "detail": "UC-66..70",
+      "level": "TQ"
+    }
+  },
+  "pages": [
+    {
+      "title": "00A · Tổng quan nghiệp vụ",
+      "type": "module",
+      "ids": [
+        "OV-01",
+        "OV-02",
+        "OV-03",
+        "OV-04",
+        "OV-05",
+        "OV-06"
+      ],
+      "note": "OV là mục tiêu mức tổng quan, không phải gói phần mềm hay 8 use case mới cần triển khai. Quyền từng thao tác xem các trang chi tiết; R2 có phân công thành viên và góp ý, R5 chỉ đề xuất đúng loại, SV chỉ đọc. Các trang là các góc nhìn của CÙNG một hệ thống."
+    },
+    {
+      "title": "00B · Tổng quan tích hợp",
+      "type": "module",
+      "ids": [
+        "OV-07",
+        "OV-08"
+      ],
+      "note": "Chi tiết OV-07: UC-71..78; OV-08: UC-66..70. E1 chỉ cung cấp dữ liệu; R3 chỉ nhập Excel trong phạm vi được giao, không cấu hình đồng bộ. Tích hợp email tùy kiến trúc thể hiện riêng tại sơ đồ 10."
+    },
+    {
+      "title": "01 · Tài khoản và phân quyền",
+      "ids": [
+        "UC-01",
+        "UC-05",
+        "UC-06",
+        "UC-08"
+      ],
+      "note": "R1-R6 là vai trò nghiệp vụ, không phải thứ bậc kế thừa. Người nhận ủy quyền hành động trong vai trò duyệt được ủy quyền, không tự có toàn bộ quyền của người ủy quyền.",
+      "type": "module"
+    },
+    {
+      "title": "02 · Tổ chức và phân công",
+      "ids": [
+        "UC-02",
+        "UC-03",
+        "UC-04",
+        "UC-07",
+        "UC-09"
+      ],
+      "note": "UC-09 là đề xuất; không cho R2/R4 sửa trực tiếp các mục chỉ có quyền Đ. Tuyến duyệt tổ chức chưa được đặc tả đầy đủ trong SRS.",
+      "type": "module"
+    },
+    {
+      "title": "03 · Danh mục học phần",
+      "ids": [
+        "UC-10",
+        "UC-11",
+        "UC-12",
+        "UC-15"
+      ],
+      "note": "“Soạn thay đổi” không đồng nghĩa cập nhật phiên bản đã ban hành. Dữ liệu công bố bất biến; mọi thay đổi đi qua UC-37/UC-38. HP khoa khác theo EC-24 chuyển thẳng Phòng ĐT.",
+      "type": "module"
+    },
+    {
+      "title": "04 · Quan hệ học phần",
+      "ids": [
+        "UC-13",
+        "UC-14",
+        "UC-16",
+        "UC-17"
+      ],
+      "note": "R4 có quyền đề xuất quan hệ phụ thuộc, nhưng không có quyền khai báo nhóm tương đương. UC-16/17 là hành vi được gọi từ use case khác; xem các trang quan hệ UML cuối tập.",
+      "type": "module"
+    },
+    {
+      "title": "05 · Chương trình và khung",
+      "ids": [
+        "UC-18",
+        "UC-19",
+        "UC-20",
+        "UC-21",
+        "UC-22"
+      ],
+      "note": "R2-R4 chỉ được soạn đề xuất theo từng dòng quyền trong 3.4. Không có use case “Tạo CTĐT từ đầu”. Nhập Excel ở sơ đồ 16, xuất tệp ở sơ đồ 19.",
+      "type": "module"
+    },
+    {
+      "title": "06 · Chuẩn đầu ra và ma trận",
+      "ids": [
+        "UC-25",
+        "UC-26",
+        "UC-27",
+        "UC-28",
+        "UC-29",
+        "UC-30"
+      ],
+      "note": "CLO dùng chung, PLO theo CTĐT, ma trận theo cặp CTĐT-HP (DEC-02/03). Ghi đè thủ công là hành vi tùy chọn «extend», không phải bước bắt buộc của việc xem ma trận.",
+      "type": "module"
+    },
+    {
+      "title": "07 · Đề cương và đánh giá",
+      "ids": [
+        "UC-32",
+        "UC-33",
+        "UC-34",
+        "UC-35",
+        "UC-36"
+      ],
+      "note": "FR-48/52 là phần NÊN CÓ trong use case có lõi bắt buộc. Không vẽ “Nhập điểm sinh viên”. Công thức điểm là cấu hình phương pháp đánh giá, không thay thế hệ thống quản lý điểm.",
+      "type": "module"
+    },
+    {
+      "title": "08 · Đề xuất thay đổi",
+      "ids": [
+        "UC-37",
+        "UC-38",
+        "UC-39",
+        "UC-40",
+        "UC-41"
+      ],
+      "note": "Quyền “Tạo đề xuất” không cấp mọi loại chỉnh sửa: vẫn kiểm tra vai trò × đối tượng. Tạo, gửi, bình luận, thu hồi là các mục tiêu riêng, không nối «include» để biểu diễn thứ tự thời gian.",
+      "type": "module"
+    },
+    {
+      "title": "09 · Xử lý phê duyệt",
+      "ids": [
+        "UC-42",
+        "UC-43",
+        "UC-44",
+        "UC-45",
+        "UC-46"
+      ],
+      "note": "Ba cấp là quy trình, không phải ba use case «include» nối tiếp. R2 không có cạnh tới chức năng duyệt. Đồng ý cấp cuối tách riêng để không tạo snapshot khi Trả lại/Từ chối.",
+      "type": "module"
+    },
+    {
+      "title": "10 · Thông báo và ủy quyền",
+      "ids": [
+        "UC-08",
+        "UC-47",
+        "UC-48"
+      ],
+      "note": "Thông báo trong ứng dụng là hậu điều kiện khi chuyển cấp; nhắc hạn là hành vi theo lịch nội bộ. E2 là dịch vụ email ngoài ranh giới nếu được triển khai, không phải mặc định có trong SRS.",
+      "type": "module"
+    },
+    {
+      "title": "11 · Phiên bản và hiệu lực",
+      "ids": [
+        "UC-49",
+        "UC-50",
+        "UC-51",
+        "UC-52",
+        "UC-53"
+      ],
+      "note": "Tạo snapshot khi duyệt cuối; tự kích hoạt đầu học kỳ theo metadata. Một bản đang hiệu lực mỗi CTĐT không có nghĩa tự chuyển khóa cũ sang bản mới. SRS mâu thuẫn thời điểm snapshot: xem ghi chú thẩm định.",
+      "type": "module"
+    },
+    {
+      "title": "12 · Kiểm tra tính nhất quán",
+      "ids": [
+        "UC-31",
+        "UC-54",
+        "UC-55",
+        "UC-56",
+        "UC-57",
+        "UC-58"
+      ],
+      "note": "Các kiểm tra tự động là hành vi bên trong; không có actor “Rules Engine”. Cảnh báo lệch TC không chặn lưu; trùng HP/chu trình/trọng số sai chặn thao tác tương ứng.",
+      "type": "module"
+    },
+    {
+      "title": "13 · Tra cứu học tập và tốt nghiệp",
+      "ids": [
+        "UC-59",
+        "UC-60",
+        "UC-61",
+        "UC-62"
+      ],
+      "note": "Khi chưa có kết quả học tập: vẫn xem khung, báo chưa có dữ liệu (EC-52), không kết luận đã đủ điều kiện. SV chỉ đọc; không có UC đăng ký thực tế, nhập điểm hay quyết định công nhận tốt nghiệp.",
+      "type": "module"
+    },
+    {
+      "title": "14 · Hành vi tính toán dùng chung",
+      "ids": [
+        "UC-63",
+        "UC-64",
+        "UC-65"
+      ],
+      "note": "Không có tác nhân trực tiếp ở trang này: đây là use case hỗ trợ được «include» ở trang 23-24. FR-95 responsive, API-01..05 và NFR là ràng buộc, không phải mục tiêu độc lập của người dùng.",
+      "type": "module"
+    },
+    {
+      "title": "15 · Tích hợp ứng dụng dDUT",
+      "ids": [
+        "UC-66",
+        "UC-67",
+        "UC-68",
+        "UC-69",
+        "UC-70"
+      ],
+      "note": "E3 là hệ thống ngoài, không kế thừa Sinh viên. API REST/JSON, OpenAPI 3.0, token + khóa riêng ứng dụng, rate limit, lỗi HTTP tiếng Việt; luôn kiểm tra quyền đối tượng. Chưa bổ sung UC quản lý khóa vì SRS chưa yêu cầu giao diện này.",
+      "type": "module"
+    },
+    {
+      "title": "16 · Nhập liệu Excel",
+      "ids": [
+        "UC-71",
+        "UC-72",
+        "UC-73",
+        "UC-74",
+        "UC-75"
+      ],
+      "note": "Dry-run là use case độc lập, là tiền điều kiện của Xác nhận nhập; cả hai «include» kiểm tra dữ liệu. Không dùng «include» từ Xác nhận nhập sang toàn bộ dry-run với thao tác tải tệp lại.",
+      "type": "module"
+    },
+    {
+      "title": "17 · Đồng bộ nguồn dữ liệu",
+      "ids": [
+        "UC-76",
+        "UC-77",
+        "UC-78"
+      ],
+      "note": "E1 là hệ thống dữ liệu ngoài, không phải CSDL nội bộ. SRS chỉ yêu cầu đồng bộ định kỳ, không tự bổ sung thao tác “Đồng bộ ngay”. Khi điểm thay đổi hồi tố, tính lại xét tốt nghiệp và thông báo R1 (EC-43).",
+      "type": "module"
+    },
+    {
+      "title": "18 · Báo cáo và kiểm định",
+      "ids": [
+        "UC-79",
+        "UC-80",
+        "UC-81",
+        "UC-82",
+        "UC-83"
+      ],
+      "note": "Use case phản ánh mục tiêu báo cáo. Bản thân biểu đồ, log append-only, cơ chế bảo mật hay chuẩn AUN-QA không phải actor. R5 không có quyền báo cáo tổng hợp trong 3.4.",
+      "type": "module"
+    },
+    {
+      "title": "19 · Xuất tài liệu",
+      "ids": [
+        "UC-23",
+        "UC-24",
+        "UC-81"
+      ],
+      "note": "Quyền xuất Excel/PDF chưa được ma trận SRS quy định rõ: mô hình tạm giới hạn R1/R3. Quyền xuất ma trận suy từ báo cáo R1-R4. Cần xác nhận trước chốt phân quyền triển khai.",
+      "type": "module"
+    },
+    {
+      "title": "20 · Kiểm tra khi soạn dữ liệu",
+      "rels": [
+        [
+          "UC-13",
+          "UC-17",
+          "include",
+          "Luôn kiểm tra chu trình trước lưu quan hệ"
+        ],
+        [
+          "UC-35",
+          "UC-58",
+          "include",
+          "Luôn kiểm tra trước lưu công thức"
+        ],
+        [
+          "UC-38",
+          "UC-57",
+          "include",
+          "Trước chuyển trạng thái gửi duyệt"
+        ]
+      ],
+      "note": "Mũi tên nét đứt «include» đi từ use case cơ sở sang hành vi bắt buộc. UC-57 kiểm tra các đề cương chịu tác động; nếu không có, trả kết quả không áp dụng. UC-16 là bước bắt buộc khi sửa đối tượng hiện có, ghi trong đặc tả do thao tác thêm mới không có đối tượng cũ.",
+      "type": "relations"
+    },
+    {
+      "title": "21 · Ban hành và nhập liệu",
+      "rels": [
+        [
+          "UC-46",
+          "UC-49",
+          "include",
+          "Chỉ nhánh đồng ý cuối cùng"
+        ],
+        [
+          "UC-72",
+          "UC-75",
+          "include",
+          "Kiểm tra, không ghi nghiệp vụ"
+        ],
+        [
+          "UC-73",
+          "UC-75",
+          "include",
+          "Kiểm tra lại trước giao dịch ghi"
+        ]
+      ],
+      "note": "Không nối các cấp duyệt bằng «include». Không bao gồm UC-49 từ Trả lại/Từ chối. UC-73 có tiền điều kiện dry-run thành công và xác nhận của người nhập; atomicity là ràng buộc xử lý.",
+      "type": "relations"
+    },
+    {
+      "title": "22 · Hành vi mở rộng có điều kiện",
+      "rels": [
+        [
+          "UC-30",
+          "UC-29",
+          "extend",
+          "EP-MT: khi xem ma trận; có quyền và chọn ghi đè"
+        ],
+        [
+          "UC-55",
+          "UC-54",
+          "extend",
+          "EP-TC: có chênh lệch; có quyền và chọn chấp nhận"
+        ]
+      ],
+      "note": "Mũi tên «extend» đi từ hành vi mở rộng sang use case cơ sở. EP-MT/EP-TC là điểm mở rộng của use case bên phải. Use case xem vẫn hoàn tất được nếu không thực hiện ghi đè. NÊN CÓ không tự động có nghĩa «extend».",
+      "type": "relations"
+    },
+    {
+      "title": "23 · Tính toán dùng chung: cổng tra cứu",
+      "rels": [
+        [
+          "UC-60",
+          "UC-63",
+          "include",
+          "Tính theo sinh viên và học kỳ"
+        ],
+        [
+          "UC-61",
+          "UC-64",
+          "include",
+          "Trả kết luận và chi tiết thiếu"
+        ],
+        [
+          "UC-84",
+          "UC-65",
+          "include",
+          "Luôn xác định đúng phiên bản của SV"
+        ]
+      ],
+      "note": "UC-84 chuyên biệt UC-18 cho mục tiêu SV xem CTĐT của mình. Vì SV luôn phải xác định bản áp dụng nên UC-84 «include» UC-65; không gắn quan hệ này cho mọi lần cán bộ tra cứu UC-18.",
+      "type": "relations"
+    },
+    {
+      "title": "24 · Tính toán dùng chung: API và theo lô",
+      "rels": [
+        [
+          "UC-68",
+          "UC-63",
+          "include",
+          "Cùng quy tắc với web"
+        ],
+        [
+          "UC-70",
+          "UC-64",
+          "include",
+          "Cùng quy tắc với web"
+        ],
+        [
+          "UC-62",
+          "UC-64",
+          "include",
+          "Lặp cho mỗi SV của khóa"
+        ]
+      ],
+      "note": "dDUT là tác nhân gọi API; không nối dDUT tới CSDL nội bộ. Số lần lặp khi xét theo lô được mô tả trong đặc tả, không dùng «include» như một vòng lặp hoặc mũi tên trình tự.",
+      "type": "relations"
+    },
+    {
+      "title": "25 · Chuyên biệt use case tra cứu",
+      "rels": [
+        [
+          "UC-84",
+          "UC-18",
+          "generalization",
+          "Chuyên biệt mục tiêu tra cứu cho Sinh viên"
+        ]
+      ],
+      "note": "Kế thừa use case: đường liền, tam giác rỗng trỏ về use case tổng quát UC-18. UC-84 giữ mục tiêu đọc chương trình và bổ sung ràng buộc đúng phiên bản cá nhân. Không có kế thừa R1 → R2 → R3 vì cấp quản lý không phải quan hệ “là một”.",
+      "type": "relations"
+    },
+    {
+      "title": "26 · Tổng hợp tín chỉ và ảnh hưởng",
+      "rels": [
+        [
+          "UC-54",
+          "UC-56",
+          "include",
+          "Tính tổng trước khi đối chiếu cảnh báo"
+        ],
+        [
+          "UC-33",
+          "UC-16",
+          "include",
+          "Xác định mọi CTĐT dùng đề cương này"
+        ]
+      ],
+      "note": "UC-33 soạn đề cương của HP đã tồn tại: luôn xác định các CTĐT liên quan trước sửa. UC-11 có cả thêm mới và sửa, nên không ép mọi lần thêm HP phải có CTĐT bị ảnh hưởng. Danh sách ảnh hưởng rỗng vẫn là kết quả hợp lệ của bước kiểm tra.",
+      "type": "relations"
+    }
+  ],
+  "relations": [
+    [
+      "UC-13",
+      "UC-17",
+      "include",
+      "Luôn kiểm tra chu trình trước lưu quan hệ"
+    ],
+    [
+      "UC-35",
+      "UC-58",
+      "include",
+      "Luôn kiểm tra trước lưu công thức"
+    ],
+    [
+      "UC-38",
+      "UC-57",
+      "include",
+      "Trước chuyển trạng thái gửi duyệt"
+    ],
+    [
+      "UC-46",
+      "UC-49",
+      "include",
+      "Chỉ nhánh đồng ý cuối cùng"
+    ],
+    [
+      "UC-72",
+      "UC-75",
+      "include",
+      "Kiểm tra, không ghi nghiệp vụ"
+    ],
+    [
+      "UC-73",
+      "UC-75",
+      "include",
+      "Kiểm tra lại trước giao dịch ghi"
+    ],
+    [
+      "UC-30",
+      "UC-29",
+      "extend",
+      "EP-MT: khi xem ma trận; có quyền và chọn ghi đè"
+    ],
+    [
+      "UC-55",
+      "UC-54",
+      "extend",
+      "EP-TC: có chênh lệch; có quyền và chọn chấp nhận"
+    ],
+    [
+      "UC-60",
+      "UC-63",
+      "include",
+      "Tính theo sinh viên và học kỳ"
+    ],
+    [
+      "UC-61",
+      "UC-64",
+      "include",
+      "Trả kết luận và chi tiết thiếu"
+    ],
+    [
+      "UC-84",
+      "UC-65",
+      "include",
+      "Luôn xác định đúng phiên bản của SV"
+    ],
+    [
+      "UC-68",
+      "UC-63",
+      "include",
+      "Cùng quy tắc với web"
+    ],
+    [
+      "UC-70",
+      "UC-64",
+      "include",
+      "Cùng quy tắc với web"
+    ],
+    [
+      "UC-62",
+      "UC-64",
+      "include",
+      "Lặp cho mỗi SV của khóa"
+    ],
+    [
+      "UC-84",
+      "UC-18",
+      "generalization",
+      "Chuyên biệt mục tiêu tra cứu cho Sinh viên"
+    ],
+    [
+      "UC-54",
+      "UC-56",
+      "include",
+      "Tính tổng trước khi đối chiếu cảnh báo"
+    ],
+    [
+      "UC-33",
+      "UC-16",
+      "include",
+      "Xác định mọi CTĐT dùng đề cương này"
+    ]
+  ],
+  "fr_traceability": {
+    "1": [
+      "UC-02"
+    ],
+    "2": [
+      "UC-02"
+    ],
+    "3": [
+      "UC-03"
+    ],
+    "4": [
+      "UC-04"
+    ],
+    "5": [
+      "UC-11"
+    ],
+    "6": [
+      "UC-05"
+    ],
+    "7": [
+      "UC-06"
+    ],
+    "8": [
+      "UC-07"
+    ],
+    "9": [
+      "UC-08"
+    ],
+    "10": [
+      "UC-06",
+      "UC-82"
+    ],
+    "11": [
+      "UC-10",
+      "UC-11"
+    ],
+    "12": [
+      "UC-10",
+      "UC-11"
+    ],
+    "13": [
+      "UC-10",
+      "UC-11"
+    ],
+    "14": [
+      "UC-10",
+      "UC-11"
+    ],
+    "15": [
+      "UC-10",
+      "UC-11",
+      "UC-12"
+    ],
+    "16": [
+      "UC-10",
+      "UC-11"
+    ],
+    "17": [
+      "UC-11",
+      "UC-16"
+    ],
+    "18": [
+      "UC-13",
+      "UC-14"
+    ],
+    "19": [
+      "UC-13"
+    ],
+    "20": [
+      "UC-13",
+      "UC-17"
+    ],
+    "21": [
+      "UC-14"
+    ],
+    "22": [
+      "UC-15"
+    ],
+    "23": [
+      "UC-18",
+      "UC-19"
+    ],
+    "24": [
+      "UC-18",
+      "UC-19"
+    ],
+    "25": [
+      "UC-20"
+    ],
+    "26": [
+      "UC-07",
+      "UC-19"
+    ],
+    "27": [
+      "UC-21"
+    ],
+    "28": [
+      "UC-18"
+    ],
+    "29": [
+      "UC-22"
+    ],
+    "30": [
+      "UC-21"
+    ],
+    "31": [
+      "UC-60"
+    ],
+    "32": [
+      "UC-18"
+    ],
+    "33": [
+      "UC-72",
+      "UC-73"
+    ],
+    "34": [
+      "UC-72",
+      "UC-73",
+      "UC-75"
+    ],
+    "35": [
+      "UC-73",
+      "UC-75"
+    ],
+    "36": [
+      "UC-23"
+    ],
+    "37": [
+      "UC-24"
+    ],
+    "38": [
+      "UC-25",
+      "UC-26"
+    ],
+    "39": [
+      "UC-25",
+      "UC-27"
+    ],
+    "40": [
+      "UC-25",
+      "UC-28"
+    ],
+    "41": [
+      "UC-29",
+      "UC-30"
+    ],
+    "42": [
+      "UC-31"
+    ],
+    "43": [
+      "UC-81"
+    ],
+    "44": [
+      "UC-32",
+      "UC-33"
+    ],
+    "45": [
+      "UC-32",
+      "UC-33"
+    ],
+    "46": [
+      "UC-33"
+    ],
+    "47": [
+      "UC-34"
+    ],
+    "48": [
+      "UC-33"
+    ],
+    "49": [
+      "UC-35"
+    ],
+    "50": [
+      "UC-35",
+      "UC-58"
+    ],
+    "51": [
+      "UC-35",
+      "UC-58"
+    ],
+    "52": [
+      "UC-35",
+      "UC-58"
+    ],
+    "53": [
+      "UC-36",
+      "UC-57"
+    ],
+    "54": [
+      "UC-31",
+      "UC-36",
+      "UC-57"
+    ],
+    "55": [
+      "UC-37",
+      "UC-38"
+    ],
+    "56": [
+      "UC-37"
+    ],
+    "57": [
+      "UC-38",
+      "UC-43",
+      "UC-44",
+      "UC-46"
+    ],
+    "58": [
+      "UC-40",
+      "UC-43",
+      "UC-44"
+    ],
+    "59": [
+      "UC-43",
+      "UC-44",
+      "UC-45",
+      "UC-46"
+    ],
+    "60": [
+      "UC-39"
+    ],
+    "61": [
+      "UC-38",
+      "UC-43",
+      "UC-44"
+    ],
+    "62": [
+      "UC-40",
+      "UC-41"
+    ],
+    "63": [
+      "UC-38",
+      "UC-47"
+    ],
+    "64": [
+      "UC-47",
+      "UC-48"
+    ],
+    "65": [
+      "UC-42"
+    ],
+    "66": [
+      "UC-47"
+    ],
+    "67": [
+      "UC-40",
+      "UC-43",
+      "UC-44",
+      "UC-45"
+    ],
+    "68": [
+      "UC-37",
+      "UC-38"
+    ],
+    "69": [
+      "UC-46",
+      "UC-49"
+    ],
+    "70": [
+      "UC-46",
+      "UC-49"
+    ],
+    "71": [
+      "UC-46",
+      "UC-49"
+    ],
+    "72": [
+      "UC-50"
+    ],
+    "73": [
+      "UC-51"
+    ],
+    "74": [
+      "UC-52",
+      "UC-65"
+    ],
+    "75": [
+      "UC-53"
+    ],
+    "76": [
+      "UC-51"
+    ],
+    "77": [
+      "UC-54",
+      "UC-56"
+    ],
+    "78": [
+      "UC-54",
+      "UC-55"
+    ],
+    "79": [
+      "UC-54"
+    ],
+    "80": [
+      "UC-17",
+      "UC-54"
+    ],
+    "81": [
+      "UC-54"
+    ],
+    "82": [
+      "UC-54"
+    ],
+    "83": [
+      "UC-60",
+      "UC-63",
+      "UC-68"
+    ],
+    "84": [
+      "UC-61",
+      "UC-64",
+      "UC-70"
+    ],
+    "85": [
+      "UC-61",
+      "UC-64",
+      "UC-70"
+    ],
+    "86": [
+      "UC-61",
+      "UC-64",
+      "UC-70"
+    ],
+    "87": [
+      "UC-62"
+    ],
+    "88": [
+      "UC-18",
+      "UC-65",
+      "UC-66",
+      "UC-84"
+    ],
+    "89": [
+      "UC-18",
+      "UC-59",
+      "UC-84"
+    ],
+    "90": [
+      "UC-59",
+      "UC-67"
+    ],
+    "91": [
+      "UC-60",
+      "UC-68"
+    ],
+    "92": [
+      "UC-60",
+      "UC-68"
+    ],
+    "93": [
+      "UC-32",
+      "UC-69"
+    ],
+    "94": [
+      "UC-66",
+      "UC-67",
+      "UC-68",
+      "UC-69",
+      "UC-70"
+    ],
+    "95": [
+      "UC-18",
+      "UC-59",
+      "UC-60",
+      "UC-61",
+      "UC-32",
+      "UC-84"
+    ],
+    "96": [
+      "UC-72",
+      "UC-73"
+    ],
+    "97": [
+      "UC-71"
+    ],
+    "98": [
+      "UC-76",
+      "UC-77"
+    ],
+    "99": [
+      "UC-76",
+      "UC-77",
+      "UC-78"
+    ],
+    "100": [
+      "UC-76",
+      "UC-77",
+      "UC-78"
+    ],
+    "101": [
+      "UC-73",
+      "UC-74"
+    ],
+    "102": [
+      "UC-79"
+    ],
+    "103": [
+      "UC-80"
+    ],
+    "104": [
+      "UC-81"
+    ],
+    "105": [
+      "UC-82"
+    ],
+    "106": [
+      "UC-82"
+    ],
+    "107": [
+      "UC-83"
+    ]
+  },
+  "issues": [
+    [
+      "C01 · Thời điểm snapshot",
+      "FR-69 và 6.2.1: tạo khi duyệt cuối; 6.1.1/6.1.4: đến hiệu lực mới sinh bản. Mô hình chọn tạo snapshot khi R1 đồng ý, giữ chờ hiệu lực và kích hoạt đầu học kỳ. Cần Khoa xác nhận."
+    ],
+    [
+      "C02 · Từ chối hay trả lại",
+      "6.1.1/2: TỪ CHỐI đóng; BR-29: TRẢ LẠI về nháp. EC-26 dùng “từ chối” nhưng lại về nháp. Mô hình theo định nghĩa trạng thái: trả lại mới được sửa/gửi lại."
+    ],
+    [
+      "C03 · Người đề xuất là R1",
+      "FR-61/BR-27 yêu cầu bỏ cấp tự duyệt, nhưng R1 là cấp cuối. Không tự suy ra được phép ban hành không có người kiểm soát. Tạm yêu cầu một R1 khác xử lý cuối; đây là giả định cần chốt, không phải yêu cầu đã xác nhận."
+    ],
+    [
+      "C04 · Tuyến duyệt tổ chức / PLO / khung",
+      "3.4 có đề xuất tổ chức/nhân bản nhưng FR-56 chưa liệt kê đủ. Đề xuất PLO/thông tin CTĐT không gắn HP thì chưa rõ cấp 1. Tạm đề xuất tổ chức về R1; đề xuất CTĐT không có nhóm bị tác động bỏ cấp 1 có log, cần xác nhận."
+    ],
+    [
+      "C05 · Ba hay bốn kết quả đăng ký",
+      "FR-83 nói ba trạng thái; 7.3 có thêm “Đã hoàn thành”. Mô hình giữ ba kết quả đủ điều kiện và một trạng thái hoàn thành riêng, không làm mất thông tin."
+    ],
+    [
+      "C06 · Song hành và chống lặp",
+      "BR-11 chỉ cấm chu trình học trước/tiên quyết, không chứng minh đệ quy song hành kết thúc. SRS còn dùng “đã hoàn thành” khác “đã học trước” ở phần thuật ngữ. Cần thống nhất ngữ nghĩa và visited-set/nhóm song hành; không thêm use case đăng ký thực tế."
+    ],
+    [
+      "C07 · Bản đang hiệu lực và bản của khóa",
+      "BR-22/26 cho bản hiện hành toàn CTĐT và bản lịch sử vẫn áp dụng cho khóa cũ. Mô hình không tự nâng phiên bản SV. Ví dụ K2023 gắn 1.1 cần quyết định chuyển đổi nếu khác bản đầu vào."
+    ],
+    [
+      "C08 · Quyền còn thiếu",
+      "SRS chưa chốt quyền: chỉ định trưởng nhóm, ủy quyền, xuất tài liệu, chạy xét lô, quản lý ánh xạ, ghi đè ma trận/TC, xem đồ thị và một số báo cáo chi tiết. Catalog nêu quyền tạm từng UC; không xem là chính sách đã được trường xác nhận."
+    ],
+    [
+      "C09 · Tín chỉ và điều kiện tự chọn",
+      "FR-29 cho tối thiểu TC hoặc số HP nhưng thuật toán 7.4 mới mô tả TC. EC-17 cấm tính đôi nhóm tương đương; tổng TC phải tránh đếm trùng và xử lý TC tự do theo quy chế. UC-64 giữ cả hai loại hạn mức, cần chốt công thức triển khai."
+    ],
+    [
+      "C10 · Phiên bản đề cương qua API",
+      "Endpoint HP/{maHP}/de-cuong chưa mang phiên bản, trong khi SV phải xem đúng bản lịch sử. Mô hình yêu cầu ngữ cảnh bản được phép; tham số/token/ngữ cảnh cụ thể cần thiết kế và chốt."
+    ],
+    [
+      "C11 · Tương đương độc lập với phiên bản",
+      "EC-16 cho nhóm tương đương toàn trường áp dụng mọi phiên bản; snapshot lại chứa các quan hệ. Cần chốt việc xét lại lịch sử dùng quy tắc hiện tại hay quy tắc tại thời điểm xét; không tự tuyên bố kết quả cũ luôn bất biến."
+    ],
+    [
+      "C12 · Các quyết định tạm Q-01..Q-17",
+      "Giữ DEC hiện có: CLO dùng chung; ảnh hưởng nhiều CTĐT; thang 4; tương đương hai chiều/bắc cầu; HP ngoài khoa chuyển R1; gửi lại từ cấp 1; cờ Excel giữ nguyên; DB ưu tiên; HP điều kiện trong xét; song ngữ/PDF nên có; tài khoản nội bộ; nhắc hạn tùy chọn. Các Q chưa xác nhận vẫn là rủi ro yêu cầu."
+    ]
+  ]
+}
