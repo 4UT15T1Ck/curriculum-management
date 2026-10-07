@@ -1,0 +1,14 @@
+- Cơ cấu khoa ( ROLE ) : ban lãnh đạo khoa, ( trưởng khoa phó khoa ), giám đốc chương trình đào tạo,  trưởng nhóm chuyên môn ( phụ trách chuyên môn ), 4 nhóm chuyên môn sau đó giảng viên các chuyên môn ( 1 giảng viên có thể thuộc nhiều nhóm chuyên môn ), phòng đào tạo  ( Quyền cao nhất)
+- Có các chương trình đào tạo ( chọn lúc mới vô trường ) --> Giám đốc CTDT phụ trách ( làm 1 - n ).  Khung chương trình đào tạo, mỗi môn có đề cương chi tiết.  
+- Cần tự động hóa, cập nhật, có công thức, làm versioning ( cập nhật phiên bản ), hiện đang quản lý trên excel.
+- Có thể liên quan tới hệ thống khác
+- 1 CTDT sẽ có 1 mục tiêu chuẩn đầu ra PLO, CLO ( entity ).
+- Phân quyền, ở dưới muốn sửa xóa gì phải qua Phòng đào tạo duyệt
+- Làm một cái app có tính năng coi chương trình đào tạo cho sinh viên ( sẽ tích hợp vào dDUT ), còn quan trọng là phần web
+- Sẽ có toàn bộ môi trường + server
+- Chỉ cần làm monolith
+- Chưa có quy trình tạo mới chương trình đào tạo, k cần làm. Chừ là quản lý CTDT thôi ( cập nhật công thức điểm, cập nhật PLO CLO, cập nhật đề cương chi tiết ( chỉ có 1 đề cương )  ) --> Qua cấp quản lý CTDT duyệt --> Qua phòng Đào tạo duyệt.
+- Giảng viên chỉnh --> Qua giám đốc duyệt --> phòng Đào tạo duyệt 
+- Update thì có lưu cái version của chương trình đào tạo ( versioning )
+- Chương trình đào tạo kỹ sư, cử nhân.
+- Học phần tương đương ( học cái này hay cái kia của CTDT ) đều có thể tốt nghiệp được 
