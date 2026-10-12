@@ -3,7 +3,7 @@
     "R1": "Phòng Đào tạo",
     "R2": "Ban lãnh đạo khoa",
     "R3": "Giám đốc CTĐT",
-    "R4": "Trưởng nhóm chuyên môn",
+    "R4": "Điều phối nhóm chuyên môn",
     "R5": "Giảng viên",
     "R6": "Sinh viên",
     "E1": "Hệ thống dữ liệu trường\n(nguồn chỉ đọc)",
@@ -50,14 +50,14 @@
       "level": "BB"
     },
     "UC-04": {
-      "name": "Chỉ định trưởng nhóm chuyên môn",
+      "name": "Chỉ định điều phối nhóm chuyên môn",
       "actors": [
         "R1"
       ],
       "fr": [
         4
       ],
-      "detail": "Lưu thời gian hiệu lực. SRS không chỉ rõ quyền của R2 cho việc chỉ định trưởng nhóm; tạm dùng R1 theo quyền quản trị.",
+      "detail": "Lưu thời gian hiệu lực. SRS không chỉ rõ quyền của R2 cho việc chỉ định người điều phối nhóm; tạm dùng R1 theo quyền quản trị.",
       "level": "BB"
     },
     "UC-05": {
@@ -639,7 +639,7 @@
         61,
         67
       ],
-      "detail": "Xem diff, đồng ý/trả lại/từ chối; nhiều nhóm phải đủ tất cả trưởng nhóm. R1 có quyền can thiệp với nhật ký; không kế thừa toàn bộ vai trò R4.",
+      "detail": "Xem diff, đồng ý/trả lại/từ chối; nhiều nhóm phải đủ tất cả người điều phối nhóm. R1 có quyền can thiệp với nhật ký; không kế thừa toàn bộ vai trò R4.",
       "level": "BB"
     },
     "UC-44": {
@@ -2212,7 +2212,7 @@
     ],
     [
       "C08 · Quyền còn thiếu",
-      "SRS chưa chốt quyền: chỉ định trưởng nhóm, ủy quyền, xuất tài liệu, chạy xét lô, quản lý ánh xạ, ghi đè ma trận/TC, xem đồ thị và một số báo cáo chi tiết. Catalog nêu quyền tạm từng UC; không xem là chính sách đã được trường xác nhận."
+      "SRS chưa chốt quyền: chỉ định người điều phối nhóm, ủy quyền, xuất tài liệu, chạy xét lô, quản lý ánh xạ, ghi đè ma trận/TC, xem đồ thị và một số báo cáo chi tiết. Catalog nêu quyền tạm từng UC; không xem là chính sách đã được trường xác nhận."
     ],
     [
       "C09 · Tín chỉ và điều kiện tự chọn",

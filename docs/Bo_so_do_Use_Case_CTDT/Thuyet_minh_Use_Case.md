@@ -2,6 +2,8 @@
 
 Nguồn: SRS PBL6 người dùng cung cấp. Mô hình bao phủ 107/107 FR, gồm BẮT BUỘC, NÊN CÓ và TÙY CHỌN. Những điểm chưa nhất quán được diễn giải công khai, không coi là quyết định đã được Khoa phê duyệt.
 
+> **Hiệu đính 2026-10-11.** Vai trò R4 đổi tên "Trưởng nhóm chuyên môn" → "**Điều phối nhóm chuyên môn**" cho khớp SRS, trong ba tệp nguồn (`.md`, `.json`, `.drawio`). Bản xuất `.pdf` **chưa xuất lại** nên còn tên cũ. SRS hiện có 109 FR: FR-108 và FR-109 (bổ sung sau khảo sát lần 2) **chưa** được gắn use case trong mô hình này; con số "107 FR" bên dưới là theo SRS tại thời điểm lập mô hình.
+
 ## Tệp sử dụng
 
 - `So_do_Use_Case_Quan_ly_CTDT.drawio`: mở bằng diagrams.net / draw.io (File → Open From → Device). Toàn bộ hình, chữ, đường nối chỉnh sửa được; chọn tab trang ở dưới. Không phải ảnh nhúng.
@@ -16,7 +18,7 @@ Nguồn: SRS PBL6 người dùng cung cấp. Mô hình bao phủ 107/107 FR, g�
 | R1 | Phòng Đào tạo |
 | R2 | Ban lãnh đạo khoa |
 | R3 | Giám đốc CTĐT |
-| R4 | Trưởng nhóm chuyên môn |
+| R4 | Điều phối nhóm chuyên môn |
 | R5 | Giảng viên |
 | R6 | Sinh viên |
 | E1 | Hệ thống dữ liệu trường (nguồn chỉ đọc) |
@@ -116,7 +118,7 @@ BR-22/26 cho bản hiện hành toàn CTĐT và bản lịch sử vẫn áp dụ
 
 ### C08 · Quyền còn thiếu
 
-SRS chưa chốt quyền: chỉ định trưởng nhóm, ủy quyền, xuất tài liệu, chạy xét lô, quản lý ánh xạ, ghi đè ma trận/TC, xem đồ thị và một số báo cáo chi tiết. Catalog nêu quyền tạm từng UC; không xem là chính sách đã được trường xác nhận.
+SRS chưa chốt quyền: chỉ định người điều phối nhóm, ủy quyền, xuất tài liệu, chạy xét lô, quản lý ánh xạ, ghi đè ma trận/TC, xem đồ thị và một số báo cáo chi tiết. Catalog nêu quyền tạm từng UC; không xem là chính sách đã được trường xác nhận.
 
 ### C09 · Tín chỉ và điều kiện tự chọn
 
@@ -172,9 +174,9 @@ Tác nhân: R1. Nguồn: FR-01, FR-02. Thêm, sửa, ngừng hoạt động; câ
 
 Tác nhân: R1, R2. Nguồn: FR-03. Một giảng viên có thể thuộc nhiều nhóm. R4 chỉ đề xuất thay đổi qua UC-09.
 
-### UC-04 · Chỉ định trưởng nhóm chuyên môn [BB]
+### UC-04 · Chỉ định điều phối nhóm chuyên môn [BB]
 
-Tác nhân: R1. Nguồn: FR-04. Lưu thời gian hiệu lực. SRS không chỉ rõ quyền của R2 cho việc chỉ định trưởng nhóm; tạm dùng R1 theo quyền quản trị.
+Tác nhân: R1. Nguồn: FR-04. Lưu thời gian hiệu lực. SRS không chỉ rõ quyền của R2 cho việc chỉ định người điều phối nhóm; tạm dùng R1 theo quyền quản trị.
 
 ### UC-05 · Quản lý tài khoản người dùng [BB]
 
@@ -330,7 +332,7 @@ Tác nhân: R1, R3, R4. Nguồn: FR-65. Chỉ đề xuất cần người dùng 
 
 ### UC-43 · Xử lý đề xuất cấp chuyên môn [BB]
 
-Tác nhân: R1, R4. Nguồn: FR-57, FR-58, FR-59, FR-61, FR-67. Xem diff, đồng ý/trả lại/từ chối; nhiều nhóm phải đủ tất cả trưởng nhóm. R1 có quyền can thiệp với nhật ký; không kế thừa toàn bộ vai trò R4.
+Tác nhân: R1, R4. Nguồn: FR-57, FR-58, FR-59, FR-61, FR-67. Xem diff, đồng ý/trả lại/từ chối; nhiều nhóm phải đủ tất cả người điều phối nhóm. R1 có quyền can thiệp với nhật ký; không kế thừa toàn bộ vai trò R4.
 
 ### UC-44 · Xử lý đề xuất cấp chương trình [BB]
 
@@ -503,7 +505,7 @@ Tác nhân: R6. Nguồn: FR-88, FR-89. Chuyên biệt của UC-18 cho SV; xác �
 | FR-01 | BẮT BUỘC | UC-02 | Hệ thống cho phép quản lý cây đơn vị: Trường → Phòng Đào tạo, Trường → Khoa → Nhóm chuyên môn |
 | FR-02 | BẮT BUỘC | UC-02 | Hệ thống cho phép quản lý 04 nhóm chuyên môn của Khoa Công nghệ Thông tin, cho phép thêm/sửa/ngừng hoạt động nhóm |
 | FR-03 | BẮT BUỘC | UC-03 | Hệ thống cho phép gán một giảng viên vào nhiều nhóm chuyên môn đồng thời (quan hệ n–n) |
-| FR-04 | BẮT BUỘC | UC-04 | Hệ thống cho phép chỉ định Trưởng nhóm chuyên môn cho từng nhóm, ghi nhận thời gian hiệu lực |
+| FR-04 | BẮT BUỘC | UC-04 | Hệ thống cho phép chỉ định Điều phối nhóm chuyên môn cho từng nhóm, ghi nhận thời gian hiệu lực |
 | FR-05 | BẮT BUỘC | UC-11 | Hệ thống cho phép ghi nhận học phần thuộc khoa khác (Toán, Vật lý, Lý luận chính trị, Ngoại ngữ) |
 | FR-06 | BẮT BUỘC | UC-05 | Hệ thống cho phép tạo, sửa, vô hiệu hóa tài khoản người dùng. Không cho phép xóa cứng tài khoản đã phát sinh giao dịch |
 | FR-07 | BẮT BUỘC | UC-06 | Hệ thống cho phép gán một người dùng nhiều vai trò đồng thời, mỗi vai trò gắn với một phạm vi đối tượng cụ thể |
@@ -556,7 +558,7 @@ Tác nhân: R6. Nguồn: FR-88, FR-89. Chuyên biệt của UC-18 cho SV; xác �
 | FR-54 | BẮT BUỘC | UC-31, UC-36, UC-57 | Hệ thống cảnh báo khi có CLO chưa được thành phần đánh giá nào bao phủ |
 | FR-55 | BẮT BUỘC | UC-37, UC-38 | Mọi thay đổi đối với dữ liệu đã ban hành phải được thực hiện thông qua Đề xuất thay đổi; không cho phép sửa trực tiếp |
 | FR-56 | BẮT BUỘC | UC-37 | Hệ thống hỗ trợ các loại đề xuất: sửa công thức điểm · sửa PLO/CLO · sửa nội dung đề cương · sửa khung chương trình · sửa quan hệ học phần · sửa thông tin chương trình |
-| FR-57 | BẮT BUỘC | UC-38, UC-43, UC-44, UC-46 | Đề xuất luân chuyển qua ba cấp duyệt: Trưởng nhóm chuyên môn → Giám đốc CTĐT → Phòng Đào tạo |
+| FR-57 | BẮT BUỘC | UC-38, UC-43, UC-44, UC-46 | Đề xuất luân chuyển qua ba cấp duyệt: Điều phối nhóm chuyên môn → Giám đốc CTĐT → Phòng Đào tạo |
 | FR-58 | BẮT BUỘC | UC-40, UC-43, UC-44 | Hệ thống hiển thị bảng so sánh trước/sau (diff) của nội dung thay đổi tại mọi cấp duyệt |
 | FR-59 | BẮT BUỘC | UC-43, UC-44, UC-45, UC-46 | Người duyệt có ba lựa chọn: Đồng ý · Trả lại (kèm lý do bắt buộc) · Từ chối (kèm lý do bắt buộc) |
 | FR-60 | BẮT BUỘC | UC-39 | Người tạo đề xuất được phép thu hồi đề xuất khi chưa có cấp nào phê duyệt |

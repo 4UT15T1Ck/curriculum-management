@@ -9,7 +9,14 @@
 > **Hiệu đính 2026-10-01 — nguồn thứ hai.** 8 trong 80 ảnh bảng của `Requirements.pdf` bị cắt phải ở đúng 1480px (giới hạn cứng của bản xuất), làm mất phần cuối nhiều dòng. `Bo_so_do_Use_Case_CTDT/Thuyet_minh_Use_Case.md` được lập từ **bản nguồn chưa bị cắt**, nên đã dùng để khôi phục:
 > - **40 dòng FR** được hiệu đính: 26 ô **Mức** còn bỏ ngỏ nay đã xác định, **5 giá trị Mức sai** đã sửa (FR-09, FR-41, FR-43, FR-47, FR-52 → `NÊN CÓ`), và **30 dòng** được phục hồi đầy đủ văn bản.
 > - Mỗi giá trị sửa đã được **đối chiếu lại với ảnh bảng gốc** trong PDF trước khi áp dụng; nơi hai nguồn khác nhau, **bản gốc thắng**.
-> - Phần **chưa** khôi phục được, đã đánh dấu tại chỗ: bảng thuật ngữ (mục 4.1), bảng thuộc tính `HocPhan` (mục 4.2), bảng ánh xạ Excel (mục 4.4), và cột "Ảnh hưởng nếu thay đổi" của Q-01/Q-02 (mục 13.1).
+> - Phần **chưa** khôi phục được ở lần hiệu đính này: bảng thuật ngữ (mục 4.1), bảng thuộc tính `HocPhan` (mục 4.2), bảng ánh xạ Excel (mục 4.3), và cột "Ảnh hưởng nếu thay đổi" của Q-01/Q-02 (mục 13.1) — **cả bốn đã được xử lý ngày 2026-10-11**, xem khối hiệu đính bên dưới.
+>
+> **Hiệu đính 2026-10-11 — hợp nhất.** Nguồn bổ sung: bản Markdown gốc của tài liệu này (v1.0, 27/08/2026 — cũ hơn `Requirements.pdf`) và các ghi chú phỏng vấn trong `docs/notes/`. Nơi bản port từ PDF đã có nội dung thì giữ bản port; bản Markdown gốc chỉ dùng để lấy phần bị mất.
+> - **Khôi phục phần bị cắt:** thuộc tính của toàn bộ thực thể (mục 4.2), 6 dòng và cột ghi chú của bảng ánh xạ Excel (mục 4.3), cột "Ảnh hưởng nếu thay đổi" của Q-01/Q-02 (mục 13.1). Bảng thuật ngữ (mục 4.1) đã đối chiếu: không thiếu dòng nào.
+> - **Đổi tên vai trò R4:** "Trưởng nhóm chuyên môn" → "**Điều phối nhóm chuyên môn**" trên toàn tài liệu, kể cả trạng thái "CHỜ ĐIỀU PHỐI NHÓM CM", theo yêu cầu ghi tại `docs/notes/raw-notes-pbl6-zalo.txt`. Đây là ngoại lệ có chủ ý so với nguyên tắc giữ nguyên văn. Bộ sơ đồ Use Case (`Bo_so_do_Use_Case_CTDT/`) đã đổi tên theo trong ba tệp nguồn (`.md`, `.json`, `.drawio`); bản xuất `.pdf` chưa xuất lại nên còn tên cũ.
+> - **Chốt:** Q-01 — CLO dùng chung theo học phần (DEC-03); Q-02 — chấp nhận sinh phiên bản mới cho mọi CTĐT liên quan; giữ luồng duyệt **ba cấp** (DEC-04).
+> - **Bổ sung từ khảo sát lần 2:** mục 6.4, FR-108, FR-109 (mục 5.6), thực thể `HoSoDeXuat` (mục 4.2.6), các câu hỏi Q-18..Q-28 (mục 13.5). Tổng số FR: **109**.
+> - Các khối `> **[Bổ sung 2026-10-11]**` đánh dấu nội dung **không có** trong `Requirements.pdf`.
 
 ---
 
@@ -86,7 +93,7 @@ Hệ thống được xây dựng theo kiến trúc **monolith (khối đơn)**,
 │  TẦNG GIAO DIỆN                                              │
 │  ├── Web quản trị (trọng tâm)                                │
 │  │     Phòng ĐT · Ban lãnh đạo khoa · GĐ CTĐT ·              │
-│  │     Trưởng nhóm CM · Giảng viên                           │
+│  │     Điều phối nhóm CM · Giảng viên                        │
 │  └── Cổng tra cứu sinh viên (responsive)                     │
 ├──────────────────────────────────────────────────────────────┤
 │  TẦNG ỨNG DỤNG (Monolith)                                    │
@@ -148,7 +155,7 @@ Hệ thống được xây dựng theo kiến trúc **monolith (khối đơn)**,
 | R1 | **Phòng Đào tạo** | Cấp 3 (cuối cùng) |
 | R2 | **Ban lãnh đạo khoa** | Không chặn (chỉ giám sát + bình luận) |
 | R3 | **Giám đốc CTĐT** | Cấp 2 |
-| R4 | **Trưởng nhóm chuyên môn** | Cấp 1 |
+| R4 | **Điều phối nhóm chuyên môn** | Cấp 1 |
 | R5 | **Giảng viên** | Người đề xuất |
 | R6 | **Sinh viên** | Chỉ đọc |
 
@@ -167,7 +174,7 @@ Khoa Công nghệ Thông tin
       ├── Giám đốc Chương trình đào tạo  (1 người phụ trách 1..n CTĐT)
       │
       └── Nhóm chuyên môn  (04 nhóm)
-             ├── Trưởng nhóm chuyên môn
+             ├── Điều phối nhóm chuyên môn
              └── Giảng viên  (1 giảng viên có thể thuộc nhiều nhóm)
 ```
 
@@ -180,7 +187,7 @@ Quyền trong hệ thống được xác định bởi cặp **(Vai trò × Ph�
 | Phòng Đào tạo | Toàn hệ thống |
 | Ban lãnh đạo khoa | Toàn bộ dữ liệu thuộc khoa |
 | Giám đốc CTĐT | Chỉ các Chương trình đào tạo được phân công |
-| Trưởng nhóm chuyên môn | Chỉ học phần thuộc nhóm của mình |
+| Điều phối nhóm chuyên môn | Chỉ học phần thuộc nhóm của mình |
 | Giảng viên | Chỉ học phần thuộc các nhóm mà mình là thành viên |
 | Sinh viên | Chỉ phiên bản Chương trình đào tạo áp dụng cho khóa của mình |
 
@@ -188,7 +195,7 @@ Quyền trong hệ thống được xác định bởi cặp **(Vai trò × Ph�
 
 **Ký hiệu:** `X` = có quyền · `Đ` = chỉ được đề xuất (phải qua duyệt) · `P` = có quyền trong phạm vi được phân công · `–` = không có quyền
 
-| Chức năng | R1 Phòng ĐT | R2 Ban LĐ khoa | R3 GĐ CTĐT | R4 Trưởng nhóm CM | R5 Giảng viên | R6 Sinh viên |
+| Chức năng | R1 Phòng ĐT | R2 Ban LĐ khoa | R3 GĐ CTĐT | R4 Điều phối nhóm CM | R5 Giảng viên | R6 Sinh viên |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
 | **Quản trị hệ thống** | | | | | | |
 | Quản lý đơn vị, nhóm chuyên môn | X | – | – | – | – | – |
@@ -255,30 +262,32 @@ Quyền trong hệ thống được xác định bởi cặp **(Vai trò × Ph�
 | **Phiên bản CTĐT** | Ảnh chụp bất biến toàn bộ Chương trình đào tạo tại thời điểm ban hành |
 | **Xét tốt nghiệp** | Quá trình kiểm tra sinh viên đã thỏa mãn mọi điều kiện của Chương trình đào tạo |
 
-> **[Ghi chú port]** Bảng này bị **cắt phải** trong bản PDF gốc (ảnh rộng đúng 1480px — giới hạn cứng của bản xuất); cột định nghĩa chỉ port được đến hết phần còn đọc được. Phần bị cắt **chưa khôi phục** — `Bo_so_do_Use_Case_CTDT/Thuyet_minh_Use_Case.md` không chứa bảng thuật ngữ này.
+> **[Ghi chú port]** Bảng này từng được đánh dấu "chưa khôi phục" (ảnh bảng trong PDF bị cắt phải ở 1480px). **Đã đối chiếu ngày 2026-10-11** với bản nguồn Markdown gốc (v1.0, 27/08/2026): cùng 14 thuật ngữ, không dòng nào bị mất.
 
 ### 4.2. Danh sách thực thể nghiệp vụ
 
+> **[Ghi chú port]** Cột thuộc tính của toàn bộ mục 4.2 được **khôi phục ngày 2026-10-11** từ bản nguồn Markdown gốc (v1.0, 27/08/2026). Ở các dòng có dấu "—", phần đứng trước là mô tả đã port từ PDF, phần sau là danh sách thuộc tính lấy từ bản nguồn; các dòng còn lại là danh sách thuộc tính đầy đủ. Tên vai trò R4 trong thuộc tính của `NhomChuyenMon` đã đổi theo tên mới (bản nguồn ghi "trưởng nhóm").
+
 #### 4.2.1. Nhóm Tổ chức và Người dùng
 
-| Thực thể | Mô tả |
+| Thực thể | Mô tả — thuộc tính chính |
 |---|---|
-| `DonVi` | Đơn vị trong cây tổ chức |
-| `NhomChuyenMon` | Nhóm chuyên môn thuộc khoa |
-| `NguoiDung` | Tài khoản người dùng |
-| `VaiTro` | Vai trò trong hệ thống |
+| `DonVi` | Đơn vị trong cây tổ chức — mã đơn vị, tên đơn vị, loại đơn vị (Trường/Khoa/Phòng), đơn vị cha |
+| `NhomChuyenMon` | Nhóm chuyên môn thuộc khoa — mã nhóm, tên nhóm, khoa chủ quản, người điều phối |
+| `NguoiDung` | Tài khoản người dùng — mã người dùng, họ tên, email, đơn vị, trạng thái hoạt động |
+| `VaiTro` | Vai trò trong hệ thống — mã vai trò, tên vai trò, mô tả |
 | `PhanQuyen` | Người dùng, vai trò, **phạm vi đối tượng, thời hạn hiệu lực** |
-| `ThanhVienNhomCM` | Quan hệ n–n giữa giảng viên và nhóm chuyên môn |
-| `PhanCongGiamDoc` | Phân công Giám đốc CTĐT cho Chương trình đào tạo |
-| `UyQuyenDuyet` | Ủy quyền phê duyệt có thời hạn |
+| `ThanhVienNhomCM` | Quan hệ n–n giữa giảng viên và nhóm chuyên môn — nhóm chuyên môn, giảng viên, vai trò trong nhóm |
+| `PhanCongGiamDoc` | Phân công Giám đốc CTĐT cho Chương trình đào tạo — Giám đốc CTĐT, Chương trình đào tạo, ngày bắt đầu, ngày kết thúc |
+| `UyQuyenDuyet` | Ủy quyền phê duyệt có thời hạn — người ủy quyền, người được ủy quyền, phạm vi, thời hạn |
 
 #### 4.2.2. Nhóm Học phần
 
-| Thực thể | Mô tả |
+| Thực thể | Mô tả — thuộc tính chính |
 |---|---|
-| `HocPhan` | Học phần trong danh mục toàn trường |
-| `QuanHeHocPhan` | Quan hệ giữa hai học phần |
-| `NhomHocPhanTuongDuong` | Nhóm các học phần tương đương nhau |
+| `HocPhan` | Học phần trong danh mục toàn trường — mã HP, tên tiếng Việt, tên tiếng Anh, số tín chỉ (số thực), khoa phụ trách, nhóm chuyên môn phụ trách, loại học phần, trạng thái |
+| `QuanHeHocPhan` | Quan hệ giữa hai học phần — học phần nguồn, học phần đích, loại quan hệ, điều kiện điểm kèm theo |
+| `NhomHocPhanTuongDuong` | Nhóm các học phần tương đương nhau — mã nhóm, danh sách học phần thành viên, ghi chú |
 
 **Loại học phần:** Lý thuyết · Thực hành · Thí nghiệm · Đồ án · Đồ án tốt nghiệp · Thực tập · Học phần điều kiện (Giáo dục thể chất, Giáo dục quốc phòng, Ngoại ngữ).
 
@@ -292,62 +301,67 @@ Quyền trong hệ thống được xác định bởi cặp **(Vai trò × Ph�
 | QH4 | **Tương đương** | Hai học phần công nhận thay thế được cho nhau |
 | QH5 | **Thay thế** | Áp dụng khi học phần nguồn ngừng mở lớp |
 
-> **[Ghi chú port]** Bảng thuộc tính `HocPhan` ở mục này bị **cắt phải** trong bản PDF gốc; phần mô tả thuộc tính **chưa khôi phục** — `Bo_so_do_Use_Case_CTDT/Thuyet_minh_Use_Case.md` không chứa bảng thuộc tính thực thể.
-
 #### 4.2.3. Nhóm Chương trình đào tạo
 
-| Thực thể | Mô tả |
+| Thực thể | Mô tả — thuộc tính chính |
 |---|---|
-| `ChuongTrinhDaoTao` | Chương trình đào tạo |
-| `PhienBanCTDT` | Phiên bản (ảnh chụp bất biến) của Chương trình đào tạo |
-| `DongKhungCTDT` | Phiên bản, thứ tự, học kỳ dự kiến, học phần, ký hiệu khối kiến thức, cờ tự chọn, nhóm tự chọn, **cờ HT ĐA, cờ TQ ĐA, điểm học, điểm chuyển**, ghi chú |
-| `NhomTuChon` | Số tín chỉ tối thiểu, số học phần tối thiểu |
-| `KhoiKienThuc` | Khối kiến thức |
+| `ChuongTrinhDaoTao` | Chương trình đào tạo — mã chương trình, tên chương trình, mã ngành, tên ngành, trình độ (Kỹ sư/Cử nhân), khóa áp dụng, số học kỳ, tổng TC yêu cầu, số TC bắt buộc, số TC tự chọn, trạng thái |
+| `PhienBanCTDT` | Phiên bản (ảnh chụp bất biến) của Chương trình đào tạo — Chương trình đào tạo, số phiên bản, số quyết định ban hành, ngày ký, học kỳ hiệu lực, khóa áp dụng, người ban hành, trạng thái |
+| `DongKhungCTDT` | Phiên bản CTĐT, thứ tự, học kỳ dự kiến, học phần, ký hiệu khối kiến thức, cờ tự chọn, nhóm tự chọn, **cờ HT ĐA, cờ TQ ĐA, điểm học, điểm chuyển**, ghi chú |
+| `NhomTuChon` | Phiên bản CTĐT, mã nhóm, tên nhóm, số tín chỉ tối thiểu, số học phần tối thiểu |
+| `KhoiKienThuc` | Khối kiến thức — mã khối, tên khối, số tín chỉ yêu cầu |
 
 #### 4.2.4. Nhóm Chuẩn đầu ra
 
-| Thực thể | Mô tả |
+| Thực thể | Mô tả — thuộc tính chính |
 |---|---|
-| `PLO` | Chuẩn đầu ra chương trình — thuộc Chương trình đào tạo |
-| `CLO` | Chuẩn đầu ra học phần — thuộc **Đề cương chi tiết**, mã CLO |
+| `PLO` | Chuẩn đầu ra chương trình, thuộc Chương trình đào tạo — mã PLO, mô tả tiếng Việt, mô tả tiếng Anh, nhóm năng lực, thứ tự |
+| `CLO` | Chuẩn đầu ra học phần, thuộc **Đề cương chi tiết** — mã CLO, mô tả tiếng Việt, mô tả tiếng Anh, mức nhận thức, thứ tự |
 | `MaTranCLO_PLO` | **Chương trình đào tạo, học phần, CLO, PLO, mức độ đóng góp** |
-| `MaTranHP_PLO` | Suy diễn từ ma trận CLO–PLO, cho phép ghi đè |
+| `MaTranHP_PLO` | Suy diễn từ ma trận CLO–PLO, cho phép ghi đè — Chương trình đào tạo, học phần, PLO, mức độ đóng góp |
 
 #### 4.2.5. Nhóm Đề cương chi tiết
 
-| Thực thể | Mô tả |
+| Thực thể | Mô tả — thuộc tính chính |
 |---|---|
-| `DeCuongChiTiet` | Đề cương chi tiết học phần |
-| `NoiDungTheoTuan` | Nội dung giảng dạy theo tuần |
-| `ThanhPhanDanhGia` | Trọng số, hình thức, cờ điều kiện, ngưỡng điều kiện |
-| `MapThanhPhan_CLO` | Ánh xạ thành phần đánh giá với CLO |
-| `TaiLieuDinhKem` | Tệp đính kèm theo phiên bản |
+| `DeCuongChiTiet` | Đề cương chi tiết học phần — học phần, mô tả học phần, mục tiêu, phương pháp giảng dạy, tài liệu tham khảo, số phiên bản nội bộ, trạng thái |
+| `NoiDungTheoTuan` | Nội dung giảng dạy theo tuần — đề cương, tuần/chương, nội dung, hoạt động dạy học, CLO liên quan |
+| `ThanhPhanDanhGia` | Đề cương, mã thành phần, tên thành phần, trọng số, hình thức đánh giá, cờ điều kiện, ngưỡng điều kiện |
+| `MapThanhPhan_CLO` | Ánh xạ thành phần đánh giá với CLO — thành phần đánh giá, CLO, tỷ trọng |
+| `TaiLieuDinhKem` | Tệp đính kèm theo phiên bản — đề cương, tên tệp, loại tệp, đường dẫn lưu trữ, người tải lên, thời điểm |
 
 #### 4.2.6. Nhóm Quy trình phê duyệt
 
-| Thực thể | Mô tả |
+| Thực thể | Mô tả — thuộc tính chính |
 |---|---|
-| `DeXuatThayDoi` | Đề xuất thay đổi |
-| `NoiDungThayDoi` | Giá trị cũ (JSON), giá trị mới (JSON) |
-| `BuocDuyet` | Cấp duyệt, người duyệt, hành động, ý kiến, thời điểm, **cờ bỏ qua** |
-| `BinhLuan` | Bình luận trên đề xuất |
-| `ThongBao` | Thông báo tới người dùng |
+| `DeXuatThayDoi` | Đề xuất thay đổi — mã đề xuất, loại đề xuất, đối tượng tác động, người tạo, tiêu đề, lý do, trạng thái, thời điểm tạo |
+| `NoiDungThayDoi` | Đề xuất, thực thể bị tác động, giá trị cũ (JSON), giá trị mới (JSON) |
+| `BuocDuyet` | Đề xuất, cấp duyệt, người duyệt, hành động, ý kiến, thời điểm, **cờ bỏ qua** |
+| `BinhLuan` | Bình luận trên đề xuất — đề xuất, người bình luận, nội dung, thời điểm |
+| `ThongBao` | Thông báo tới người dùng — người nhận, loại thông báo, nội dung, đường dẫn liên kết, trạng thái đọc |
+
+> **[Bổ sung 2026-10-11]** Không có trong `Requirements.pdf`. Theo khảo sát lần 2 (mục 6.4, FR-108, FR-109), nhóm này cần thêm:
+>
+> | Thực thể | Mô tả — thuộc tính chính |
+> |---|---|
+> | `DeXuatThayDoi` *(thêm thuộc tính)* | nguồn phát sinh (Trường/Khoa), số văn bản căn cứ |
+> | `HoSoDeXuat` *(mới)* | Hồ sơ căn cứ đính kèm đề xuất — đề xuất, loại hồ sơ (tờ trình/biên bản/biên bản họp hội đồng/biên bản thẩm định/công văn), tên tệp, đường dẫn lưu trữ, người tải lên, thời điểm |
 
 #### 4.2.7. Nhóm Sinh viên và Kết quả học tập
 
-| Thực thể | Mô tả |
+| Thực thể | Mô tả — thuộc tính chính |
 |---|---|
-| `SinhVien` | Khóa tuyển sinh, **phiên bản CTĐT áp dụng** |
-| `KetQuaHocTap` | Điểm thang 10, thang 4, điểm chữ, trạng thái Đạt / Không đạt / Đang học / **Miễn** |
-| `KetQuaXetTotNghiep` | Kết luận, **danh sách thiếu hụt (JSON)** |
+| `SinhVien` | Mã sinh viên, họ tên, khóa tuyển sinh, ngành, Chương trình đào tạo, **phiên bản CTĐT áp dụng**, trạng thái |
+| `KetQuaHocTap` | Sinh viên, học phần, học kỳ, điểm thang 10, điểm thang 4, điểm chữ, trạng thái (Đạt / Không đạt / Đang học / **Miễn**) |
+| `KetQuaXetTotNghiep` | Sinh viên, thời điểm xét, kết luận, **danh sách thiếu hụt (JSON)** |
 
 #### 4.2.8. Nhóm Hệ thống
 
-| Thực thể | Mô tả |
+| Thực thể | Mô tả — thuộc tính chính |
 |---|---|
-| `NhatKyHeThong` | Nhật ký bất biến toàn bộ thao tác |
-| `PhienNhapLieu` | Phiên nhập liệu từ Excel |
-| `LogDongBo` | Nhật ký đồng bộ với cơ sở dữ liệu ngoài |
+| `NhatKyHeThong` | Nhật ký bất biến toàn bộ thao tác — người thực hiện, hành động, thực thể tác động, giá trị cũ, giá trị mới, địa chỉ IP, thời điểm |
+| `PhienNhapLieu` | Phiên nhập liệu từ Excel — loại nhập, tên tệp, người thực hiện, tổng dòng, số dòng thành công, số dòng lỗi, trạng thái |
+| `LogDongBo` | Nhật ký đồng bộ với cơ sở dữ liệu ngoài — nguồn dữ liệu, thời điểm bắt đầu, thời điểm kết thúc, số bản ghi, trạng thái, thông báo lỗi |
 
 ### 4.3. Diễn giải cấu trúc dữ liệu hiện tại
 
@@ -356,30 +370,36 @@ Bảng dưới đây ánh xạ các cột trong file Excel hiện hành sang th�
 | Cột Excel | Ánh xạ thực thể | Ghi chú |
 |---|---|---|
 | Mã chương trình | `ChuongTrinhDaoTao.maChuongTrinh` | Ví dụ: 1024034 |
-| TT | `DongKhungCTDT.thuTu` | |
-| **Ký hiệu** | `DongKhungCTDT.kyHieu` | Giữ nguyên ký hiệu gốc |
+| Tên chương trình đào tạo | `ChuongTrinhDaoTao.tenChuongTrinh` | Ví dụ: Công nghệ Thông tin K2023 Đặc thù_CNPM |
+| Số học kỳ | `ChuongTrinhDaoTao.soHocKy` | Ví dụ: 8 |
+| Tổng số tín chỉ yêu cầu | `ChuongTrinhDaoTao.tongTinChi` | Ví dụ: 130 |
+| Số tín chỉ bắt buộc | `ChuongTrinhDaoTao.tinChiBatBuoc` | Ví dụ: 122 |
+| Số tín chỉ tự chọn | `ChuongTrinhDaoTao.tinChiTuChon` | Ví dụ: 8 |
+| Mã ngành | `ChuongTrinhDaoTao.maNganh` | Ví dụ: 7480201 |
+| TT | `DongKhungCTDT.thuTu` | Số thứ tự dòng trong khung |
+| **Ký hiệu** | `DongKhungCTDT.kyHieu` | Mã khối kiến thức. Giữ nguyên ký hiệu gốc, hệ thống không tự đặt lại |
 | Mã HP | `HocPhan.maHocPhan` | Ví dụ: 3190111 |
-| Tên học phần | `HocPhan.tenHocPhan` | |
+| Tên học phần | `HocPhan.tenHocPhan` | Ví dụ: Giải tích 1 |
 | Số tín chỉ | `HocPhan.soTinChi` | **Kiểu số thực: 0 · 1 · 2.5 · 3 · 4** |
-| Học kỳ | `DongKhungCTDT.hocKyDuKien` | |
-| Tự chọn | `DongKhungCTDT.laTuChon` | |
-| **HT ĐA** | `DongKhungCTDT.htDA` | Giữ nguyên ký hiệu gốc |
-| **TQ ĐA** | `DongKhungCTDT.tqDA` | Giữ nguyên ký hiệu gốc |
-| **Điểm học** | `DongKhungCTDT.diemHoc` | |
-| **Điểm chuyển** | `DongKhungCTDT.diemChuyen` | |
-| **"Đăng ký được?"** | *(cột suy diễn)* | **Không lưu trữ** — tính tự động |
-| HP cần học trước | `QuanHeHocPhan` loại QH1 | |
-| HP song hành | `QuanHeHocPhan` loại QH3 | |
-| Cần HP tiên quyết | `QuanHeHocPhan` loại QH2 | |
-| Ghi chú | `DongKhungCTDT.ghiChu` | |
+| Học kỳ | `DongKhungCTDT.hocKyDuKien` | Học kỳ dự kiến (1–8) |
+| Tự chọn | `DongKhungCTDT.laTuChon` | Cờ đánh dấu học phần tự chọn |
+| **HT ĐA** | `DongKhungCTDT.htDA` | Cờ liên quan điều kiện đồ án. Giữ nguyên ký hiệu gốc, xem Q-04 |
+| **TQ ĐA** | `DongKhungCTDT.tqDA` | Cờ liên quan điều kiện tiên quyết đồ án. Giữ nguyên ký hiệu gốc, xem Q-04 |
+| **Điểm học** | `DongKhungCTDT.diemHoc` | Ngưỡng điểm tối thiểu để công nhận đã học học phần. Giá trị mẫu: 3 · 3.5 · 4 |
+| **Điểm chuyển** | `DongKhungCTDT.diemChuyen` | Ngưỡng điểm tối thiểu để được chuyển tiếp/miễn |
+| **"Đăng ký được?"** | *(cột suy diễn)* | **Không lưu trữ** — tính tự động bởi Bộ quy tắc, xem mục 7.3 |
+| HP cần học trước | `QuanHeHocPhan` loại QH1 | Ví dụ: 3190111 – Giải tích 1 |
+| HP song hành | `QuanHeHocPhan` loại QH3 | Ví dụ: 1020072 – Phương pháp tính |
+| Cần HP tiên quyết | `QuanHeHocPhan` loại QH2 | Ví dụ: 4130501 – Anh văn A2.1 |
+| Ghi chú | `DongKhungCTDT.ghiChu` | Ghi chú tự do |
 
-> **[Ghi chú port]** Bảng ánh xạ Excel bị **cắt phải** trong bản PDF gốc (~24 dòng, cột ghi chú bị cắt một phần). Nội dung trên là phần đọc được; **chưa khôi phục** — cần đối chiếu file Excel gốc để bổ sung.
+> **[Ghi chú port]** Bảng ánh xạ Excel bị cắt phải trong bản PDF gốc. **Đã khôi phục ngày 2026-10-11** từ bản nguồn Markdown gốc (v1.0, 27/08/2026): bổ sung 6 dòng thông tin chương trình và cột ghi chú của các dòng còn lại. File Excel gốc vẫn chưa có trong kho tài liệu — cần đối chiếu khi nhận được.
 
 ---
 
 ## 5. YÊU CẦU CHỨC NĂNG
 
-> **[Ghi chú port]** Mọi bảng yêu cầu chức năng trong bản PDF gốc đều có cột **Mức** nhận một trong ba giá trị `BẮT BUỘC` / `NÊN CÓ` / `TÙY CHỌN`. Ở các bảng bị cắt phải (FR-01..22, FR-33..37), cột này không đọc được từ file PDF. **Đã khôi phục đầy đủ** từ `Bo_so_do_Use_Case_CTDT/Thuyet_minh_Use_Case.md` — tài liệu đó được lập từ bản nguồn chưa bị cắt. Toàn bộ 107 FR nay đều có giá trị **Mức** xác định (90 BẮT BUỘC · 15 NÊN CÓ · 2 TÙY CHỌN).
+> **[Ghi chú port]** Mọi bảng yêu cầu chức năng trong bản PDF gốc đều có cột **Mức** nhận một trong ba giá trị `BẮT BUỘC` / `NÊN CÓ` / `TÙY CHỌN`. Ở các bảng bị cắt phải (FR-01..22, FR-33..37), cột này không đọc được từ file PDF. **Đã khôi phục đầy đủ** từ `Bo_so_do_Use_Case_CTDT/Thuyet_minh_Use_Case.md` — tài liệu đó được lập từ bản nguồn chưa bị cắt. Toàn bộ 107 FR nay đều có giá trị **Mức** xác định (90 BẮT BUỘC · 15 NÊN CÓ · 2 TÙY CHỌN). **Bổ sung 2026-10-11:** thêm FR-108 và FR-109 (mục 5.6), mức tạm thời NÊN CÓ → tổng **109 FR** (90 BẮT BUỘC · 17 NÊN CÓ · 2 TÙY CHỌN).
 
 ### 5.1. M1 — Quản trị tổ chức và Phân quyền
 
@@ -390,7 +410,7 @@ Bảng dưới đây ánh xạ các cột trong file Excel hiện hành sang th�
 | FR-01 | Hệ thống cho phép quản lý cây đơn vị: Trường → Phòng Đào tạo, Trường → Khoa → Nhóm chuyên môn | BẮT BUỘC |
 | FR-02 | Hệ thống cho phép quản lý 04 nhóm chuyên môn của Khoa Công nghệ Thông tin, cho phép thêm/sửa/ngừng sử dụng nhóm | BẮT BUỘC |
 | FR-03 | Hệ thống cho phép gán một giảng viên vào **nhiều nhóm chuyên môn** đồng thời (quan hệ n–n) | BẮT BUỘC |
-| FR-04 | Hệ thống cho phép chỉ định Trưởng nhóm chuyên môn cho từng nhóm, ghi nhận thời gian hiệu lực | BẮT BUỘC |
+| FR-04 | Hệ thống cho phép chỉ định Điều phối nhóm chuyên môn cho từng nhóm, ghi nhận thời gian hiệu lực | BẮT BUỘC |
 | FR-05 | Hệ thống cho phép ghi nhận học phần thuộc khoa khác (Toán, Vật lý, Lý luận chính trị, Ngoại ngữ) | BẮT BUỘC |
 
 #### 5.1.2. Quản lý người dùng và vai trò
@@ -494,7 +514,7 @@ Bảng dưới đây ánh xạ các cột trong file Excel hiện hành sang th�
 |---|---|---|
 | FR-55 | Mọi thay đổi đối với dữ liệu đã ban hành phải được thực hiện thông qua **Đề xuất thay đổi**; không cho phép sửa trực tiếp | BẮT BUỘC |
 | FR-56 | Hệ thống hỗ trợ các loại đề xuất: sửa công thức điểm · sửa PLO/CLO · sửa nội dung đề cương · sửa khung chương trình · sửa quan hệ học phần · sửa thông tin chương trình | BẮT BUỘC |
-| FR-57 | Đề xuất luân chuyển qua **ba cấp duyệt**: Trưởng nhóm chuyên môn → Giám đốc CTĐT → Phòng Đào tạo | BẮT BUỘC |
+| FR-57 | Đề xuất luân chuyển qua **ba cấp duyệt**: Điều phối nhóm chuyên môn → Giám đốc CTĐT → Phòng Đào tạo | BẮT BUỘC |
 | FR-58 | Hệ thống hiển thị **bảng so sánh trước/sau** (diff) của nội dung thay đổi tại mọi cấp duyệt | BẮT BUỘC |
 | FR-59 | Người duyệt có ba lựa chọn: **Đồng ý** · **Trả lại** (kèm lý do bắt buộc) · **Từ chối** (kèm lý do bắt buộc) | BẮT BUỘC |
 | FR-60 | Người tạo đề xuất được phép **thu hồi** đề xuất khi chưa có cấp nào phê duyệt | BẮT BUỘC |
@@ -506,6 +526,14 @@ Bảng dưới đây ánh xạ các cột trong file Excel hiện hành sang th�
 | FR-66 | Hệ thống nhắc hạn khi đề xuất tồn đọng quá số ngày quy định | TÙY CHỌN |
 | FR-67 | Hệ thống lưu **lịch sử đầy đủ** các bước duyệt: ai duyệt, khi nào, ý kiến gì | BẮT BUỘC |
 | FR-68 | Hệ thống phát hiện và cảnh báo khi có **hai đề xuất đang mở** cùng tác động lên một đối tượng | BẮT BUỘC |
+
+> **[Bổ sung 2026-10-11 — khảo sát lần 2]** Hai yêu cầu dưới đây không có trong `Requirements.pdf`; bối cảnh ở mục 6.4. Mức ưu tiên là **tạm thời**, chờ trả lời Q-18 và Q-19.
+>
+> | Mã | Yêu cầu | Mức |
+> |---|---|---|
+> | FR-108 | Đề xuất thay đổi ghi nhận **nguồn phát sinh** (Trường yêu cầu / Khoa đề nghị) và số văn bản căn cứ (công văn, quyết định) nếu có | NÊN CÓ |
+> | FR-109 | Đề xuất thay đổi cho phép đính kèm **hồ sơ căn cứ** (tờ trình, biên bản, biên bản họp hội đồng, biên bản thẩm định, công văn); hồ sơ xem được ở mọi cấp duyệt | NÊN CÓ |
+
 ### 5.7. M7 — Quản lý phiên bản
 
 | Mã | Yêu cầu | Mức |
@@ -586,7 +614,7 @@ Bảng dưới đây ánh xạ các cột trong file Excel hiện hành sang th�
                                │ Gửi duyệt               │ Trả lại
                                ▼                         │ (kèm lý do)
                   ┌────────────────────────┐             │
-                  │ CHỜ TRƯỞNG NHÓM CM     │─────────────┤
+                  │ CHỜ ĐIỀU PHỐI NHÓM CM  │─────────────┤
                   │      (Cấp 1)           │             │
                   └───────────┬────────────┘             │
                               │ Đồng ý                   │
@@ -624,7 +652,7 @@ Bảng dưới đây ánh xạ các cột trong file Excel hiện hành sang th�
 | Trạng thái | Người thao tác được | Hành động cho phép |
 |---|---|---|
 | **NHÁP** | Người tạo | Sửa nội dung · Gửi duyệt · Xóa |
-| **CHỜ TRƯỞNG NHÓM CM** | Trưởng nhóm chuyên môn phụ trách học phần | Đồng ý · Trả lại · Từ chối |
+| **CHỜ ĐIỀU PHỐI NHÓM CM** | Điều phối nhóm chuyên môn phụ trách học phần | Đồng ý · Trả lại · Từ chối |
 | **CHỜ GIÁM ĐỐC CTĐT** | Giám đốc CTĐT phụ trách chương trình | Đồng ý · Trả lại · Từ chối |
 | **CHỜ PHÒNG ĐÀO TẠO** | Phòng Đào tạo | Đồng ý · Trả lại · Từ chối |
 | **ĐÃ DUYỆT** | Hệ thống | Chờ đến học kỳ hiệu lực |
@@ -636,7 +664,7 @@ Bảng dưới đây ánh xạ các cột trong file Excel hiện hành sang th�
 
 | Cấp | Nguyên tắc xác định |
 |---|---|
-| Cấp 1 | Trưởng nhóm chuyên môn của nhóm **phụ trách học phần** bị tác động. Nếu đề xuất tác động nhiều học phần thuộc nhiều nhóm, cần sự đồng ý của tất cả trưởng nhóm liên quan |
+| Cấp 1 | Điều phối nhóm chuyên môn của nhóm **phụ trách học phần** bị tác động. Nếu đề xuất tác động nhiều học phần thuộc nhiều nhóm, cần sự đồng ý của tất cả người điều phối nhóm liên quan |
 | Cấp 2 | Giám đốc CTĐT của Chương trình đào tạo bị tác động. Nếu học phần thuộc nhiều CTĐT, cần sự đồng ý của tất cả Giám đốc liên quan |
 | Cấp 3 | Bất kỳ tài khoản nào thuộc Phòng Đào tạo |
 
@@ -647,8 +675,8 @@ Bảng dưới đây ánh xạ các cột trong file Excel hiện hành sang th�
 | Bước | Người thực hiện | Hành động | Trạng thái sau bước |
 |---|---|---|---|
 | 1 | Giảng viên | Tạo đề xuất: đổi trọng số Cuối kỳ 50% → 40%, thêm Bài tập lớn 10% | NHÁP |
-| 2 | Giảng viên | Gửi duyệt | CHỜ TRƯỞNG NHÓM CM |
-| 3 | Trưởng nhóm Công nghệ phần mềm | Xem bảng so sánh, Đồng ý | CHỜ GIÁM ĐỐC CTĐT |
+| 2 | Giảng viên | Gửi duyệt | CHỜ ĐIỀU PHỐI NHÓM CM |
+| 3 | Điều phối nhóm Công nghệ phần mềm | Xem bảng so sánh, Đồng ý | CHỜ GIÁM ĐỐC CTĐT |
 | 4 | Ban lãnh đạo khoa | Bình luận góp ý (không chặn luồng) | CHỜ GIÁM ĐỐC CTĐT |
 | 5 | Giám đốc CTĐT | Xem bảng so sánh, Đồng ý | CHỜ PHÒNG ĐÀO TẠO |
 | 6 | Phòng Đào tạo | Xem bảng so sánh, Đồng ý, nhập số quyết định và học kỳ hiệu lực | ĐÃ DUYỆT |
@@ -740,6 +768,38 @@ CTĐT: Công nghệ Thông tin Đặc thù_CNPM (Mã 1024034)
               │    nhập liệu         │
               └──────────────────────┘
 ```
+
+### 6.4. Bối cảnh điều chỉnh thực tế theo khảo sát lần 2
+
+> **[Bổ sung 2026-10-11]** Mục này không có trong `Requirements.pdf`. Nội dung lấy từ ghi chú khảo sát lần 2 (`docs/notes/raw-notes-pbl6-mr-ly.txt`); chính ghi chú đó ghi "thủ tục phải hỏi rõ hơn" và "cần verify lại với thầy Bình". Mọi điểm chưa được xác nhận đều dẫn sang câu hỏi ở mục 13.5. Sơ đồ nháp của các luồng này nằm ở `docs/notes/interview2-workflows.md`, cũng chưa được xác nhận.
+
+#### 6.4.1. Hai nguồn phát sinh thay đổi
+
+| Nguồn | Nội dung điều chỉnh | Hồ sơ căn cứ theo ghi chú |
+|---|---|---|
+| **Trường** | Trường yêu cầu Khoa thay đổi Chương trình đào tạo, ví dụ đợt rà soát điều chỉnh 5 năm một lần | Công văn quyết định thay đổi CTĐT của Trường; biên bản họp hội đồng, biên bản thẩm định |
+| **Khoa** | Cập nhật đề cương (Khoa có quyền cập nhật sau 1 năm); điều chỉnh thời gian của một học phần, ví dụ chuyển từ học kỳ 1 sang học kỳ 2 | Tờ trình và biên bản do Khoa lập |
+
+Ở cả hai nguồn, thay đổi chỉ được thực hiện **sau khi hồ sơ trình được duyệt** — khớp với FR-55 (không sửa trực tiếp dữ liệu đã ban hành).
+
+#### 6.4.2. Phân tầng quản lý
+
+| Cấp | Phạm vi theo ghi chú | Tương ứng trong tài liệu này |
+|---|---|---|
+| Trường | Toàn bộ khung CTĐT | R1 Phòng Đào tạo — toàn hệ thống (mục 3.3) |
+| Khoa | Khung chương trình của khoa mình | R2 Ban lãnh đạo khoa và R3 Giám đốc CTĐT — ai chịu trách nhiệm chính chưa rõ, xem Q-24 |
+| Giảng viên | Học phần do mình soạn đề cương | R5 Giảng viên — vẫn phải qua Đề xuất thay đổi (FR-55). Mục 3.3 hiện xác định phạm vi theo **nhóm chuyên môn**, chưa theo người soạn đề cương, xem Q-27 |
+
+#### 6.4.3. Tác động lên tài liệu này
+
+| Nội dung | Xử lý |
+|---|---|
+| Luồng phê duyệt ba cấp (mục 6.1) | **Không đổi** — DEC-04 |
+| Nguồn phát sinh và văn bản căn cứ | FR-108; thuộc tính bổ sung của `DeXuatThayDoi` (mục 4.2.6) |
+| Tờ trình, biên bản, công văn | FR-109; thực thể `HoSoDeXuat` (mục 4.2.6). Số hóa hay chỉ đính kèm: Q-18 |
+| Người tạo đề xuất khi Trường ra công văn | Q-19 |
+| Đợt rà soát 5 năm, hội đồng thẩm định | Q-20 |
+| Giảm cấp duyệt cho thay đổi nhỏ, hạn nộp, văn bản quy trình của Trường | Q-21, Q-22, Q-23 |
 
 ---
 
@@ -879,7 +939,7 @@ HÀM XetTotNghiep(sinhVien):
 | BR-20 | Mọi PLO phải được **ít nhất một học phần** trong khung chương trình đóng góp; nếu không, sinh cảnh báo |
 | BR-21 | Mức độ đóng góp dùng thang **I–R–M** (Introduce – Reinforce – Master) hoặc thang số **1–2–3** |
 
-> **[Ghi chú port — xung đột nội tại]** BR-19 (ma trận CLO–PLO tách theo CTĐT) kết hợp với DEC-02 (một đề cương dùng chung cho mọi CTĐT) dẫn tới hệ quả: **CLO dùng chung nhưng ánh xạ CLO→PLO tách riêng**. DEC-03 giải quyết điều này, và Q-01 ghi nhận rằng nếu Khoa yêu cầu **CLO** cũng phải khác nhau theo từng CTĐT thì DEC-02 phải được xem xét lại. Nội dung trên được port nguyên văn, **không chỉnh sửa**.
+> **[Ghi chú port — xung đột nội tại]** BR-19 (ma trận CLO–PLO tách theo CTĐT) kết hợp với DEC-02 (một đề cương dùng chung cho mọi CTĐT) dẫn tới hệ quả: **CLO dùng chung nhưng ánh xạ CLO→PLO tách riêng**. DEC-03 giải quyết điều này, và Q-01 ghi nhận rằng nếu Khoa yêu cầu **CLO** cũng phải khác nhau theo từng CTĐT thì DEC-02 phải được xem xét lại. Nội dung trên được port nguyên văn, **không chỉnh sửa**. **Cập nhật 2026-10-11:** Q-01 đã chốt — CLO dùng chung theo học phần, xem DEC-03.
 
 ### 7.7. Quy tắc về phiên bản
 
@@ -1029,7 +1089,7 @@ HÀM XetTotNghiep(sinhVien):
 | **Hệ quả** | Sửa một đề cương lan tỏa tới mọi CTĐT có chứa học phần đó |
 | **Biện pháp xử lý hệ quả** | FR-17 yêu cầu hiển thị danh sách CTĐT bị ảnh hưởng trước khi gửi duyệt; mục 6.1.3 yêu cầu tất cả Giám đốc CTĐT liên quan phải đồng ý |
 
-> **[Ghi chú port — xung đột nội tại]** DEC-02 (đề cương và CLO dùng chung) đứng cạnh BR-19 (ma trận CLO–PLO tách theo CTĐT). Hai điều này **không mâu thuẫn trực tiếp** vì DEC-03 tách riêng phần ánh xạ, nhưng Q-01 ghi nhận đây là điểm **cần Khoa xác nhận**: nếu CLO cũng phải khác nhau theo CTĐT thì DEC-02 không còn đúng. Port nguyên văn, không chỉnh sửa.
+> **[Ghi chú port — xung đột nội tại]** DEC-02 (đề cương và CLO dùng chung) đứng cạnh BR-19 (ma trận CLO–PLO tách theo CTĐT). Hai điều này **không mâu thuẫn trực tiếp** vì DEC-03 tách riêng phần ánh xạ, nhưng Q-01 ghi nhận đây là điểm **cần Khoa xác nhận**: nếu CLO cũng phải khác nhau theo CTĐT thì DEC-02 không còn đúng. Port nguyên văn, không chỉnh sửa. **Cập nhật 2026-10-11:** Q-01 đã chốt — CLO dùng chung theo học phần, DEC-02 giữ nguyên; xem DEC-03.
 
 ### DEC-03 — Ma trận CLO–PLO tách theo Chương trình đào tạo
 
@@ -1039,17 +1099,21 @@ HÀM XetTotNghiep(sinhVien):
 | **Quyết định** | **Bộ CLO dùng chung theo học phần; bảng ánh xạ CLO→PLO tách theo cặp (CTĐT, Học phần)** |
 | **Lý do chọn** | Là cách duy nhất thỏa mãn đồng thời "một đề cương cho một học phần" và "PLO thuộc về từng chương trình" |
 | **Hệ quả** | Bảng `MaTranCLO_PLO` có khóa ba phần: Chương trình đào tạo + CLO + PLO |
-| **Cần xác nhận** | Nếu Khoa yêu cầu CLO phải khác nhau theo từng CTĐT, DEC-02 phải được xem xét lại — xem **Q-01** |
+| **Trạng thái** | **Đã chốt 2026-10-11**, đóng Q-01 — quyết định của nhóm thực hiện, chưa có xác nhận bằng văn bản của Khoa. Trước đó dòng này ghi "Cần xác nhận": nếu Khoa yêu cầu CLO phải khác nhau theo từng CTĐT thì DEC-02 phải được xem xét lại |
+| **Căn cứ chốt** | (1) Ghi chú phỏng vấn thầy Bình: mỗi học phần "chỉ có 1 đề cương". (2) Hệ thống PLO/CLO ở kho `plo-clo-backend` dùng đúng mô hình này: CLO gắn với học phần (không gắn với chương trình), PLO gắn với chương trình, liên kết CLO–PLO nhiều–nhiều. Câu "1 CTĐT có PLO, CLO" trong cùng ghi chú được đáp ứng bằng việc mỗi CTĐT có bộ PLO riêng và bảng ánh xạ CLO→PLO riêng |
+| **So với `plo-clo-backend`** | Ở đó CLO được định danh theo (học phần, học kỳ); ở đây CLO được phiên bản hóa qua đề cương và ảnh chụp CTĐT (DEC-01) — cùng mục đích, khác cơ chế. Các điểm còn khác nhau được treo ở Q-25, Q-26, Q-28 |
+| **Ràng buộc bổ sung** | Khi một học phần bị gỡ khỏi khung của một CTĐT, các dòng `MaTranCLO_PLO` của cặp (CTĐT, Học phần) đó **không được mang sang phiên bản mới**. `plo-clo-backend` để lại liên kết CLO–PLO mồ côi trong trường hợp này |
 
 ### DEC-04 — Luồng phê duyệt ba cấp
 
 | | |
 |---|---|
-| **Quyết định** | Trưởng nhóm chuyên môn (cấp 1) → Giám đốc CTĐT (cấp 2) → Phòng Đào tạo (cấp 3) |
-| **Phương án thay thế đã cân nhắc** | Hai cấp (bỏ Trưởng nhóm chuyên môn) · Bốn cấp (thêm Ban lãnh đạo khoa) · Luồng cấu hình hoàn toàn tự do |
-| **Lý do chọn** | Ba cấp phản ánh đúng quyền sở hữu chuyên môn thực tế của Trưởng nhóm mà không làm luồng duyệt dài tới mức không khả thi |
+| **Quyết định** | Điều phối nhóm chuyên môn (cấp 1) → Giám đốc CTĐT (cấp 2) → Phòng Đào tạo (cấp 3) |
+| **Phương án thay thế đã cân nhắc** | Hai cấp (bỏ Điều phối nhóm chuyên môn) · Bốn cấp (thêm Ban lãnh đạo khoa) · Luồng cấu hình hoàn toàn tự do |
+| **Lý do chọn** | Ba cấp phản ánh đúng quyền sở hữu chuyên môn thực tế của Điều phối nhóm chuyên môn mà không làm luồng duyệt dài tới mức không khả thi |
 | **Vai trò Ban lãnh đạo khoa** | Được xem và bình luận trên mọi đề xuất, **không phải chốt chặn** — tránh làm nghẽn luồng |
 | **Cơ chế mở rộng** | Số cấp và người duyệt từng cấp khai báo trong bảng cấu hình (NFR-24), cho phép thêm cấp sau này mà không sửa mã nguồn |
+| **Xác nhận 2026-10-11** | **Giữ ba cấp.** Ghi chú phỏng vấn thầy Bình có mô tả luồng hai cấp (Giám đốc CTĐT → Phòng Đào tạo), đồng thời vẫn liệt kê vai trò phụ trách nhóm chuyên môn trong cơ cấu khoa; nhóm thực hiện quyết định giữ cấp 1. Khả năng giảm cấp cho thay đổi nhỏ được treo ở Q-21 |
 
 ### DEC-05 — Giữ nguyên ký hiệu của bản Excel gốc
 
@@ -1159,9 +1223,9 @@ HÀM XetTotNghiep(sinhVien):
 | Mã | Tình huống | Cách xử lý |
 |---|---|---|
 | EC-19 | Giám đốc CTĐT tự tạo đề xuất | Tự động bỏ qua cấp 2, ghi nhật ký lý do (DEC-09, BR-27) |
-| EC-20 | Trưởng nhóm chuyên môn tự tạo đề xuất | Tự động bỏ qua cấp 1, ghi nhật ký lý do |
-| EC-21 | Giảng viên thuộc nhiều nhóm chuyên môn | Đề xuất chuyển tới trưởng nhóm của nhóm **phụ trách học phần bị tác động**, không phụ thuộc giảng viên thuộc những nhóm nào |
-| EC-22 | Đề xuất tác động nhiều học phần thuộc nhiều nhóm | Cần sự đồng ý của tất cả trưởng nhóm liên quan; hệ thống hiển thị tiến độ phê duyệt theo từng người |
+| EC-20 | Điều phối nhóm chuyên môn tự tạo đề xuất | Tự động bỏ qua cấp 1, ghi nhật ký lý do |
+| EC-21 | Giảng viên thuộc nhiều nhóm chuyên môn | Đề xuất chuyển tới người điều phối của nhóm **phụ trách học phần bị tác động**, không phụ thuộc giảng viên thuộc những nhóm nào |
+| EC-22 | Đề xuất tác động nhiều học phần thuộc nhiều nhóm | Cần sự đồng ý của tất cả người điều phối nhóm liên quan; hệ thống hiển thị tiến độ phê duyệt theo từng người |
 | EC-23 | Học phần thuộc nhiều Chương trình đào tạo | Cần sự đồng ý của tất cả Giám đốc CTĐT liên quan (mục 6.1.3) |
 | EC-24 | Học phần thuộc khoa khác (Toán, Vật lý, Lý luận chính trị) | Khoa CNTT chỉ được **đề xuất**; đề xuất chuyển thẳng lên Phòng Đào tạo, bỏ qua cấp 1 và cấp 2 |
 | EC-25 | Người duyệt đi công tác / chuyển công tác | Dùng cơ chế ủy quyền có thời hạn (FR-09); Phòng Đào tạo có quyền override (BR-31) |
@@ -1233,10 +1297,10 @@ Mục này liệt kê các vấn đề đã được **quyết định tạm th�
 
 | Mã | Vấn đề | Quyết định tạm thời | Ảnh hưởng nếu thay đổi |
 |---|---|---|---|
-| Q-01 | Khi một học phần thuộc nhiều CTĐT, bộ **CLO** có cần khác nhau theo từng CTĐT không, hay chỉ ma trận CLO–PLO khác nhau? | CLO dùng chung; chỉ ma trận CLO–PLO tách theo CTĐT (DEC-03) | Nếu CLO phải kh… DEC-02 (một đề… một học phần) k… đúng — phải tác… theo cặp (CTĐT,… Đây là thay đổi l… dữ liệu *(bị cắt)* |
-| Q-02 | Khi sửa một đề cương dùng chung, có chấp nhận việc **mọi CTĐT chứa học phần đó** đều sinh phiên bản mới không? | Chấp nhận (DEC-01 kết hợp DEC-02) | Nếu không chấp… chuyển sang mô… bản độc lập cho… phần — thay đổ… quản lý phiên b… *(bị cắt)* |
+| Q-01 | Khi một học phần thuộc nhiều CTĐT, bộ **CLO** có cần khác nhau theo từng CTĐT không, hay chỉ ma trận CLO–PLO khác nhau? | **ĐÃ CHỐT 2026-10-11:** CLO dùng chung; chỉ ma trận CLO–PLO tách theo CTĐT (DEC-03) | Nếu CLO phải khác nhau, DEC-02 (một đề cương cho một học phần) không còn đúng — phải tách đề cương theo cặp (CTĐT, Học phần). Đây là thay đổi lớn về lược đồ dữ liệu |
+| Q-02 | Khi sửa một đề cương dùng chung, có chấp nhận việc **mọi CTĐT chứa học phần đó** đều sinh phiên bản mới không? | **ĐÃ CHỐT 2026-10-11:** Chấp nhận (DEC-01 kết hợp DEC-02) | Nếu không chấp nhận, phải chuyển sang mô hình phiên bản độc lập cho từng thành phần — thay đổi lớn về cách quản lý phiên bản |
 
-> **[Ghi chú port]** Bảng 13.1 bị **cắt phải** trong bản PDF gốc — cột "Ảnh hưởng nếu thay đổi" của Q-01 và Q-02 mất phần cuối mỗi dòng. Nội dung còn lại được port **nguyên trạng kể cả chỗ cắt dở**, đánh dấu `*(bị cắt)*`. Đây là đoạn mất mát văn bản duy nhất có ý nghĩa nội dung trong toàn tài liệu; cần đối chiếu bản gốc (file nguồn, không phải PDF đã xuất) để phục hồi.
+> **[Ghi chú port]** Cột "Ảnh hưởng nếu thay đổi" của Q-01 và Q-02 bị cắt phải trong bản PDF gốc; **đã khôi phục ngày 2026-10-11** từ bản nguồn Markdown gốc (v1.0, 27/08/2026). Cả hai câu được chốt cùng ngày (quyết định của nhóm thực hiện) và được giữ lại trong bảng để truy vết; cột "Ảnh hưởng nếu thay đổi" cho biết cái giá phải trả nếu sau này Khoa yêu cầu khác.
 
 ### 13.2. Nhóm ảnh hưởng quy tắc nghiệp vụ (ưu tiên cao)
 
@@ -1267,6 +1331,24 @@ Mục này liệt kê các vấn đề đã được **quyết định tạm th�
 | Q-15 | **Số người dùng đồng thời** dự kiến | Giả định 200 người (NFR-04) |
 | Q-16 | **Công nghệ triển khai** (ngôn ngữ, framework, hệ quản trị cơ sở dữ liệu) | Chốt ở giai đoạn thiết kế kiến trúc; ràng buộc duy nhất là monolith (RB-01) |
 | Q-17 | Có cần chức năng **nhắc hạn duyệt** không | Xếp mức TÙY CHỌN (FR-66) |
+
+### 13.5. Nhóm phát sinh từ khảo sát lần 2 và từ đối chiếu `plo-clo-backend`
+
+> **[Bổ sung 2026-10-11]** Nhóm này không có trong `Requirements.pdf`. Q-18..Q-24 và Q-27 đến từ khảo sát lần 2 (mục 6.4; danh sách câu hỏi chi tiết ở `docs/notes/interview2-confirm-questions.md`). Q-25, Q-26, Q-28 đến từ việc đối chiếu mô hình PLO/CLO với kho `plo-clo-backend` (DEC-03).
+
+| Mã | Vấn đề | Quyết định tạm thời | Ảnh hưởng nếu thay đổi |
+|---|---|---|---|
+| Q-18 | **Tờ trình và biên bản** là thủ tục giấy ngoài hệ thống, hay hệ thống phải số hóa và thay thế chúng? | Thủ tục vẫn làm ngoài hệ thống; hệ thống chỉ lưu bản quét đính kèm đề xuất (FR-109) | Nếu phải số hóa toàn bộ, cần biểu mẫu tờ trình/biên bản trong hệ thống — phạm vi công việc tăng đáng kể |
+| Q-19 | Khi **Trường ra công văn** yêu cầu thay đổi CTĐT, ai là người tạo đề xuất trong hệ thống? | Giám đốc CTĐT của chương trình bị tác động tạo đề xuất, ghi nguồn "Trường" và số công văn (FR-108) | Nếu Phòng Đào tạo tự tạo và ban hành, cần quy định rõ các cấp được bỏ qua (FR-61 hiện chỉ bỏ qua cấp mà người tạo là người duyệt) |
+| Q-20 | Đợt **rà soát 5 năm**: hội đồng thẩm định gồm những ai, và có đi luồng duyệt khác với điều chỉnh thông thường không? | Đi chung luồng ba cấp; biên bản họp hội đồng và biên bản thẩm định là hồ sơ đính kèm (FR-109); thành viên hội đồng không phải người dùng hệ thống | Nếu hội đồng phải cho ý kiến trong hệ thống, cần thêm vai trò và bước duyệt qua bảng cấu hình (NFR-24) |
+| Q-21 | Thay đổi nhỏ (ví dụ cập nhật tài liệu tham khảo của đề cương) có được **giảm cấp duyệt** không? Ghi chú phỏng vấn thầy Bình có mô tả luồng hai cấp | Không — mọi đề xuất đi đủ ba cấp (DEC-04) | Nếu được giảm, khai báo số cấp theo loại đề xuất trong bảng cấu hình (NFR-24); không đổi lược đồ |
+| Q-22 | Có **hạn nộp** đề xuất trong năm không? "Sau 1 năm" Khoa mới được cập nhật đề cương tính từ mốc nào? | Không ràng buộc hạn nộp hay khoảng cách giữa hai lần cập nhật; học kỳ hiệu lực do Phòng Đào tạo nhập khi duyệt (mục 6.1.4) | Nếu có, bổ sung quy tắc kiểm tra khi gửi duyệt — không ảnh hưởng lược đồ |
+| Q-23 | Trường có **văn bản quy định chính thức** về quy trình điều chỉnh CTĐT không? | Chưa có tài liệu; mục 6.1 và 6.4 dựa trên ghi chú phỏng vấn | Khi nhận được văn bản, phải đối chiếu lại mục 6.1, 6.4 và các câu Q-18..Q-22 |
+| Q-24 | "Khoa quản lý khung chương trình của mình" — người chịu trách nhiệm chính là **Ban lãnh đạo khoa** hay **Giám đốc CTĐT**? | Giám đốc CTĐT duyệt cấp 2; Ban lãnh đạo khoa chỉ xem và bình luận (FR-62, DEC-04) | Nếu Ban lãnh đạo khoa phải duyệt, thêm một cấp qua bảng cấu hình (NFR-24) |
+| Q-25 | Có phải chỉ **học phần cốt lõi** mới đóng góp vào PLO? `plo-clo-backend` chỉ cho gán PLO vào học phần được đánh dấu cốt lõi của chương trình; chưa rõ "cốt lõi" có trùng với "bắt buộc" (không tự chọn) hay không | Mọi học phần trong khung đều khai báo được ma trận CLO–PLO (FR-40) | Nếu chỉ học phần cốt lõi, cần cờ cốt lõi trên `DongKhungCTDT` và ràng buộc khi khai báo ma trận; BR-20 và FR-42 phải tính lại theo tập học phần đó |
+| Q-26 | Ma trận **Học phần–PLO** được suy diễn từ CLO–PLO (FR-41), hay nhập trực tiếp như `plo-clo-backend`? Ở đó Học phần–PLO được nhập trước kèm trọng số số thực và giới hạn CLO chỉ được ánh xạ tới PLO mà học phần đã gắn; liên kết CLO–PLO không mang mức độ đóng góp | Giữ FR-41 và BR-21: suy diễn từ CLO–PLO, cho phép ghi đè, thang I–R–M hoặc 1–2–3 | Nếu phải khớp `plo-clo-backend`, Học phần–PLO trở thành dữ liệu nhập và là ràng buộc của CLO–PLO; cần thêm trường trọng số và bỏ hoặc đổi nghĩa mức độ trên `MaTranCLO_PLO` |
+| Q-27 | Phạm vi của **giảng viên** xác định theo nhóm chuyên môn (mục 3.3) hay theo "học phần do mình soạn đề cương" như ghi chú khảo sát lần 2? | Giữ theo nhóm chuyên môn (mục 3.3) | Nếu theo người soạn, cần thuộc tính người soạn trên `DeCuongChiTiet` và sửa quy tắc phạm vi của R5 |
+| Q-28 | `plo-clo-backend` cũng lưu PLO, CLO và liên kết CLO–PLO. Hệ thống nào là **nguồn chuẩn**, và hai bên có cần đồng bộ không? | Hai hệ thống độc lập, chưa đồng bộ; mô hình ở đây giữ tương thích (CLO theo học phần, PLO theo chương trình) để có thể đồng bộ sau | Nếu phải đồng bộ, bổ sung yêu cầu tích hợp vào M10 và chốt Q-25, Q-26 trước |
 
 ---
 

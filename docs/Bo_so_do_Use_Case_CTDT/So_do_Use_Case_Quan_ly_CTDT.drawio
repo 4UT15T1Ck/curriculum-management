@@ -91,7 +91,7 @@
         <mxCell id="v14" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="151" y="541.0" width="50" height="77" />
         </mxCell>
-        <mxCell id="v15" value="R4 · Trưởng nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="v15" value="R4 · Điều phối nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="37" y="624.0" width="278" height="63" />
         </mxCell>
         <mxCell id="v16" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
@@ -437,7 +437,7 @@
         <mxCell id="v14" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="151" y="541.0" width="50" height="77" />
         </mxCell>
-        <mxCell id="v15" value="R4 · Trưởng nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="v15" value="R4 · Điều phối nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="37" y="624.0" width="278" height="63" />
         </mxCell>
         <mxCell id="v16" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
@@ -614,7 +614,7 @@
         <mxCell id="v12" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="151" y="777.0" width="50" height="77" />
         </mxCell>
-        <mxCell id="v13" value="R4 · Trưởng nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="v13" value="R4 · Điều phối nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="37" y="860.0" width="278" height="63" />
         </mxCell>
         <mxCell id="v14" value="UC-02 · Quản lý cây đơn vị và nhóm chuyên môn" style="ellipse;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=18;spacing=18;fillColor=#F0F7FC;strokeColor=#456A88;" vertex="1" parent="1">
@@ -629,7 +629,7 @@
         <mxCell id="v17" value="BB  |  FR-03" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=11;fontColor=#5F7385;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="855" y="432.5" width="508" height="17.96" />
         </mxCell>
-        <mxCell id="v18" value="UC-04 · Chỉ định trưởng nhóm chuyên môn" style="ellipse;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=18;spacing=18;fillColor=#F0F7FC;strokeColor=#456A88;" vertex="1" parent="1">
+        <mxCell id="v18" value="UC-04 · Chỉ định điều phối nhóm chuyên môn" style="ellipse;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=18;spacing=18;fillColor=#F0F7FC;strokeColor=#456A88;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="835" y="463.5" width="548" height="79" />
         </mxCell>
         <mxCell id="v19" value="BB  |  FR-04" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=11;fontColor=#5F7385;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
@@ -759,7 +759,7 @@
         <mxCell id="v14" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="151" y="541.0" width="50" height="77" />
         </mxCell>
-        <mxCell id="v15" value="R4 · Trưởng nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="v15" value="R4 · Điều phối nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="37" y="624.0" width="278" height="63" />
         </mxCell>
         <mxCell id="v16" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
@@ -990,7 +990,7 @@
         <mxCell id="v14" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="151" y="777.0" width="50" height="77" />
         </mxCell>
-        <mxCell id="v15" value="R4 · Trưởng nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="v15" value="R4 · Điều phối nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="37" y="860.0" width="278" height="63" />
         </mxCell>
         <mxCell id="v16" value="UC-13 · Soạn quan hệ phụ thuộc / thay thế" style="ellipse;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=18;spacing=18;fillColor=#F0F7FC;strokeColor=#456A88;" vertex="1" parent="1">
@@ -1129,7 +1129,7 @@
         <mxCell id="v14" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="151" y="541.0" width="50" height="77" />
         </mxCell>
-        <mxCell id="v15" value="R4 · Trưởng nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="v15" value="R4 · Điều phối nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="37" y="624.0" width="278" height="63" />
         </mxCell>
         <mxCell id="v16" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
@@ -1390,7 +1390,7 @@
         <mxCell id="v14" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="151" y="541.0" width="50" height="77" />
         </mxCell>
-        <mxCell id="v15" value="R4 · Trưởng nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="v15" value="R4 · Điều phối nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="37" y="624.0" width="278" height="63" />
         </mxCell>
         <mxCell id="v16" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
@@ -1737,7 +1737,7 @@
         <mxCell id="v14" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="151" y="541.0" width="50" height="77" />
         </mxCell>
-        <mxCell id="v15" value="R4 · Trưởng nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="v15" value="R4 · Điều phối nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="37" y="624.0" width="278" height="63" />
         </mxCell>
         <mxCell id="v16" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
@@ -2046,7 +2046,7 @@
         <mxCell id="v14" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="151" y="629.5" width="50" height="77" />
         </mxCell>
-        <mxCell id="v15" value="R4 · Trưởng nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="v15" value="R4 · Điều phối nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="37" y="712.5" width="278" height="63" />
         </mxCell>
         <mxCell id="v16" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
@@ -2335,7 +2335,7 @@
         <mxCell id="v12" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="151" y="777.0" width="50" height="77" />
         </mxCell>
-        <mxCell id="v13" value="R4 · Trưởng nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="v13" value="R4 · Điều phối nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="37" y="860.0" width="278" height="63" />
         </mxCell>
         <mxCell id="v14" value="UC-42 · Xem hàng đợi chờ duyệt" style="ellipse;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=18;spacing=18;fillColor=#F0F7FC;strokeColor=#456A88;" vertex="1" parent="1">
@@ -2496,7 +2496,7 @@
         <mxCell id="v14" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="151" y="541.0" width="50" height="77" />
         </mxCell>
-        <mxCell id="v15" value="R4 · Trưởng nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="v15" value="R4 · Điều phối nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="37" y="624.0" width="278" height="63" />
         </mxCell>
         <mxCell id="v16" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
@@ -2657,7 +2657,7 @@
         <mxCell id="v14" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="151" y="629.5" width="50" height="77" />
         </mxCell>
-        <mxCell id="v15" value="R4 · Trưởng nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="v15" value="R4 · Điều phối nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="37" y="712.5" width="278" height="63" />
         </mxCell>
         <mxCell id="v16" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
@@ -2848,7 +2848,7 @@
         <mxCell id="v14" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="151" y="777.0" width="50" height="77" />
         </mxCell>
-        <mxCell id="v15" value="R4 · Trưởng nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="v15" value="R4 · Điều phối nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="37" y="860.0" width="278" height="63" />
         </mxCell>
         <mxCell id="v16" value="UC-31 · Rà soát độ bao phủ chuẩn đầu ra" style="ellipse;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=18;spacing=18;fillColor=#F0F7FC;strokeColor=#456A88;" vertex="1" parent="1">
@@ -3039,7 +3039,7 @@
         <mxCell id="v14" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="151" y="541.0" width="50" height="77" />
         </mxCell>
-        <mxCell id="v15" value="R4 · Trưởng nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="v15" value="R4 · Điều phối nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="37" y="624.0" width="278" height="63" />
         </mxCell>
         <mxCell id="v16" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
@@ -3675,7 +3675,7 @@
         <mxCell id="v14" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="151" y="777.0" width="50" height="77" />
         </mxCell>
-        <mxCell id="v15" value="R4 · Trưởng nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="v15" value="R4 · Điều phối nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="37" y="860.0" width="278" height="63" />
         </mxCell>
         <mxCell id="v16" value="UC-79 · Đối sánh hai chương trình" style="ellipse;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=18;spacing=18;fillColor=#FFF8E9;strokeColor=#456A88;" vertex="1" parent="1">
@@ -3916,7 +3916,7 @@
         <mxCell id="v14" value="" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=0;fillColor=#FFFFFF;strokeColor=#294B64;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="151" y="777.0" width="50" height="77" />
         </mxCell>
-        <mxCell id="v15" value="R4 · Trưởng nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="v15" value="R4 · Điều phối nhóm chuyên môn" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=top;fontFamily=Helvetica;fontSize=15;fontColor=#18334B;fontStyle=0;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry as="geometry" x="37" y="860.0" width="278" height="63" />
         </mxCell>
         <mxCell id="v16" value="UC-23 · Xuất khung ra Excel" style="ellipse;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=18;spacing=18;fillColor=#F0F7FC;strokeColor=#456A88;" vertex="1" parent="1">
