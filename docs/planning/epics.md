@@ -66,7 +66,7 @@ Cột "UC" ghi use case **chính** của epic; mỗi use case chỉ xuất hiệ
 
 **Chưa có ở bậc này.** Chương trình đào tạo, nên FR-17 ("hiển thị các CTĐT đang dùng học phần trước khi sửa") và phạm vi quyền theo chương trình (FR-08) nằm ở B2. Dữ liệu học phần nhập tay; nhập từ Excel đến ở B2.
 
-**Cần chốt trước khi làm.** Q-16 (công nghệ — chặn toàn bộ); Q-13 (xác thực nội bộ hay SSO); Q-27 (phạm vi của giảng viên theo nhóm chuyên môn hay theo người soạn đề cương — quyết định mô hình phạm vi quyền của EP-02); Q-06 (học phần khoa khác).
+**Cần chốt trước khi làm.** Q-13 (xác thực nội bộ hay SSO); Q-27 (phạm vi của giảng viên theo nhóm chuyên môn hay theo người soạn đề cương — quyết định mô hình phạm vi quyền của EP-02); Q-06 (học phần khoa khác). Đã chốt: Q-16 (công nghệ — `docs/design/tech-stack.md`).
 
 ### B2 — Chương trình đào tạo và khung (phiên bản 0.2)
 

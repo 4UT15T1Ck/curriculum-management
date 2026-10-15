@@ -1,0 +1,11 @@
+// Models arrive with the task that first needs them; names follow docs/design/data-dictionary.md.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}

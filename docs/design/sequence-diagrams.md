@@ -30,7 +30,7 @@
 
 - Mũi tên từ HT về chính nó là một bước xử lý bên trong, viết bằng lời nghiệp vụ.
 - Mã trong ngoặc ở phần giải thích (ví dụ DX-04, PB-05) là mã chuyển trạng thái trong `state-diagrams.md`.
-- Mọi thao tác ghi dữ liệu đều kèm một dòng `NhatKyHeThong` (FR-105). Sơ đồ chỉ vẽ bước ghi nhật ký khi nhật ký là một phần của quy tắc (bỏ qua cấp, can thiệp, đồng bộ).
+- Mọi thao tác ghi dữ liệu đều kèm một dòng `AuditLog` (FR-105). Sơ đồ chỉ vẽ bước ghi nhật ký khi nhật ký là một phần của quy tắc (bỏ qua cấp, can thiệp, đồng bộ).
 - Mọi yêu cầu từ người dùng đều được HT kiểm tra quyền và phạm vi ở phía máy chủ trước khi xử lý (NFR-09). Sơ đồ chỉ vẽ bước này ở những luồng mà việc từ chối là một nhánh đáng nêu.
 
 ### Danh sách sơ đồ
@@ -91,17 +91,17 @@ sequenceDiagram
 
 | Điểm | Quy tắc | Nguồn |
 |---|---|---|
-| Mật khẩu | So với `NguoiDung.matKhauBam`; không lưu, không ghi nhật ký mật khẩu dạng rõ | NFR-06 |
+| Mật khẩu | So với `User.passwordHash`; không lưu, không ghi nhật ký mật khẩu dạng rõ | NFR-06 |
 | Kênh truyền | Mọi trao đổi qua HTTPS | NFR-07 |
 | Hết phiên | 60 phút không hoạt động; giá trị nằm trong cấu hình | NFR-08, NFR-24 |
-| Vai trò và phạm vi | Đọc từ `PhanQuyen`, `PhanCongGiamDoc`, `ThanhVienNhomCM` tại lúc đăng nhập; dòng hết hạn không được nạp | FR-07, M-7 |
+| Vai trò và phạm vi | Đọc từ `RoleAssignment`, `ProgramDirectorAssignment`, `SubjectGroupMember` tại lúc đăng nhập; dòng hết hạn không được nạp | FR-07, M-7 |
 | Sai nhiều lần | SRS không nêu khóa tài khoản — xem L-1 | L-1 |
 
 ---
 
 ## 3. Nhập Excel: chạy thử rồi ghi
 
-Phục vụ UC-71..UC-75; FR-33, FR-34, FR-35, FR-96, FR-97, FR-101; SRS mục 6.3. Dùng chung cho bốn loại dữ liệu của `PhienNhapLieu.loaiNhap`. R3 chỉ nhập được khung của chương trình mình được phân công.
+Phục vụ UC-71..UC-75; FR-33, FR-34, FR-35, FR-96, FR-97, FR-101; SRS mục 6.3. Dùng chung cho bốn loại dữ liệu của `ImportBatch.importType`. R3 chỉ nhập được khung của chương trình mình được phân công.
 
 ```mermaid
 sequenceDiagram
@@ -151,7 +151,7 @@ sequenceDiagram
 | Kiểm tra lại khi xác nhận | Chuyển trạng thái NL-03, NL-04 | S-12 |
 | Thời gian | Tệp 1000 dòng xử lý dưới 60 giây | NFR-05 |
 | Nhập khung chương trình | Tạo hoặc thay nội dung của phiên bản Nháp; chương trình đã có phiên bản rời Nháp thì không nhập đè được | M-2, FR-55, L-2 |
-| Nhập danh sách sinh viên | Tạo `SinhVien`, tài khoản đăng nhập và `GhiDanhCTDT` theo khóa (GD-01) | H-2, E-8, mục 12 |
+| Nhập danh sách sinh viên | Tạo `Student`, tài khoản đăng nhập và `ProgramEnrollment` theo khóa (GD-01) | H-2, E-8, mục 12 |
 
 ---
 
@@ -193,9 +193,9 @@ sequenceDiagram
 | Lỗi chặn | Học phần bắt buộc trong nhóm tự chọn, học phần trùng, học kỳ vượt số học kỳ khai báo, chu trình tiên quyết | EC-05, EC-06, EC-08, EC-09 |
 | Thiếu đề cương | Chặn ban hành | EC-44 |
 | Cảnh báo không chặn | Lệch tổng tín chỉ đã có lý do ghi đè, tiên quyết xếp sau, học kỳ trống, PLO chưa có học phần đóng góp | EC-03, EC-10, EC-07, EC-41 |
-| Dữ liệu chép vào khung | `tenHocPhanChup`, `soTinChiChup`, `RangBuocKhung` | M-5 |
+| Dữ liệu chép vào khung | `courseNameSnapshot`, `creditsSnapshot`, `CurriculumRequisite` | M-5 |
 | Đề cương | Chuyển trạng thái DC-03 | M-1 |
-| Khóa áp dụng | Ghi vào `ApDungPhienBan` | FR-70, FR-74 |
+| Khóa áp dụng | Ghi vào `CohortVersion` | FR-70, FR-74 |
 | Xác nhận | Thao tác không hoàn tác phải có hộp xác nhận | NFR-20 |
 | Số phiên bản đầu | Mặc định 1.0; Phòng Đào tạo sửa được khi nạp dữ liệu đã có từ trước — xem L-3 | BR-24, L-3 |
 
@@ -243,7 +243,7 @@ sequenceDiagram
 | Nguồn phát sinh | Trường hoặc Khoa, kèm số văn bản căn cứ | FR-108, Q-19 |
 | Hồ sơ | Bản quét tờ trình, biên bản, công văn; xem được ở mọi cấp | FR-109, Q-18 |
 | Kiểm tra trước khi gửi | Tổng trọng số, CLO chưa được bao phủ | BR-12, BR-14, EC-39, EC-40 |
-| Đối tượng đã đổi | So `NoiDungThayDoi.phienBanGoc`; lệch thì người tạo phải soạn lại trên dữ liệu mới | EC-27 |
+| Đối tượng đã đổi | So `ChangeItem.baseVersion`; lệch thì người tạo phải soạn lại trên dữ liệu mới | EC-27 |
 | Người duyệt cấp 1 | Điều phối của nhóm phụ trách học phần bị tác động; nhiều nhóm thì cần tất cả | SRS mục 6.1.3, EC-21, EC-22 |
 | Chuyển trạng thái | DX-01, DX-02, DX-04 | — |
 
@@ -341,7 +341,7 @@ sequenceDiagram
 | Đề xuất thay đổi tổ chức / phân công | Cấp 1 và cấp 2 | E-4, C04 |
 | Người tạo là Phòng Đào tạo | Không bỏ cấp 3; tài khoản R1 khác duyệt | C03, L-5 |
 
-Mỗi lần bỏ qua ghi `BuocDuyet.coBoQua`, `lyDoBoQua` và một dòng nhật ký. Chuyển trạng thái: DX-05, DX-06, DX-08, BD-02.
+Mỗi lần bỏ qua ghi `ApprovalStep.isSkipped`, `skipReason` và một dòng nhật ký. Chuyển trạng thái: DX-05, DX-06, DX-08, BD-02.
 
 ---
 
@@ -428,9 +428,9 @@ sequenceDiagram
 | Điểm | Quy tắc | Nguồn |
 |---|---|---|
 | Ai ủy quyền được | R3, R4 cho phần việc của mình; R1 lập thay khi người duyệt đã vắng | UC-08, EC-25 |
-| Hết hạn | Tự chuyển Hết hạn khi qua `denNgay` | FR-09 |
+| Hết hạn | Tự chuyển Hết hạn khi qua `validTo` | FR-09 |
 | Không tự duyệt qua ủy quyền | Người được ủy quyền không được là người tạo đề xuất | BR-27 |
-| Dấu vết | `BuocDuyet.nguoiThucHien`, `uyQuyen`, `laCanThiep` | FR-67, BR-31 |
+| Dấu vết | `ApprovalStep.performedBy`, `delegation`, `isOverride` | FR-67, BR-31 |
 | Can thiệp | R1 duyệt thay ở bất kỳ cấp nào, luôn có nhật ký | BR-31, EC-28 |
 | Nhắc hạn | Số ngày lấy từ cấu hình | FR-66, NFR-24, Q-17 |
 | Email | Gửi cho các sự kiện quan trọng; email hỏng không làm hỏng thao tác chính — xem L-6 | FR-64, L-6 |
@@ -495,7 +495,7 @@ sequenceDiagram
 | Đánh số | Khung hoặc PLO đổi thì tăng số Chính; đề cương hoặc công thức điểm đổi thì tăng số Phụ | BR-24 |
 | Một phiên bản hiệu lực | Hai bước đổi trạng thái ở phần B chạy trong một giao dịch | BR-22 |
 | Bất biến | Từ lúc rời Nháp không sửa, không xóa | FR-71, BR-23, NFR-14 |
-| Dòng ma trận | Dòng `MaTranCLO_PLO` của học phần đã rời khung không được mang sang phiên bản mới | DEC-03 |
+| Dòng ma trận | Dòng `CLOPLOMapping` của học phần đã rời khung không được mang sang phiên bản mới | DEC-03 |
 | Sinh viên | Kích hoạt không chuyển sinh viên nào sang phiên bản mới | BR-26, M-8, C07 |
 | Đính chính | Không xóa bản nhầm; R1 ban hành trực tiếp kèm lý do | FR-75, DEC-08, EC-31, S-8 |
 | Chuyển trạng thái | DX-10, DX-11; PB-05..PB-09; DC-04, DC-05 | — |
@@ -542,8 +542,8 @@ sequenceDiagram
 | Báo trước | Người tạo thấy danh sách chương trình bị ảnh hưởng trước khi gửi | FR-17, EC-38 |
 | Cấp 2 | Cần đồng ý của Giám đốc mọi chương trình bị tác động; hiển thị tiến độ theo từng người | SRS mục 6.1.3, EC-23 |
 | Chương trình nào bị tác động | Chương trình có học phần trong khung của phiên bản Đang hiệu lực hoặc Chờ hiệu lực. Phiên bản Lịch sử không sinh bản mới — xem L-8 | DEC-01, BR-26, L-8 |
-| Một đề xuất, nhiều phiên bản | Mỗi chương trình bị tác động sinh một phiên bản riêng, cùng `deXuatNguon` | E-3, EC-38 |
-| Ma trận CLO–PLO | Dòng ma trận của từng chương trình được chép sang phiên bản mới và trỏ tới CLO của bản đề cương mới theo `maCLO` | DEC-03, M-1, M-6 |
+| Một đề xuất, nhiều phiên bản | Mỗi chương trình bị tác động sinh một phiên bản riêng, cùng `sourceRequest` | E-3, EC-38 |
+| Ma trận CLO–PLO | Dòng ma trận của từng chương trình được chép sang phiên bản mới và trỏ tới CLO của bản đề cương mới theo `cloCode` | DEC-03, M-1, M-6 |
 | Hiệu lực | Từ học kỳ kế tiếp, không hồi tố | BR-16, EC-30 |
 
 ---
@@ -646,10 +646,10 @@ sequenceDiagram
 |---|---|---|
 | Học trước | Thỏa khi đã có kết quả, kể cả không đạt | BR-06 |
 | Tiên quyết | Thỏa khi điểm cao nhất đạt ngưỡng; so trên thang 4 | BR-07, DEC-11, EC-36 |
-| Ngưỡng điểm | Lấy `RangBuocKhung.nguongDiem`; nếu trống lấy `DongKhungCTDT.diemHoc` | E-1 |
+| Ngưỡng điểm | Lấy `CurriculumRequisite.minScore`; nếu trống lấy `CurriculumItem.minStudiedScore` | E-1 |
 | Song hành | Đệ quy; giới hạn 20 cấp và phải nhớ các học phần đã xét để không lặp | SRS mục 7.3, C06 |
 | Học phần tiên quyết đã ngừng mở lớp | Dùng học phần thay thế theo QH5; chưa khai báo thì cảnh báo cho quản trị | EC-12, EC-32 |
-| Ràng buộc lấy từ đâu | Từ `RangBuocKhung` của phiên bản áp dụng, không lấy từ danh mục hiện hành | M-5 |
+| Ràng buộc lấy từ đâu | Từ `CurriculumRequisite` của phiên bản áp dụng, không lấy từ danh mục hiện hành | M-5 |
 | Chưa có kết quả học tập | Vẫn tính được; học phần không có ràng buộc cho kết luận Được | EC-52 |
 | Thời gian | Toàn khung của một sinh viên dưới 3 giây | NFR-02 |
 | Cán bộ xem thay | R1, R3 xem được kết quả của một sinh viên trong phạm vi — xem L-10 | UC-60, L-10 |
@@ -696,11 +696,11 @@ sequenceDiagram
 | Học cả hai học phần cùng nhóm | Tính một lần; học phần còn lại là tín chỉ tự do | EC-17 |
 | Nhóm tương đương dùng bản nào | Nhóm hiện tại ở danh mục, không theo phiên bản | EC-16, E-11, C11 |
 | Học phần 0 tín chỉ | Không cộng vào tổng, nhưng bắt buộc hoàn thành nếu là học phần điều kiện | BR-02, EC-01 |
-| Nhóm tự chọn | Tín chỉ đạt trong nhóm so với `soTinChiToiThieu`; không tính trùng một học phần cho hai nhóm | BR-04, C09 |
+| Nhóm tự chọn | Tín chỉ đạt trong nhóm so với `minCredits`; không tính trùng một học phần cho hai nhóm | BR-04, C09 |
 | Học lại | Lấy điểm cao nhất | EC-36 |
 | Song ngành | Xét độc lập theo từng ghi danh | EC-34 |
 | Điểm sửa hồi tố | Xét lại tự động, lưu dòng mới, thông báo Phòng Đào tạo | EC-43 |
-| Lưu kết quả | Mỗi lần xét một dòng `KetQuaXetTotNghiep`; không ghi đè dòng cũ | M-9 |
+| Lưu kết quả | Mỗi lần xét một dòng `GraduationAudit`; không ghi đè dòng cũ | M-9 |
 | Thời gian | Lô khoảng 500 sinh viên dưới 5 phút | NFR-03 |
 | Sinh viên tự xem | Sinh viên xem kết quả xét của chính mình ở cổng sinh viên | SRS mục 3.4, UC-61 |
 
@@ -789,8 +789,8 @@ sequenceDiagram
 |---|---|---|
 | Kiểu giao tiếp | REST, dữ liệu JSON | API-01 |
 | Tài liệu | OpenAPI 3.0, xem được qua web | API-02 |
-| Xác thực | Mỗi bên tích hợp một khóa riêng; lưu dạng băm ở `BenTichHop.khoaBam` | API-03 |
-| Giới hạn tần suất | Theo `BenTichHop.gioiHanTanSuat` | API-04 |
+| Xác thực | Mỗi bên tích hợp một khóa riêng; lưu dạng băm ở `IntegrationClient.keyHash` | API-03 |
+| Giới hạn tần suất | Theo `IntegrationClient.rateLimit` | API-04 |
 | Mã trả về | Mã HTTP chuẩn kèm thông báo tiếng Việt | API-05 |
 | Một quy tắc, hai kênh | API và web dùng chung kết quả tính của UC-63, UC-64, UC-65 | UC-68, UC-70 |
 | Đề cương theo ngữ cảnh | Đường dẫn đề cương không mang phiên bản; trả về bản Đã ban hành mới nhất | C10, S-9 |
@@ -846,7 +846,7 @@ sequenceDiagram
 | Chỉ đọc | Hệ thống không ghi gì vào cơ sở dữ liệu có sẵn | FR-98, SRS mục 8.1 |
 | Dữ liệu lấy về | Sinh viên, kết quả học tập, lớp học phần | SRS mục 8.1 |
 | Nguồn ưu tiên | Kết quả học tập và danh sách sinh viên: cơ sở dữ liệu có sẵn thắng. Danh mục học phần và khung chương trình: hệ thống này thắng | SRS mục 8.2, DEC-10 |
-| Mâu thuẫn | Áp quy tắc ưu tiên và ghi cảnh báo, đếm vào `LogDongBo.soMauThuan` | FR-100, EC-48 |
+| Mâu thuẫn | Áp quy tắc ưu tiên và ghi cảnh báo, đếm vào `SyncLog.conflictCount` | FR-100, EC-48 |
 | Mất kết nối | Hoàn tác toàn bộ, ghi lỗi, thử lại theo lịch | EC-49 |
 | Không có kết nối | Hệ thống vẫn chạy đủ chức năng bằng dữ liệu nhập từ Excel | DEC-10, Q-09 |
 | Điểm sửa hồi tố | Xét lại tốt nghiệp và thông báo Phòng Đào tạo | EC-43 |

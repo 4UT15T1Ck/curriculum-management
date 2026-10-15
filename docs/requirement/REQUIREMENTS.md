@@ -1329,7 +1329,7 @@ Mục này liệt kê các vấn đề đã được **quyết định tạm th�
 | Q-13 | **Phương thức xác thực**: SSO của trường hay tài khoản nội bộ | Tài khoản nội bộ, thiết kế tầng xác thực tách biệt để có thể thay bằng SSO sau |
 | Q-14 | Có cần **xuất PDF theo mẫu quyết định** của trường không (cần file mẫu) | Xếp mức NÊN CÓ (FR-37), dùng mẫu tổng quát nếu chưa có file mẫu chính thức |
 | Q-15 | **Số người dùng đồng thời** dự kiến | Giả định 200 người (NFR-04) |
-| Q-16 | **Công nghệ triển khai** (ngôn ngữ, framework, hệ quản trị cơ sở dữ liệu) | Chốt ở giai đoạn thiết kế kiến trúc; ràng buộc duy nhất là monolith (RB-01) |
+| Q-16 | **Công nghệ triển khai** (ngôn ngữ, framework, hệ quản trị cơ sở dữ liệu) | **ĐÃ CHỐT 2026-10-15:** TypeScript trên Node.js 22; một ứng dụng NestJS với Prisma, PostgreSQL, hàng đợi BullMQ trên Redis; giao diện React + Vite + Ant Design. Vẫn là monolith (RB-01). Chi tiết ở `docs/design/tech-stack.md` |
 | Q-17 | Có cần chức năng **nhắc hạn duyệt** không | Xếp mức TÙY CHỌN (FR-66) |
 
 ### 13.5. Nhóm phát sinh từ khảo sát lần 2 và từ đối chiếu `plo-clo-backend`

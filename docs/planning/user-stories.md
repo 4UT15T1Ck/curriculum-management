@@ -70,7 +70,7 @@
   2. **Cho** mật khẩu sai hoặc tên đăng nhập không tồn tại — **Khi** bấm đăng nhập — **Thì** bị từ chối bằng một thông báo chung, không cho biết sai phần nào.
   3. **Cho** tài khoản ở trạng thái Vô hiệu hóa — **Khi** đăng nhập đúng mật khẩu — **Thì** bị từ chối và được hướng dẫn liên hệ Phòng Đào tạo.
   4. **Cho** phiên đã không hoạt động 60 phút — **Khi** thực hiện thao tác kế tiếp — **Thì** phải đăng nhập lại; thao tác đó không được thực hiện.
-  5. **Cho** cơ sở dữ liệu của hệ thống — **Khi** xem dòng `NguoiDung` — **Thì** chỉ thấy `matKhauBam`, không có mật khẩu dạng rõ.
+  5. **Cho** cơ sở dữ liệu của hệ thống — **Khi** xem dòng `User` — **Thì** chỉ thấy `passwordHash`, không có mật khẩu dạng rõ.
 - **Bao phủ:** FR — · UC-01 · BR — · EC — · khác: NFR-06, NFR-07, NFR-08, Q-13, L-1
 
 ### US-002 — Ghi nhật ký bất biến cho mọi thay đổi
@@ -78,7 +78,7 @@
 - **Vai trò:** R1 · **Bậc:** B1 · **Epic:** EP-01
 - **Là** Phòng Đào tạo, **tôi muốn** mọi thao tác thêm, sửa, đổi trạng thái đều để lại một dòng nhật ký không sửa được, **để** truy được ai đã đổi gì và khi nào.
 - **Tiêu chí chấp nhận**
-  1. **Cho** một bản ghi bất kỳ — **Khi** người dùng lưu thay đổi — **Thì** có một dòng `NhatKyHeThong` ghi người thực hiện, hành động, loại và mã bản ghi, giá trị trước, giá trị sau, thời điểm.
+  1. **Cho** một bản ghi bất kỳ — **Khi** người dùng lưu thay đổi — **Thì** có một dòng `AuditLog` ghi người thực hiện, hành động, loại và mã bản ghi, giá trị trước, giá trị sau, thời điểm.
   2. **Cho** một dòng nhật ký đã ghi — **Khi** bất kỳ vai trò nào, kể cả R1, thử sửa hoặc xóa nó — **Thì** không có chức năng nào cho phép và máy chủ từ chối.
   3. **Cho** thao tác bị từ chối vì thiếu quyền — **Khi** xem nhật ký — **Thì** không có dòng thay đổi dữ liệu nào được ghi cho thao tác đó.
 - **Bao phủ:** FR-105 · UC-82 · BR — · EC — · khác: NFR-10
@@ -117,7 +117,10 @@
   2. **Cho** một vai trò có ngày kết thúc đã qua — **Khi** người dùng đăng nhập — **Thì** vai trò đó không còn tác dụng.
   3. **Cho** giảng viên không có quyền quản trị — **Khi** gửi thẳng yêu cầu của một thao tác quản trị tới máy chủ, không qua giao diện — **Thì** máy chủ từ chối và không đổi dữ liệu.
   4. **Cho** đợt 1 — **Khi** gán phạm vi — **Thì** chọn được Toàn hệ thống, Đơn vị, hoặc Theo phân công với phân công đọc từ thành viên nhóm chuyên môn; phạm vi theo chương trình có ở US-021.
-- **Bao phủ:** FR-07 (đợt 1) · UC-06 · BR — · EC — · khác: NFR-09, M-7
+  5. **Cho** ma trận quyền ban đầu đã nạp vào `RolePermission` — **Khi** máy chủ kiểm một thao tác — **Thì** kết quả lấy từ dòng của vai trò ứng với mã quyền của thao tác ấy; vai trò không có dòng thì bị từ chối, kể cả khi có quyền ở thao tác khác trên cùng đối tượng (ví dụ có quyền sửa đề cương nhưng không có quyền ban hành).
+  6. **Cho** một dòng có `scope` = Theo phạm vi — **Khi** thao tác trên đối tượng ngoài phạm vi của vai trò — **Thì** bị từ chối; cùng thao tác trên đối tượng trong phạm vi thì được.
+  7. **Cho** Phòng Đào tạo — **Khi** mở ma trận quyền — **Thì** thấy mọi vai trò và quyền kèm chế độ và phạm vi, không có thao tác sửa nào.
+- **Bao phủ:** FR-07 (đợt 1) · UC-06 · BR — · EC — · khác: NFR-09, M-7, M-10
 
 ### US-006 — Nhật ký thay đổi phân quyền
 

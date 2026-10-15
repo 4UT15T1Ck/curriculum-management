@@ -1,0 +1,8 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "oxc"],
+  "env": {
+    "browser": true
+  },
+  "ignorePatterns": ["src/api/schema.d.ts"]
+}
