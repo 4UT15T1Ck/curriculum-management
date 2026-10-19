@@ -7,10 +7,8 @@ import type {
   ScopeTarget,
 } from '../../shared/authz/access-context.js';
 import { PERMISSIONS } from '../../shared/authz/permission-codes.js';
-import {
-  assertEditPath,
-  REQUEST_DRAFT_SELECT,
-} from '../../shared/change-requests/request-draft.js';
+import { REQUEST_DRAFT_SELECT } from '../../shared/change-requests/request-draft.js';
+import { assertVersionWritePath } from '../../shared/releases/correction-access.js';
 import { AppException } from '../../shared/exception/app.exception.js';
 import type { PrismaService } from '../../shared/prisma/prisma.service.js';
 import { programEditState } from '../../shared/programs/program-target.js';
@@ -27,6 +25,7 @@ export const VERSION_SELECT = {
   programId: true,
   programName: true,
   versionNumber: true,
+  correctionOfId: true,
   totalCredits: true,
   compulsoryCredits: true,
   electiveCredits: true,
@@ -52,11 +51,11 @@ export async function assertCurriculumWrite(
   target: ScopeTarget,
 ): Promise<void> {
   assertDraft(version);
-  await assertEditPath(
+  await assertVersionWritePath(
     access,
     PERMISSIONS.CURRICULUM_EDIT,
     target,
-    version.sourceRequest,
+    version,
     () => programEditState(prisma, version.programId),
   );
 }

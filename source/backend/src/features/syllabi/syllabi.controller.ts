@@ -77,7 +77,12 @@ export class SyllabiController {
     @Query() query: CourseSyllabusQueryDto,
     @CurrentAccess() access: AccessContext,
   ) {
-    return this.syllabi.forCourse(courseId, access, query.requestId);
+    return this.syllabi.forCourse(
+      courseId,
+      access,
+      query.requestId,
+      query.versionId,
+    );
   }
 
   @Post('courses/:courseId/syllabus')

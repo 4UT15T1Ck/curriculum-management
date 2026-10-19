@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   CourseStatus,
+  ProgramVersionStatus,
   SyllabusStatus,
   type Prisma,
 } from '../../generated/prisma/client.js';
@@ -25,6 +26,8 @@ import {
   BYTES_PER_MB,
 } from '../../shared/files/attachment-types.js';
 import { PrismaService } from '../../shared/prisma/prisma.service.js';
+import { programTarget } from '../../shared/programs/program-target.js';
+import { revisionForItems } from '../../shared/syllabi/revision-for-items.js';
 import { mapUniqueViolation } from '../../shared/prisma/unique-violation.js';
 import { sanitizeRichText } from '../../shared/rich-text/sanitize-rich-text.js';
 import {
@@ -34,6 +37,7 @@ import {
   SYLLABUS_COURSE_SELECT,
   seesDrafts,
   syllabusEditState,
+  type SyllabusCourseRow,
 } from './syllabus-access.js';
 import type { AttachmentRulesDto } from './syllabus-attachment.dto.js';
 import {
@@ -49,6 +53,16 @@ import {
   type UpdateSyllabusDto,
 } from './update-syllabus.dto.js';
 
+// Adding a signed file to a published revision needs the same cell as editing the syllabus, over this course.
+export function canAttachTo(
+  access: AccessContext,
+  course: SyllabusCourseRow,
+): boolean {
+  return (
+    access.modeFor(PERMISSIONS.SYLLABUS_EDIT, courseTarget(course)) !== null
+  );
+}
+
 @Injectable()
 export class SyllabiService {
   constructor(
@@ -63,12 +77,14 @@ export class SyllabiService {
     courseId: string,
     access: AccessContext,
     requestId?: string,
+    versionId?: string,
   ): Promise<CourseSyllabusDto> {
     const course = await this.prisma.course.findUnique({
       where: { id: courseId },
       select: SYLLABUS_COURSE_SELECT,
     });
     assertCourseVisible(course, access);
+    if (versionId) return this.forVersion(course, versionId, access);
     const revisions = await this.prisma.syllabus.findMany({
       where: {
         courseId,
@@ -126,6 +142,66 @@ export class SyllabiService {
           ) === EDIT_PATH.DIRECT,
       editPath,
       attachmentRules: this.attachmentRules(),
+      canAttachToPublished: published !== null && canAttachTo(access, course),
+      version: null,
+    };
+  }
+
+  // The revision a released version pins is what that version's viewers read (US-074, US-079): never today's Published
+  // by default, and a Historical revision is shown as such. A version row with no pin reads like a Draft does.
+  private async forVersion(
+    course: SyllabusCourseRow,
+    versionId: string,
+    access: AccessContext,
+  ): Promise<CourseSyllabusDto> {
+    const version = await this.prisma.programVersion.findFirst({
+      where: {
+        id: versionId,
+        sourceRequestId: null,
+        curriculumItems: { some: { courseId: course.id } },
+      },
+      select: {
+        id: true,
+        status: true,
+        versionNumber: true,
+        program: { select: { id: true, facultyId: true, programCode: true } },
+        curriculumItems: {
+          where: { courseId: course.id },
+          select: { id: true, courseId: true, syllabusId: true },
+        },
+      },
+    });
+    if (
+      !version ||
+      (version.status === ProgramVersionStatus.DRAFT && !seesDrafts(access))
+    ) {
+      throw new AppException(SYLLABUS_ERRORS.SYLLABUS_NOT_FOUND);
+    }
+    access.assertCan(PERMISSIONS.PROGRAM_VIEW, programTarget(version.program));
+    const [item] = version.curriculumItems;
+    const revision = (await revisionForItems(this.prisma, [item])).get(item.id);
+    const row = revision
+      ? await this.prisma.syllabus.findUniqueOrThrow({
+          where: { id: revision.id },
+          include: SYLLABUS_INCLUDE,
+        })
+      : null;
+    return {
+      course: toSyllabusCourseDto(course),
+      programsUsing: await this.usage.programsUsing(course.id),
+      published: row && toSyllabusDto(row, () => false),
+      draft: null,
+      canCreate: false,
+      canEditClos: false,
+      editPath: null,
+      attachmentRules: this.attachmentRules(),
+      canAttachToPublished: row !== null && canAttachTo(access, course),
+      version: {
+        id: version.id,
+        programId: version.program.id,
+        programCode: version.program.programCode,
+        versionNumber: version.versionNumber,
+      },
     };
   }
 

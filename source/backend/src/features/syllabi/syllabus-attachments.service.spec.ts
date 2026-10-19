@@ -128,6 +128,35 @@ describe('SyllabusAttachmentsService', () => {
   });
 
   describe('upload', () => {
+    it('adds a signed file to a published or historical revision for a holder of syllabus.edit (US-077)', async () => {
+      for (const status of [
+        SyllabusStatus.PUBLISHED,
+        SyllabusStatus.HISTORICAL,
+      ]) {
+        prisma.syllabus.findUnique.mockResolvedValue(accessRow(status));
+
+        await expect(
+          service.upload('s1', upload('Quyết định ký.pdf', PDF_BYTES), R3),
+        ).resolves.toMatchObject({ fileName: 'Quyết định ký.pdf' });
+      }
+      expect(prisma.syllabusAttachment.create).toHaveBeenCalledTimes(2);
+    });
+
+    it('still asks the scope of the course for a published revision', async () => {
+      prisma.syllabus.findUnique.mockResolvedValue({
+        ...accessRow(SyllabusStatus.PUBLISHED),
+        course: {
+          ...accessRow(SyllabusStatus.PUBLISHED).course,
+          ownerFacultyId: 'elsewhere',
+        },
+      });
+
+      await expect(
+        service.upload('s1', upload('Ký.pdf', PDF_BYTES), R3),
+      ).rejects.toMatchObject({ code: 'OUT_OF_SCOPE' });
+      expect(files.write).not.toHaveBeenCalled();
+    });
+
     it('stores a PDF under a random name and keeps the original name in the row', async () => {
       const result = await service.upload(
         's1',
@@ -259,16 +288,24 @@ describe('SyllabusAttachmentsService', () => {
       await expect(service.remove('a1', R3)).resolves.toBeUndefined();
     });
 
-    it('asks for a change request on a published revision, not for the uploader', async () => {
-      prisma.syllabusAttachment.findUnique.mockResolvedValue({
-        ...row,
-        syllabus: accessRow(SyllabusStatus.PUBLISHED),
-      });
-      prisma.syllabus.findFirst.mockResolvedValue({ id: 's1' });
+    it('locks the files of a published or historical revision before asking who uploaded them (D15)', async () => {
+      for (const status of [
+        SyllabusStatus.PUBLISHED,
+        SyllabusStatus.HISTORICAL,
+      ]) {
+        prisma.syllabusAttachment.findUnique.mockResolvedValue({
+          ...row,
+          syllabus: accessRow(status),
+        });
 
-      await expect(service.remove('a1', OTHER_R3)).rejects.toMatchObject({
-        code: 'CHANGE_REQUEST_REQUIRED',
-      });
+        await expect(service.remove('a1', OTHER_R3)).rejects.toMatchObject({
+          code: 'ATTACHMENT_LOCKED',
+        });
+        await expect(service.remove('a1', R3)).rejects.toMatchObject({
+          code: 'ATTACHMENT_LOCKED',
+        });
+      }
+      expect(prisma.syllabusAttachment.delete).not.toHaveBeenCalled();
     });
   });
 });

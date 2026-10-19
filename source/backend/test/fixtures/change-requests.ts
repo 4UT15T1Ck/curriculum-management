@@ -1,11 +1,9 @@
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import request from 'supertest';
-import { ProgramVersionStatus } from '../../src/generated/prisma/client.js';
-import { PrismaService } from '../../src/shared/prisma/prisma.service.js';
 import { createCourse } from './courses.js';
-import { addCurriculumItem, releaseVersionForTest } from './curriculum.js';
+import { addCurriculumItem } from './curriculum.js';
 import { createProgram } from './programs.js';
-import { createSyllabusDraft, publishSyllabusForTest } from './syllabi.js';
+import { publishSyllabusViaRelease, releaseViaApi } from './releases.js';
 
 const CSRF = { 'X-Requested-With': 'XMLHttpRequest' };
 
@@ -110,7 +108,9 @@ export async function approveAs(agent: Agent, requestId: string) {
   return response.body as RequestDetail;
 }
 
-// A course with a published syllabus, written by the admin (R1) and published the way F-15 will.
+// A course with a published syllabus, written by the admin (R1). A syllabus is published only by a program release
+// (DC-03), so the course is released in a program of its own, which is then switched off: the course keeps its
+// published revision while no program "uses" it, and requests on it fan out to nobody until a test releases a program.
 export async function publishedCourse(
   app: NestExpressApplication,
   admin: Agent,
@@ -119,13 +119,10 @@ export async function publishedCourse(
   facultyCode?: string,
 ) {
   const course = await createCourse(app, { courseCode, groupId, facultyCode });
-  const draft = await createSyllabusDraft(admin, course.id);
-  await admin
-    .patch(`/api/syllabi/${draft.id}`)
-    .set(CSRF)
-    .send({ objectives: '<p>Mục tiêu gốc</p>' })
-    .expect(200);
-  await publishSyllabusForTest(app, draft.id);
+  await publishSyllabusViaRelease(app, admin, course.id, {
+    content: { objectives: '<p>Mục tiêu gốc</p>' },
+    deactivate: true,
+  });
   return course;
 }
 
@@ -134,7 +131,7 @@ export interface ReleasedProgram {
   versionId: string;
 }
 
-// A program whose only version is Active, with the given courses planned in semester 1.
+// A program whose only version is Active (released for real, by R1), with the given courses planned in semester 1.
 export async function releasedProgram(
   app: NestExpressApplication,
   admin: Agent,
@@ -146,32 +143,27 @@ export async function releasedProgram(
   for (const courseId of courseIds) {
     await addCurriculumItem(admin, versionId, { courseId, plannedSemester: 1 });
   }
-  await releaseVersionForTest(app, versionId);
+  await releaseViaApi(app, admin, { programId: program.id, versionId });
   return { programId: program.id, versionId };
 }
 
 // A newer version that has left Draft: the base of every open request on the program is now stale.
-export async function releaseAnotherVersionForTest(
-  app: NestExpressApplication,
+// A correction (US-076) is the quickest real release: it needs no request and no approver.
+export async function releaseAnotherVersion(
+  admin: Agent,
   programId: string,
+  versionId: string,
 ) {
-  const prisma = app.get(PrismaService);
-  const newest = await prisma.programVersion.findFirstOrThrow({
-    where: { programId, sourceRequestId: null },
-    orderBy: { createdAt: 'desc' },
-  });
-  return prisma.programVersion.create({
-    data: {
-      programId,
-      status: ProgramVersionStatus.PENDING,
-      versionNumber: '1.1',
-      programName: newest.programName,
-      majorCode: newest.majorCode,
-      majorName: newest.majorName,
-      semesterCount: newest.semesterCount,
-      totalCredits: newest.totalCredits,
-      compulsoryCredits: newest.compulsoryCredits,
-      electiveCredits: newest.electiveCredits,
-    },
-  });
+  const draft = await admin
+    .post(`/api/programs/${programId}/versions/${versionId}/corrections`)
+    .set(CSRF)
+    .expect(201);
+  const issued = await admin
+    .post(
+      `/api/programs/${programId}/versions/${versionId}/corrections/${draft.body.id}/issue`,
+    )
+    .set(CSRF)
+    .send({ reason: 'Đính chính để làm cũ các bản nháp.' })
+    .expect(201);
+  return issued.body as { id: string; versionNumber: string };
 }

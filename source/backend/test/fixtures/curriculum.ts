@@ -1,7 +1,4 @@
-import type { NestExpressApplication } from '@nestjs/platform-express';
 import request from 'supertest';
-import { ProgramVersionStatus } from '../../src/generated/prisma/client.js';
-import { PrismaService } from '../../src/shared/prisma/prisma.service.js';
 
 const CSRF = { 'X-Requested-With': 'XMLHttpRequest' };
 
@@ -35,15 +32,4 @@ export async function readCurriculum(agent: Agent, versionId: string) {
     .get(`/api/program-versions/${versionId}/curriculum`)
     .expect(200);
   return response.body;
-}
-
-// Test-only: writes the released state directly. F-15 replaces it with the real release flow; delete it then.
-export async function releaseVersionForTest(
-  app: NestExpressApplication,
-  versionId: string,
-) {
-  return app.get(PrismaService).programVersion.update({
-    where: { id: versionId },
-    data: { status: ProgramVersionStatus.ACTIVE, versionNumber: '1.0' },
-  });
 }

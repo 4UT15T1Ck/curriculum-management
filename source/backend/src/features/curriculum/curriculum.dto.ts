@@ -12,12 +12,9 @@ import {
   toRelatedCourseDto,
 } from '../../shared/courses/related-course.js';
 import { toWireDecimal } from '../../shared/decimal/decimal.js';
-import {
-  CURRICULUM_WARNING,
-  WARNING_SEVERITY,
-  type CurriculumWarning,
-} from '../../shared/curriculum/curriculum-warnings.js';
+import { CurriculumWarningDto } from '../../shared/curriculum/curriculum-warning.dto.js';
 import { CreditBreakdownDto } from '../../shared/curriculum/credit-breakdown.dto.js';
+import { rowCourse } from '../../shared/curriculum/row-course.js';
 import { ElectiveGroupDto } from './elective-group.dto.js';
 import {
   CURRICULUM_REQUISITE_TYPES,
@@ -110,23 +107,6 @@ export class KnowledgeBlockDto {
   requiredCredits!: string | null;
 }
 
-export class CurriculumWarningDto {
-  @ApiProperty({
-    enum: Object.values(CURRICULUM_WARNING),
-    enumName: 'CurriculumWarningCode',
-  })
-  code!: CurriculumWarning['code'];
-  @ApiProperty({
-    enum: Object.values(WARNING_SEVERITY),
-    enumName: 'WarningSeverity',
-  })
-  severity!: CurriculumWarning['severity'];
-  @ApiProperty() message!: string;
-  @ApiProperty({ nullable: true, type: Number }) semester!: number | null;
-  @ApiProperty({ nullable: true, type: String }) itemId!: string | null;
-  @ApiProperty({ nullable: true, type: String }) groupId!: string | null;
-}
-
 export class ProgramCreditsDto {
   @ApiProperty({ type: CreditBreakdownDto }) computed!: CreditBreakdownDto;
   @ApiProperty({ type: CreditBreakdownDto }) declared!: CreditBreakdownDto;
@@ -201,8 +181,8 @@ export function toCurriculumItemDto(
     displayOrder: context.displayOrder,
     plannedSemester: row.plannedSemester,
     sortOrder: row.sortOrder,
-    course: toRelatedCourseDto(row.course),
-    hasSyllabus: row.course.syllabi.length > 0,
+    course: toRelatedCourseDto(rowCourse(row)),
+    hasSyllabus: Boolean(row.syllabusId) || row.course.syllabi.length > 0,
     blockSymbol: row.blockSymbol,
     blockName: row.blockSymbol
       ? (context.blockNames.get(row.blockSymbol) ?? null)

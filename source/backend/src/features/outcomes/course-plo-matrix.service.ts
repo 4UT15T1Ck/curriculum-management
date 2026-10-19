@@ -3,6 +3,7 @@ import { Prisma } from '../../generated/prisma/client.js';
 import type { AccessContext } from '../../shared/authz/access-context.js';
 import { PERMISSIONS } from '../../shared/authz/permission-codes.js';
 import { groupBy } from '../../shared/collections/group-by.js';
+import { rowCourse, rowCredits } from '../../shared/curriculum/row-course.js';
 import { toWireDecimal } from '../../shared/decimal/decimal.js';
 import { AppException } from '../../shared/exception/app.exception.js';
 import { PrismaService } from '../../shared/prisma/prisma.service.js';
@@ -63,6 +64,8 @@ export class CoursePloMatrixService {
         select: {
           id: true,
           plannedSemester: true,
+          courseNameSnapshot: true,
+          creditsSnapshot: true,
           course: {
             select: {
               id: true,
@@ -95,7 +98,10 @@ export class CoursePloMatrixService {
       rows: items.map((item) => ({
         itemId: item.id,
         plannedSemester: item.plannedSemester,
-        course: { ...item.course, credits: toWireDecimal(item.course.credits) },
+        course: {
+          ...rowCourse(item),
+          credits: toWireDecimal(rowCredits(item)),
+        },
         cells: (cellsByItem.get(item.id) ?? []).map((cell) =>
           toCellDto(cell, linkCount.get(cellKey(cell)) ?? 0),
         ),

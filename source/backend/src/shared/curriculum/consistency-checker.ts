@@ -9,6 +9,7 @@ import {
 } from '../courses/requisite-graph.js';
 import { REQUEST_DRAFT_SELECT } from '../change-requests/request-draft.js';
 import { toWireDecimal } from '../decimal/decimal.js';
+import { revisionForItems } from '../syllabi/revision-for-items.js';
 import { AppException } from '../exception/app.exception.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CONSISTENCY_ERRORS } from './consistency-errors.js';
@@ -34,6 +35,7 @@ const CHECK_VERSION_SELECT = {
   id: true,
   programId: true,
   versionNumber: true,
+  correctionOfId: true,
   status: true,
   programName: true,
   semesterCount: true,
@@ -58,6 +60,8 @@ const CHECK_ITEM_SELECT = {
   plannedSemester: true,
   isElective: true,
   electiveGroupId: true,
+  syllabusId: true,
+  creditsSnapshot: true,
   course: { select: { courseCode: true, credits: true } },
   requisites: {
     select: {
@@ -195,6 +199,7 @@ export class ConsistencyChecker {
     }));
     const credits = this.creditCheck(version, programCredits(items, groups));
     const cycles = await this.cycleIssues(db, catalogRelations, items);
+    const missing = await missingSyllabusIssues(db, rows, items);
     return {
       version,
       credits,
@@ -206,6 +211,7 @@ export class ConsistencyChecker {
           groups,
         }),
         ...cycles,
+        ...missing,
         ...creditIssues(credits),
       ]),
     };
@@ -322,6 +328,25 @@ export class ConsistencyChecker {
       };
     });
   }
+}
+
+// A row is pinned (released) or reads the course's Published-else-Draft revision; none of either is an Error.
+async function missingSyllabusIssues(
+  db: Db,
+  rows: readonly { id: string; courseId: string; syllabusId: string | null }[],
+  items: readonly WarningItem[],
+): Promise<CurriculumWarning[]> {
+  const revisions = await revisionForItems(db, rows);
+  return items
+    .filter((item) => !revisions.get(item.id))
+    .map((item) => ({
+      code: CURRICULUM_WARNING.MISSING_SYLLABUS,
+      severity: WARNING_SEVERITY.ERROR,
+      message: `Học phần ${item.courseCode} chưa có đề cương.`,
+      semester: item.plannedSemester,
+      itemId: item.id,
+      groupId: null,
+    }));
 }
 
 function isCycleChecked(type: CourseRelationType): boolean {

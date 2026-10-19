@@ -6,6 +6,7 @@ import type { Env } from '../../shared/config/env.validation.js';
 import { CurriculumSharedModule } from '../../shared/curriculum/curriculum-shared.module.js';
 import { BYTES_PER_MB } from '../../shared/files/attachment-types.js';
 import { FilesModule } from '../../shared/files/files.module.js';
+import { ReleasesSharedModule } from '../../shared/releases/releases-shared.module.js';
 import { ProgramsSharedModule } from '../../shared/programs/programs-shared.module.js';
 import { ApprovalHistoryReader } from './approval-history.reader.js';
 import { ApprovalQueueController } from './approval-queue.controller.js';
@@ -20,6 +21,9 @@ import { ChangeRequestsController } from './change-requests.controller.js';
 import { ChangeRequestsService } from './change-requests.service.js';
 import { CommentsService } from './comments.service.js';
 import { ConflictFinder } from './conflict-finder.js';
+import { FinalApprovalApplier } from './final-approval.applier.js';
+import { FinalApprovalPreviewReader } from './final-approval.preview.js';
+import { FinalApprovalService } from './final-approval.service.js';
 import { OrganizationalApplier } from './organizational-applier.js';
 import { RequestItemsService } from './request-items.service.js';
 import { RequestTargetResolver } from './request-target.resolver.js';
@@ -32,6 +36,7 @@ import { WorkingCopyService } from './working-copy.service.js';
     ProgramsSharedModule,
     CurriculumSharedModule,
     ChangeRequestsSharedModule,
+    ReleasesSharedModule,
     FilesModule,
     // Same limits as syllabus attachments; Multer keeps the file in memory by default.
     MulterModule.registerAsync({
@@ -62,6 +67,9 @@ import { WorkingCopyService } from './working-copy.service.js';
     AuthoredItemsService,
     ChangeRequestDocumentsService,
     ConflictFinder,
+    FinalApprovalApplier,
+    FinalApprovalPreviewReader,
+    FinalApprovalService,
     RequestItemsService,
     RequestTargetResolver,
     RoutingPlanner,

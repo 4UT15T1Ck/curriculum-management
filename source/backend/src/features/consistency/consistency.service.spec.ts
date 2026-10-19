@@ -92,6 +92,7 @@ function result(
       creditMismatchAcceptedAt: null,
       creditMismatchAcceptedBy: null,
       sourceRequest: null,
+      correctionOfId: null,
     },
     credits: {
       declared: breakdown('100', '50', '150'),

@@ -3,6 +3,7 @@ import {
   IsIn,
   IsInt,
   IsNotEmpty,
+  IsOptional,
   MinLength,
   IsString,
   Max,
@@ -57,6 +58,12 @@ export class Env {
   @IsInt()
   @Min(1)
   ATTACHMENT_MAX_MB: number = DEFAULT_ATTACHMENT_MAX_MB;
+
+  // Redis key prefix of every queue. Unset means BullMQ's own default ("bull"); the e2e specs share one Redis and set a unique one each.
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  BULLMQ_PREFIX?: string;
 }
 
 export function validateEnv(raw: Record<string, unknown>): Env {

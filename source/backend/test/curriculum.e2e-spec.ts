@@ -14,9 +14,9 @@ import {
   addCurriculumItem,
   postItem,
   readCurriculum,
-  releaseVersionForTest,
 } from './fixtures/curriculum.js';
 import { assignDirector, createProgram } from './fixtures/programs.js';
+import { releaseViaApi } from './fixtures/releases.js';
 import {
   addMembership,
   createSubjectGroup,
@@ -837,7 +837,7 @@ describe('curriculum, requisites and elective groups', () => {
       courseId: row.id,
       plannedSemester: 1,
     });
-    await releaseVersionForTest(app, versionId);
+    await releaseViaApi(app, admin, { programId, versionId });
 
     const frozen = await postItem(admin, versionId, {
       courseId: row.id,

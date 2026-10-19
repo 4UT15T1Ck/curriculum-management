@@ -87,10 +87,7 @@ export function assertRevisionVisible(
   row: SyllabusAccessRow | null,
   access: AccessContext,
 ): asserts row is SyllabusAccessRow {
-  if (
-    !row ||
-    (row.status !== SyllabusStatus.PUBLISHED && !seesDrafts(access))
-  ) {
+  if (!row || (row.status === SyllabusStatus.DRAFT && !seesDrafts(access))) {
     throw new AppException(SYLLABUS_ERRORS.SYLLABUS_NOT_FOUND);
   }
   assertCourseVisible(row.course, access);

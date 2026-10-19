@@ -95,8 +95,14 @@ export const programInclude = (today: Date) =>
   ({
     faculty: { select: ORG_UNIT_REF_SELECT },
     versions: {
-      // A request's working copy is not a version of the program.
-      where: { sourceRequestId: null },
+      // A request's working copy and an unissued correction Draft (F-15) are not versions of the program.
+      where: {
+        sourceRequestId: null,
+        NOT: {
+          status: ProgramVersionStatus.DRAFT,
+          correctionOfId: { not: null },
+        },
+      },
       select: VERSION_INFO_SELECT,
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     },

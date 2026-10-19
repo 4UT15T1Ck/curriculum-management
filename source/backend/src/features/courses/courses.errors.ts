@@ -1,4 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
+import { COURSE_WRITE_ERRORS } from '../../shared/courses/course-write.errors.js';
 import type { ErrorDefinition } from '../../shared/exception/error-definition.js';
 
 export const COURSE_ERRORS = {
@@ -12,22 +13,9 @@ export const COURSE_ERRORS = {
     code: 'COURSE_CODE_TAKEN',
     message: 'Mã học phần đã tồn tại.',
   },
-  OWNER_FACULTY_INVALID: {
-    status: HttpStatus.BAD_REQUEST,
-    code: 'OWNER_FACULTY_INVALID',
-    message: 'Khoa phụ trách phải là một Khoa đang hoạt động.',
-  },
-  OWNER_GROUP_INVALID: {
-    status: HttpStatus.BAD_REQUEST,
-    code: 'OWNER_GROUP_INVALID',
-    message:
-      'Nhóm phụ trách phải là nhóm đang hoạt động của chính khoa phụ trách.',
-  },
-  COURSE_CANCELLED: {
-    status: HttpStatus.CONFLICT,
-    code: 'COURSE_CANCELLED',
-    message: 'Học phần đã hủy, không sửa và không đổi trạng thái được.',
-  },
+  OWNER_FACULTY_INVALID: COURSE_WRITE_ERRORS.OWNER_FACULTY_INVALID,
+  OWNER_GROUP_INVALID: COURSE_WRITE_ERRORS.OWNER_GROUP_INVALID,
+  COURSE_CANCELLED: COURSE_WRITE_ERRORS.COURSE_CANCELLED,
   STATUS_TRANSITION_INVALID: {
     status: HttpStatus.CONFLICT,
     code: 'STATUS_TRANSITION_INVALID',
@@ -53,8 +41,4 @@ export const COURSE_ERRORS = {
   },
 } as const satisfies Record<string, ErrorDefinition>;
 
-// Constraint keys in `details`, the same style as class-validator keys (FieldErrorDto).
-export const OWNER_CONSTRAINT = {
-  ACTIVE_FACULTY: 'activeFaculty',
-  GROUP_OF_FACULTY: 'groupOfFaculty',
-} as const;
+export { OWNER_CONSTRAINT } from '../../shared/courses/course-write.errors.js';

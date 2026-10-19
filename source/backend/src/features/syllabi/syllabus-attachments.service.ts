@@ -13,10 +13,14 @@ import { FileStorageService } from '../../shared/files/file-storage.service.js';
 import { uploadedFileName } from '../../shared/files/uploaded-file-name.js';
 import { USER_REF_SELECT } from '../../shared/dtos/ref.dto.js';
 import { PrismaService } from '../../shared/prisma/prisma.service.js';
+import { PERMISSIONS } from '../../shared/authz/permission-codes.js';
+import { courseTarget } from '../../shared/courses/course-target.js';
+import { SyllabusStatus } from '../../generated/prisma/client.js';
 import {
   assertDraftWrite,
   assertRevisionVisible,
   SYLLABUS_ACCESS_SELECT,
+  type SyllabusAccessRow,
 } from './syllabus-access.js';
 import {
   toAttachmentDto,
@@ -42,14 +46,15 @@ export class SyllabusAttachmentsService {
     file: Express.Multer.File | undefined,
     access: AccessContext,
   ): Promise<SyllabusAttachmentDto> {
-    const revision = await assertDraftWrite(
-      this.prisma,
-      access,
-      await this.prisma.syllabus.findUnique({
-        where: { id: syllabusId },
-        select: SYLLABUS_ACCESS_SELECT,
-      }),
-    );
+    const found = await this.prisma.syllabus.findUnique({
+      where: { id: syllabusId },
+      select: SYLLABUS_ACCESS_SELECT,
+    });
+    // A published revision only ever gains signed files (US-077); a Draft takes the ordinary write rules.
+    const revision =
+      found && found.status !== SyllabusStatus.DRAFT
+        ? this.assertCanAttach(found, access)
+        : await assertDraftWrite(this.prisma, access, found);
     if (revision.sourceRequest) {
       throw new AppException(REQUEST_DRAFT_ERRORS.COPY_HAS_NO_ATTACHMENTS);
     }
@@ -93,6 +98,15 @@ export class SyllabusAttachmentsService {
     }
   }
 
+  private assertCanAttach(
+    row: SyllabusAccessRow,
+    access: AccessContext,
+  ): SyllabusAccessRow {
+    assertRevisionVisible(row, access);
+    access.assertCan(PERMISSIONS.SYLLABUS_EDIT, courseTarget(row.course));
+    return row;
+  }
+
   async open(
     attachmentId: string,
     access: AccessContext,
@@ -131,6 +145,10 @@ export class SyllabusAttachmentsService {
     });
     if (!row) {
       throw new AppException(SYLLABUS_ERRORS.ATTACHMENT_NOT_FOUND);
+    }
+    // Published signed files never go (D15): the lock answers before any permission question.
+    if (row.syllabus.status !== SyllabusStatus.DRAFT) {
+      throw new AppException(SYLLABUS_ERRORS.ATTACHMENT_LOCKED);
     }
     const revision = await assertDraftWrite(this.prisma, access, row.syllabus);
     if (revision.sourceRequest) {

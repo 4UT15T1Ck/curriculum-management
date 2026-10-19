@@ -8,6 +8,7 @@ import { createAccount, loginAgent } from './fixtures/accounts.js';
 import { createCourse, createForeignFaculty } from './fixtures/courses.js';
 import { addCurriculumItem, readCurriculum } from './fixtures/curriculum.js';
 import { createProgram } from './fixtures/programs.js';
+import { publishSyllabusViaRelease } from './fixtures/releases.js';
 import {
   addMembership,
   createSubjectGroup,
@@ -16,7 +17,6 @@ import {
   createSyllabusDraft,
   EXE_BYTES,
   PDF_BYTES,
-  publishSyllabusForTest,
 } from './fixtures/syllabi.js';
 import { startPostgres, startRedis } from './containers.js';
 import type { TestPostgres, TestRedis } from './containers.js';
@@ -477,7 +477,7 @@ describe('syllabi', () => {
       .expect(404);
     expect(file.body.code).toBe('SYLLABUS_NOT_FOUND');
 
-    await publishSyllabusForTest(app, draft.id);
+    await publishSyllabusViaRelease(app, admin, course.id);
     const seen = await getSyllabus(student, course.id).expect(200);
     expect(seen.body.published.id).toBe(draft.id);
     await student
@@ -488,7 +488,7 @@ describe('syllabi', () => {
   it('routes every change of a published syllabus through a request', async () => {
     const course = await newCourse();
     const draft = await createSyllabusDraft(admin, course.id);
-    await publishSyllabusForTest(app, draft.id);
+    await publishSyllabusViaRelease(app, admin, course.id);
 
     const read = await getSyllabus(admin, course.id).expect(200);
     expect(read.body).toMatchObject({

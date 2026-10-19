@@ -5,6 +5,7 @@ import {
   ChangeRequestStatus,
   ChangeRequestType,
   ChangeTargetType,
+  ProgramVersionStatus,
   RequestOrigin,
   ApprovalAction,
 } from '../../generated/prisma/client.js';
@@ -13,6 +14,7 @@ import {
   type ApprovalStepKind,
 } from '../../shared/change-requests/approval.constants.js';
 import { UserRefDto } from '../../shared/dtos/ref.dto.js';
+import { SemesterDto } from '../../shared/releases/semester.dto.js';
 
 export const WORKSPACE_KINDS = ['PROGRAM_VERSION', 'SYLLABUS'] as const;
 export const AUTHORED_ENTITY_TYPES = [
@@ -157,10 +159,34 @@ export class RequestActionsDto {
   @ApiProperty() canWithdraw!: boolean;
   @ApiProperty() canUpload!: boolean;
   @ApiProperty() canApprove!: boolean;
+  @ApiProperty({
+    description:
+      'Đề xuất dữ liệu đang chờ Phòng Đào tạo và người xem được phép phê duyệt cuối (MH-43).',
+  })
+  canFinalApprove!: boolean;
   @ApiProperty() canReturn!: boolean;
   @ApiProperty() canReject!: boolean;
   @ApiProperty() canOverride!: boolean;
   @ApiProperty() canComment!: boolean;
+}
+
+export class ReleasedVersionDto {
+  @ApiProperty() id!: string;
+  @ApiProperty() programId!: string;
+  @ApiProperty() programCode!: string;
+  @ApiProperty({ nullable: true, type: String }) versionNumber!: string | null;
+  @ApiProperty({ enum: ProgramVersionStatus, enumName: 'ProgramVersionStatus' })
+  status!: ProgramVersionStatus;
+}
+
+// What the final approval decided and what it produced (F-15).
+export class RequestReleaseDto {
+  @ApiProperty() decisionNumber!: string;
+  @ApiProperty({ format: 'date' }) signedDate!: string;
+  @ApiProperty({ type: SemesterDto, nullable: true })
+  effectiveSemester!: SemesterDto | null;
+  @ApiProperty() pastSemesterAllowed!: boolean;
+  @ApiProperty({ type: [ReleasedVersionDto] }) versions!: ReleasedVersionDto[];
 }
 
 export class ChangeRequestDetailDto extends ChangeRequestSummaryDto {
@@ -179,4 +205,6 @@ export class ChangeRequestDetailDto extends ChangeRequestSummaryDto {
   steps!: ApprovalStepDto[];
   @ApiProperty({ type: [ConflictDto] }) conflicts!: ConflictDto[];
   @ApiProperty({ type: RequestActionsDto }) permissions!: RequestActionsDto;
+  @ApiProperty({ type: RequestReleaseDto, nullable: true })
+  release!: RequestReleaseDto | null;
 }

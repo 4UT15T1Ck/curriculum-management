@@ -55,12 +55,19 @@ export function assertDirectEdit(
 
 const SCHOOL_WIDE_TARGET: ScopeTarget = { subjectGroupIds: [], orgUnitIds: [] };
 
+export function isSchoolWideDirect(
+  access: AccessContext,
+  code: PermissionCode,
+): boolean {
+  return access.modeFor(code, SCHOOL_WIDE_TARGET) === EDIT_PATH.DIRECT;
+}
+
 // Data that belongs to no unit or group (equivalence groups): only a direct, unscoped cell may change it.
 export function assertSchoolWideDirect(
   access: AccessContext,
   code: PermissionCode,
 ): void {
-  if (access.modeFor(code, SCHOOL_WIDE_TARGET) !== EDIT_PATH.DIRECT) {
+  if (!isSchoolWideDirect(access, code)) {
     throw new AppException(COMMON_ERRORS.PERMISSION_DENIED);
   }
 }

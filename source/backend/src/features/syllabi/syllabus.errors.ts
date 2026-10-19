@@ -97,6 +97,12 @@ export const SYLLABUS_ERRORS = {
     code: 'ATTACHMENT_LIMIT_REACHED',
     message: `Mỗi bản đề cương có tối đa ${SYLLABUS_LIMITS.ATTACHMENTS_MAX} tệp đính kèm.`,
   },
+  ATTACHMENT_LOCKED: {
+    status: HttpStatus.CONFLICT,
+    code: 'ATTACHMENT_LOCKED',
+    message:
+      'Tệp đính kèm của bản đề cương đã ban hành không gỡ được; chỉ được bổ sung thêm tệp ký.',
+  },
   ATTACHMENT_NOT_UPLOADER: {
     status: HttpStatus.FORBIDDEN,
     code: 'ATTACHMENT_NOT_UPLOADER',

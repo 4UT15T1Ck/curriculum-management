@@ -8,6 +8,12 @@ export const APPROVAL_FEATURE_ERRORS = {
     message:
       'Phê duyệt cuối cấp Phòng Đào tạo cần số quyết định và học kỳ hiệu lực; dùng màn hình ban hành.',
   },
+  FINAL_APPROVAL_NOT_APPLICABLE: {
+    status: HttpStatus.CONFLICT,
+    code: 'FINAL_APPROVAL_NOT_APPLICABLE',
+    message:
+      'Loại đề xuất này không ban hành phiên bản; duyệt bằng nút Đồng ý.',
+  },
   ORGANIZATION_APPLY_FAILED: {
     status: HttpStatus.CONFLICT,
     code: 'ORGANIZATION_APPLY_FAILED',

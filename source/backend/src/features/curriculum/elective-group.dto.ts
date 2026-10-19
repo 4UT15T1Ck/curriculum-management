@@ -18,6 +18,7 @@ import {
   toWireDecimal,
 } from '../../shared/decimal/decimal.js';
 import { emptyToNull, trimString } from '../../shared/dtos/transforms.js';
+import { rowCredits } from '../../shared/curriculum/row-course.js';
 import { CURRICULUM_LIMITS } from './create-curriculum-item.dto.js';
 
 export class CreateElectiveGroupDto {
@@ -73,7 +74,11 @@ export class ElectiveGroupDto {
 
 export const GROUP_INCLUDE = {
   items: {
-    select: { id: true, course: { select: { credits: true } } },
+    select: {
+      id: true,
+      creditsSnapshot: true,
+      course: { select: { credits: true } },
+    },
     orderBy: [{ plannedSemester: 'asc' }, { sortOrder: 'asc' }, { id: 'asc' }],
   },
 } as const satisfies Prisma.ElectiveGroupInclude;
@@ -92,7 +97,7 @@ export function toElectiveGroupDto(row: GroupRow): ElectiveGroupDto {
     itemIds: row.items.map((item) => item.id),
     listedCredits: toWireDecimal(
       row.items.reduce(
-        (total, item) => total.plus(item.course.credits),
+        (total, item) => total.plus(rowCredits(item)),
         new Prisma.Decimal(0),
       ),
     ),

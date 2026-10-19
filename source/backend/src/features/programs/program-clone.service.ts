@@ -57,7 +57,9 @@ export class ProgramCloneService {
           },
           select: { id: true, versions: { select: { id: true } } },
         });
-        await this.copier.copy(tx, version.id, program.versions[0].id);
+        await this.copier.copy(tx, version.id, program.versions[0].id, {
+          carryRelease: false,
+        });
         return program;
       });
       this.logger.log(

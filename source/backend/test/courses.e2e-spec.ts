@@ -12,11 +12,9 @@ import { HOME_FACULTY_CODE } from '../src/shared/org-units/home-faculty.js';
 import { PrismaService } from '../src/shared/prisma/prisma.service.js';
 import { createAccount, loginAgent } from './fixtures/accounts.js';
 import { createCourse, createForeignFaculty } from './fixtures/courses.js';
-import {
-  addCurriculumItem,
-  releaseVersionForTest,
-} from './fixtures/curriculum.js';
+import { addCurriculumItem } from './fixtures/curriculum.js';
 import { createProgram } from './fixtures/programs.js';
+import { releaseViaApi } from './fixtures/releases.js';
 import {
   addMembership,
   createSubjectGroup,
@@ -508,7 +506,7 @@ describe('course catalog', () => {
       .send({ courseName: 'Tên sửa trực tiếp' })
       .expect(200);
 
-    await releaseVersionForTest(app, versionId);
+    await releaseViaApi(app, admin, { programId: program.id, versionId });
     const released = await admin.get(`/api/courses/${course.id}`).expect(200);
     expect(released.body.programsUsing[0].versionLabel).toBe('1.0');
     expect(released.body.editPath).toBe('VIA_REQUEST');

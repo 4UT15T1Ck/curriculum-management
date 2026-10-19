@@ -179,13 +179,15 @@ describe('ProgramCloneService', () => {
       expect(program.create).not.toHaveBeenCalled();
     });
 
-    it('calls the copier with the source version and the new Draft', async () => {
+    it('calls the copier with the source version and the new Draft, leaving the release facts behind', async () => {
       await service.clone(
         'p1',
         { programCode: '1024035', programName: 'Bản sao' },
         R1,
       );
-      expect(copier.copy).toHaveBeenCalledWith(expect.anything(), 'v1', 'new');
+      expect(copier.copy).toHaveBeenCalledWith(expect.anything(), 'v1', 'new', {
+        carryRelease: false,
+      });
     });
 
     it('maps a duplicate code to PROGRAM_CODE_TAKEN', async () => {

@@ -3,10 +3,12 @@ import { ProgramVersionStatus } from '../../generated/prisma/client.js';
 import type { AccessContext } from '../../shared/authz/access-context.js';
 import { EDIT_PATH, editPathFor } from '../../shared/authz/edit-path.js';
 import { PERMISSIONS } from '../../shared/authz/permission-codes.js';
+import { canEditCopy } from '../../shared/change-requests/request-draft.js';
 import {
-  assertEditPath,
-  canEditCopy,
-} from '../../shared/change-requests/request-draft.js';
+  assertVersionWritePath,
+  canEditCorrection,
+  isCorrectionDraft,
+} from '../../shared/releases/correction-access.js';
 import { CurriculumFactsReader } from '../../shared/curriculum/curriculum-facts.reader.js';
 import { AppException } from '../../shared/exception/app.exception.js';
 import { PrismaService } from '../../shared/prisma/prisma.service.js';
@@ -55,11 +57,11 @@ export class ProgramVersionInfoService {
     if (row.status !== ProgramVersionStatus.DRAFT) {
       throw new AppException(PROGRAM_ERRORS.VERSION_NOT_EDITABLE);
     }
-    await assertEditPath(
+    await assertVersionWritePath(
       access,
       PERMISSIONS.PROGRAM_EDIT_INFO,
       programTarget(row.program),
-      row.sourceRequest,
+      row,
       () => programEditState(this.prisma, row.programId),
     );
     await assertSemestersCoverCurriculum(
@@ -90,6 +92,7 @@ export class ProgramVersionInfoService {
       return false;
     }
     const target = programTarget(row.program);
+    if (isCorrectionDraft(row)) return canEditCorrection(access);
     if (row.sourceRequest) {
       return canEditCopy(
         access,

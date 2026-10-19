@@ -30,6 +30,7 @@ const VERSION: VersionRow = {
   electiveCredits: new Prisma.Decimal('50'),
   program: { id: 'p1', facultyId: 'home', programCode: '1024034' },
   sourceRequest: null,
+  correctionOfId: null,
 };
 
 interface Grant {

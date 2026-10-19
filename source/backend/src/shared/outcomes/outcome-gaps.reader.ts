@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { currentRevisionByCourse } from '../syllabi/current-revision.js';
+import { revisionForItems } from '../syllabi/revision-for-items.js';
 import { outcomeGaps, type OutcomeGaps } from './outcome-gaps.js';
 
 type CloRef = { id: string; cloCode: string; description: string };
@@ -22,6 +22,8 @@ export class OutcomeGapsReader {
         select: {
           id: true,
           plannedSemester: true,
+          syllabusId: true,
+          courseNameSnapshot: true,
           course: {
             select: {
               id: true,
@@ -46,26 +48,36 @@ export class OutcomeGapsReader {
         select: { curriculumItemId: true, cloId: true },
       }),
     ]);
-    const revisions = await currentRevisionByCourse(
+    const revisions = await revisionForItems(
       this.prisma,
-      items.map((item) => item.course.id),
+      items.map((item) => ({
+        id: item.id,
+        courseId: item.course.id,
+        syllabusId: item.syllabusId,
+      })),
     );
-    const closByRevision = await this.closOf(
-      [...revisions.values()].map((revision) => revision.id),
-    );
+    const closByRevision = await this.closOf([
+      ...new Set(
+        [...revisions.values()].flatMap((revision) =>
+          revision ? [revision.id] : [],
+        ),
+      ),
+    ]);
     return outcomeGaps({
       plos,
-      items: items.map(({ id, plannedSemester, course }) => {
-        const revision = revisions.get(course.id);
-        return {
-          itemId: id,
-          plannedSemester,
-          courseCode: course.courseCode,
-          courseName: course.courseName,
-          ownerGroupId: course.ownerGroupId,
-          clos: revision ? (closByRevision.get(revision.id) ?? []) : null,
-        };
-      }),
+      items: items.map(
+        ({ id, plannedSemester, course, courseNameSnapshot }) => {
+          const revision = revisions.get(id);
+          return {
+            itemId: id,
+            plannedSemester,
+            courseCode: course.courseCode,
+            courseName: courseNameSnapshot ?? course.courseName,
+            ownerGroupId: course.ownerGroupId,
+            clos: revision ? (closByRevision.get(revision.id) ?? []) : null,
+          };
+        },
+      ),
       cells,
       links,
     });

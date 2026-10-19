@@ -58,6 +58,7 @@ describe('ConsistencyChecker', () => {
     electiveGroup: { findMany: ReturnType<typeof vi.fn> };
     courseRelation: { findMany: ReturnType<typeof vi.fn> };
     course: { findMany: ReturnType<typeof vi.fn> };
+    syllabus: { findMany: ReturnType<typeof vi.fn> };
   };
   let checker: ConsistencyChecker;
 
@@ -70,6 +71,22 @@ describe('ConsistencyChecker', () => {
       electiveGroup: { findMany: vi.fn().mockResolvedValue([]) },
       courseRelation: { findMany: vi.fn().mockResolvedValue([]) },
       course: { findMany: vi.fn().mockResolvedValue([]) },
+      // Every course has a Published revision unless a test says otherwise.
+      syllabus: {
+        findMany: vi
+          .fn()
+          .mockImplementation(
+            ({ where }: { where: { courseId?: { in: string[] } } }) =>
+              Promise.resolve(
+                (where.courseId?.in ?? []).map((courseId) => ({
+                  id: `rev-${courseId}`,
+                  courseId,
+                  revisionNumber: 1,
+                  status: 'PUBLISHED',
+                })),
+              ),
+          ),
+      },
     };
     checker = new ConsistencyChecker(db as unknown as PrismaService);
   });
@@ -197,5 +214,76 @@ describe('ConsistencyChecker', () => {
     await expect(run()).rejects.toMatchObject({
       code: 'PROGRAM_VERSION_NOT_FOUND',
     });
+  });
+
+  it('names a course without any syllabus revision as an error (MISSING_SYLLABUS, D7)', async () => {
+    db.syllabus.findMany.mockImplementation(
+      ({ where }: { where: { courseId?: { in: string[] } } }) =>
+        Promise.resolve(
+          (where.courseId?.in ?? [])
+            .filter((courseId) => courseId !== 'course-B')
+            .map((courseId) => ({
+              id: `rev-${courseId}`,
+              courseId,
+              revisionNumber: 1,
+              status: 'PUBLISHED',
+            })),
+        ),
+    );
+
+    const { issues } = await run();
+
+    expect(issues.filter((issue) => issue.code === 'MISSING_SYLLABUS')).toEqual(
+      [
+        expect.objectContaining({
+          severity: 'ERROR',
+          itemId: 'item-B',
+          message: expect.stringContaining('B'),
+        }),
+      ],
+    );
+    await expect(
+      checker.assertPasses('v1', db as unknown as PrismaService),
+    ).rejects.toMatchObject({ code: 'CONSISTENCY_FAILED' });
+  });
+
+  it('counts a pinned row by its pin and a released row by its frozen credits', async () => {
+    db.curriculumItem.findMany.mockResolvedValue([
+      row('A', { syllabusId: 'old-rev', creditsSnapshot: dec('4') }),
+      row('B'),
+    ]);
+    db.syllabus.findMany.mockImplementation(
+      ({
+        where,
+      }: {
+        where: { id?: { in: string[] }; courseId?: { in: string[] } };
+      }) =>
+        Promise.resolve(
+          where.id
+            ? [
+                {
+                  id: 'old-rev',
+                  courseId: 'course-A',
+                  revisionNumber: 1,
+                  status: 'HISTORICAL',
+                },
+              ]
+            : [
+                {
+                  id: 'rev-B',
+                  courseId: 'course-B',
+                  revisionNumber: 1,
+                  status: 'PUBLISHED',
+                },
+              ],
+        ),
+    );
+
+    const { issues, credits } = await run();
+
+    expect(issues.some((issue) => issue.code === 'MISSING_SYLLABUS')).toBe(
+      false,
+    );
+    expect(credits.computed.total.toString()).toBe('7');
   });
 });

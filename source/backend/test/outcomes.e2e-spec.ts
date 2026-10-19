@@ -433,7 +433,11 @@ describe('outcomes: PLO, course-PLO and CLO-PLO matrices', () => {
     const { program } = await newProgram();
     await prisma.programVersion.update({
       where: { id: program.versions[0].id },
-      data: { status: ProgramVersionStatus.ACTIVE, versionNumber: '1.0' },
+      data: {
+        status: ProgramVersionStatus.ACTIVE,
+        versionNumber: '1.0',
+        publishedAt: new Date(),
+      },
     });
     const draft = await prisma.programVersion.create({
       data: {

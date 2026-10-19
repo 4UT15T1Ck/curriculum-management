@@ -1,5 +1,6 @@
 import { CourseRelationType, Prisma } from '../../generated/prisma/client.js';
 import type { CreditGroup, CreditItem } from './program-credits.js';
+import { rowCredits } from './row-course.js';
 
 export const CURRICULUM_WARNING = {
   EMPTY_SEMESTER: 'EMPTY_SEMESTER',
@@ -11,6 +12,8 @@ export const CURRICULUM_WARNING = {
   REQUISITE_CYCLE: 'REQUISITE_CYCLE',
   CREDIT_MISMATCH: 'CREDIT_MISMATCH',
   CREDIT_MISMATCH_ACCEPTED: 'CREDIT_MISMATCH_ACCEPTED',
+  // Raised by the checker only: a course of the frame has no syllabus revision to release with.
+  MISSING_SYLLABUS: 'MISSING_SYLLABUS',
 } as const;
 export type CurriculumWarningCode =
   (typeof CURRICULUM_WARNING)[keyof typeof CURRICULUM_WARNING];
@@ -67,6 +70,7 @@ export interface WarningItemRow {
   plannedSemester: number;
   isElective: boolean;
   electiveGroupId: string | null;
+  creditsSnapshot: Prisma.Decimal | null;
   course: { courseCode: string; credits: Prisma.Decimal };
   requisites: readonly {
     sourceCourseId: string;
@@ -81,7 +85,7 @@ export function toWarningItem(row: WarningItemRow): WarningItem {
     courseId: row.courseId,
     courseCode: row.course.courseCode,
     plannedSemester: row.plannedSemester,
-    credits: row.course.credits,
+    credits: rowCredits(row),
     isElective: row.isElective,
     electiveGroupId: row.electiveGroupId,
     requisites: row.requisites.map((requisite) => ({

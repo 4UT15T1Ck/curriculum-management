@@ -133,6 +133,9 @@ describe('user account management', () => {
       '/api/notifications/unread-count',
       '/api/notifications/read-all',
       '/api/notifications/:id/read',
+      // Selectors of the release forms: names and dates, no personal data (F-15).
+      '/api/semesters',
+      '/api/cohorts',
     ]);
     for (const [path, operations] of Object.entries(paths)) {
       const normalizedPath = path.replace(

@@ -71,6 +71,13 @@ export class SyllabusDto {
   clos!: CloDto[];
 }
 
+export class SyllabusVersionRefDto {
+  @ApiProperty() id!: string;
+  @ApiProperty() programId!: string;
+  @ApiProperty() programCode!: string;
+  @ApiProperty({ nullable: true, type: String }) versionNumber!: string | null;
+}
+
 export class CourseSyllabusQueryDto {
   @ApiPropertyOptional({
     description: "A change request's id: show its working copy as the Draft",
@@ -78,6 +85,14 @@ export class CourseSyllabusQueryDto {
   @IsOptional()
   @IsString()
   requestId?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'A program version whose curriculum holds the course: show the revision that version pins as the published one',
+  })
+  @IsOptional()
+  @IsString()
+  versionId?: string;
 }
 
 export class CourseSyllabusDto {
@@ -96,6 +111,17 @@ export class CourseSyllabusDto {
   editPath!: EditPath | null;
   @ApiProperty({ type: AttachmentRulesDto })
   attachmentRules!: AttachmentRulesDto;
+  @ApiProperty({
+    description:
+      'The caller may add a signed file to the published revision (files are only ever added once a revision is published)',
+  })
+  canAttachToPublished!: boolean;
+  @ApiProperty({
+    type: SyllabusVersionRefDto,
+    nullable: true,
+    description: 'Set when the answer is the revision pinned by this version',
+  })
+  version!: SyllabusVersionRefDto | null;
 }
 
 export const SYLLABUS_INCLUDE = {

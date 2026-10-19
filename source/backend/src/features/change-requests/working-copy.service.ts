@@ -12,6 +12,7 @@ import {
   workspaceKindFor,
 } from '../../shared/change-requests/request-kinds.js';
 import { AppException } from '../../shared/exception/app.exception.js';
+import { versionCopyFields } from '../../shared/programs/version-fields.js';
 import { VersionContentCopier } from '../../shared/programs/version-content.copier.js';
 import { copySyllabusRevision } from '../../shared/syllabi/syllabus-revision.copier.js';
 import { CHANGE_REQUEST_ERRORS } from './change-request-feature.errors.js';
@@ -71,23 +72,12 @@ export class WorkingCopyService {
     if (!base) {
       throw new AppException(CHANGE_REQUEST_ERRORS.TARGET_NOT_RELEASED);
     }
-    // versionNumber stays null until F-15 numbers the release.
+    // versionNumber stays null until the final approval numbers the release.
     const copy = await tx.programVersion.create({
       data: {
         programId,
         status: ProgramVersionStatus.DRAFT,
-        programName: base.programName,
-        majorCode: base.majorCode,
-        majorName: base.majorName,
-        semesterCount: base.semesterCount,
-        totalCredits: base.totalCredits,
-        compulsoryCredits: base.compulsoryCredits,
-        electiveCredits: base.electiveCredits,
-        creditMismatchReason: base.creditMismatchReason,
-        creditMismatchCompulsoryGap: base.creditMismatchCompulsoryGap,
-        creditMismatchElectiveGap: base.creditMismatchElectiveGap,
-        creditMismatchAcceptedById: base.creditMismatchAcceptedById,
-        creditMismatchAcceptedAt: base.creditMismatchAcceptedAt,
+        ...versionCopyFields(base),
         sourceRequestId: requestId,
         baseVersionId: base.id,
       },

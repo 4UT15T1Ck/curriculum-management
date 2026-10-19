@@ -11,7 +11,7 @@ import {
   programEditState,
   programTarget,
 } from '../../shared/programs/program-target.js';
-import { currentRevisionByCourse } from '../../shared/syllabi/current-revision.js';
+import { revisionForItems } from '../../shared/syllabi/revision-for-items.js';
 import {
   CLO_REF_SELECT,
   type CloPloLinkDto,
@@ -55,8 +55,8 @@ export class CloPloMatrixService {
     );
     assertMatrixReader(access);
     const revision =
-      (await currentRevisionByCourse(this.prisma, [item.course.id])).get(
-        item.course.id,
+      (await revisionForItems(this.prisma, [revisionItem(item)])).get(
+        item.id,
       ) ?? null;
     const [clos, plos, cells, links, state] = await Promise.all([
       revision
@@ -99,7 +99,7 @@ export class CloPloMatrixService {
         course: {
           id: item.course.id,
           courseCode: item.course.courseCode,
-          courseName: item.course.courseName,
+          courseName: item.courseNameSnapshot ?? item.course.courseName,
         },
       },
       revision,
@@ -130,8 +130,8 @@ export class CloPloMatrixService {
     );
     const links = uniqueLinks(dto.links);
     const revision = (
-      await currentRevisionByCourse(this.prisma, [item.course.id])
-    ).get(item.course.id);
+      await revisionForItems(this.prisma, [revisionItem(item)])
+    ).get(item.id);
     const [clos, cells] = await Promise.all([
       revision
         ? this.prisma.cLO.findMany({
@@ -197,6 +197,8 @@ export class CloPloMatrixService {
         select: {
           id: true,
           plannedSemester: true,
+          syllabusId: true,
+          courseNameSnapshot: true,
           course: {
             select: { id: true, courseCode: true, courseName: true },
           },
@@ -212,24 +214,31 @@ export class CloPloMatrixService {
         select: { curriculumItemId: true, cloId: true, ploId: true },
       }),
     ]);
-    const revisions = await currentRevisionByCourse(
+    const revisions = await revisionForItems(
       this.prisma,
-      items.map((item) => item.course.id),
+      items.map(revisionItem),
     );
-    const closByRevision = await this.closOf(
-      [...revisions.values()].map((revision) => revision.id),
-    );
+    const closByRevision = await this.closOf([
+      ...new Set(
+        [...revisions.values()].flatMap((revision) =>
+          revision ? [revision.id] : [],
+        ),
+      ),
+    ]);
     const cellsByItem = groupBy(cells, (cell) => cell.curriculumItemId);
     const linksByItem = groupBy(links, (link) => link.curriculumItemId);
     return {
       version: toOutcomeVersionDto(version),
       plos,
       rows: items.map((item) => {
-        const revision = revisions.get(item.course.id);
+        const revision = revisions.get(item.id);
         return {
           itemId: item.id,
           plannedSemester: item.plannedSemester,
-          course: item.course,
+          course: {
+            ...item.course,
+            courseName: item.courseNameSnapshot ?? item.course.courseName,
+          },
           revisionNumber: revision?.revisionNumber ?? null,
           clos: revision ? (closByRevision.get(revision.id) ?? []) : [],
           mappedPloIds: (cellsByItem.get(item.id) ?? []).map(
@@ -272,6 +281,14 @@ export class CloPloMatrixService {
     }
     return item;
   }
+}
+
+function revisionItem(item: {
+  id: string;
+  syllabusId: string | null;
+  course: { id: string };
+}) {
+  return { id: item.id, courseId: item.course.id, syllabusId: item.syllabusId };
 }
 
 function uniqueLinks(links: readonly CloPloLinkDto[]): CloPloLinkDto[] {

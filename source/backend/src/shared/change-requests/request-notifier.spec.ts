@@ -24,6 +24,11 @@ function setup() {
     user: {
       findUniqueOrThrow: vi.fn().mockResolvedValue({ fullName: 'Nguyễn A' }),
     },
+    semester: {
+      findUniqueOrThrow: vi
+        .fn()
+        .mockResolvedValue({ semesterCode: '2026-2027-2' }),
+    },
   };
   const notifier = new RequestNotifier({
     notify,
@@ -135,5 +140,16 @@ describe('RequestNotifier', () => {
       recipientIds: ['coord'],
       type: NotificationType.REQUEST_OVERRIDDEN,
     });
+  });
+
+  it('tells only the creator, once, that the request is now in force', async () => {
+    const { notifier, tx, sent, notify } = setup();
+    await notifier.effective(tx, request, 'sem1', 'office');
+    expect(notify).toHaveBeenCalledTimes(1);
+    expect(sent()).toMatchObject({
+      recipientIds: ['creator'],
+      type: NotificationType.REQUEST_EFFECTIVE,
+    });
+    expect(sent().content).toContain('2026-2027-2');
   });
 });

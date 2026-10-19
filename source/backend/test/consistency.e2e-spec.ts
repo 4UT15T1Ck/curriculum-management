@@ -6,12 +6,10 @@ import { ConsistencyChecker } from '../src/shared/curriculum/consistency-checker
 import { PrismaService } from '../src/shared/prisma/prisma.service.js';
 import { createAccount, loginAgent } from './fixtures/accounts.js';
 import { createCourse } from './fixtures/courses.js';
-import {
-  addCurriculumItem,
-  readCurriculum,
-  releaseVersionForTest,
-} from './fixtures/curriculum.js';
+import { addCurriculumItem, readCurriculum } from './fixtures/curriculum.js';
 import { createProgram } from './fixtures/programs.js';
+import { createSyllabusDraft } from './fixtures/syllabi.js';
+import { releaseViaApi } from './fixtures/releases.js';
 import { startPostgres, startRedis } from './containers.js';
 import { createTestApp } from './test-app.js';
 import { setAppEnv } from './test-env.js';
@@ -77,8 +75,15 @@ describe('consistency check', () => {
     return { programId: program.id, versionId };
   }
 
-  const course = (suffix: string, credits = '3') =>
-    createCourse(app, { courseCode: `CON${seq}_${suffix}`, credits });
+  // A course comes with a Draft syllabus: a frame row without any revision is an Error (MISSING_SYLLABUS, F-15).
+  const course = async (suffix: string, credits = '3', syllabus = true) => {
+    const created = await createCourse(app, {
+      courseCode: `CON${seq}_${suffix}`,
+      credits,
+    });
+    if (syllabus) await createSyllabusDraft(admin, created.id);
+    return created;
+  };
 
   const row = async (
     versionId: string,
@@ -225,7 +230,7 @@ describe('consistency check', () => {
 
     const released = await draft();
     await row(released.versionId, 'A');
-    await releaseVersionForTest(app, released.versionId);
+    await releaseViaApi(app, admin, released);
     const frozen = await accept(released.versionId, {
       reason: 'x',
       compulsoryGap: '-7',
@@ -367,6 +372,32 @@ describe('consistency check', () => {
     await expect(
       app.get(ConsistencyChecker).assertPasses(versionId),
     ).resolves.toBeUndefined();
+  });
+
+  it('raises MISSING_SYLLABUS as an Error for a row whose course has no revision, until a Draft exists (D7)', async () => {
+    const { versionId } = await draft(['6', '0', '6']);
+    await row(versionId, 'A');
+    const bare = await course('B', '3', false);
+    const item = await addCurriculumItem(admin, versionId, {
+      courseId: bare.id,
+      plannedSemester: 1,
+    });
+
+    const missing = await report(versionId);
+    expect(issue(missing, 'MISSING_SYLLABUS')).toMatchObject({
+      severity: 'ERROR',
+      itemId: item.id,
+    });
+    expect(missing).toMatchObject({ errorCount: 1, passes: false });
+    await expect(
+      app.get(ConsistencyChecker).assertPasses(versionId),
+    ).rejects.toMatchObject({ code: 'CONSISTENCY_FAILED' });
+
+    await createSyllabusDraft(admin, bare.id);
+    expect(await report(versionId)).toMatchObject({
+      errorCount: 0,
+      passes: true,
+    });
   });
 
   it('lets R2 read but not accept, and refuses R4 an acceptance', async () => {

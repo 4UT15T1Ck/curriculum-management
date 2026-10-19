@@ -1,16 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import type { Prisma } from '../../generated/prisma/client.js';
+import { revisionForItems } from '../syllabi/revision-for-items.js';
+
+export interface CopyOptions {
+  // Keep what a release froze on each row: the name and credits it was released with and its syllabus revision.
+  // A working copy, a fan-out shell and a correction carry it; a clone is a new program and reads the live course again.
+  carryRelease?: boolean;
+}
 
 // Copies everything that hangs off a program version into another version, inside the caller's transaction.
 // Each feature that adds version-owned tables adds its step here: clone (FR-25) and the Draft of a change request depend on it.
 // F-07 added the elective groups, curriculum rows and their requisites; F-11 added the PLOs and both matrices after them
-// (the old id -> new id maps of the rows and PLOs are what a matrix step needs).
+// (the old id -> new id maps of the rows and PLOs are what a matrix step needs). F-15 added the frozen row facts.
 @Injectable()
 export class VersionContentCopier {
   async copy(
     tx: Prisma.TransactionClient,
     fromVersionId: string,
     toVersionId: string,
+    { carryRelease = true }: CopyOptions = {},
   ): Promise<void> {
     const groupIds = await this.copyElectiveGroups(
       tx,
@@ -22,11 +30,12 @@ export class VersionContentCopier {
       fromVersionId,
       toVersionId,
       groupIds,
+      carryRelease,
     );
     await this.copyRequisites(tx, itemIds);
     const ploIds = await this.copyPlos(tx, fromVersionId, toVersionId);
     await this.copyCoursePloMappings(tx, itemIds, ploIds);
-    await this.copyCloPloLinks(tx, itemIds, ploIds);
+    await this.copyCloPloLinks(tx, itemIds, ploIds, carryRelease);
   }
 
   // Returns old id -> new id, matched back through the natural key (groupCode) because createMany returns no rows.
@@ -68,6 +77,7 @@ export class VersionContentCopier {
     from: string,
     to: string,
     groupIds: ReadonlyMap<string, string>,
+    carryRelease: boolean,
   ): Promise<Map<string, string>> {
     const items = await tx.curriculumItem.findMany({
       where: { versionId: from },
@@ -91,6 +101,11 @@ export class VersionContentCopier {
         minStudiedScore: item.minStudiedScore,
         minTransferScore: item.minTransferScore,
         note: item.note,
+        ...(carryRelease && {
+          courseNameSnapshot: item.courseNameSnapshot,
+          creditsSnapshot: item.creditsSnapshot,
+          syllabusId: item.syllabusId,
+        }),
       })),
     });
     const created = await tx.curriculumItem.findMany({
@@ -186,11 +201,13 @@ export class VersionContentCopier {
     });
   }
 
-  // CLO ids are kept: the clone shares the syllabus, so it shares its CLOs.
+  // CLO ids are kept while the copy shares the revision (a pinned row, or a Draft). A copy that reads the live course
+  // again maps its links onto the CLOs of the revision it now reads, by cloCode; a code that revision lacks drops the link.
   private async copyCloPloLinks(
     tx: Prisma.TransactionClient,
     itemIds: ReadonlyMap<string, string>,
     ploIds: ReadonlyMap<string, string>,
+    carryRelease: boolean,
   ): Promise<void> {
     if (itemIds.size === 0 || ploIds.size === 0) {
       return;
@@ -198,12 +215,55 @@ export class VersionContentCopier {
     const links = await tx.cLOPLOMapping.findMany({
       where: { curriculumItemId: { in: [...itemIds.keys()] } },
     });
-    await tx.cLOPLOMapping.createMany({
-      data: links.map(({ curriculumItemId, ploId, cloId }) => ({
-        curriculumItemId: itemIds.get(curriculumItemId)!,
-        ploId: ploIds.get(ploId)!,
-        cloId,
-      })),
+    const cloIdFor = carryRelease
+      ? (_itemId: string, cloId: string) => cloId
+      : await this.remapClos(tx, itemIds, links);
+    const data = links.flatMap(({ curriculumItemId, ploId, cloId }) => {
+      const mapped = cloIdFor(curriculumItemId, cloId);
+      return mapped
+        ? [
+            {
+              curriculumItemId: itemIds.get(curriculumItemId)!,
+              ploId: ploIds.get(ploId)!,
+              cloId: mapped,
+            },
+          ]
+        : [];
     });
+    if (data.length > 0) await tx.cLOPLOMapping.createMany({ data });
+  }
+
+  private async remapClos(
+    tx: Prisma.TransactionClient,
+    itemIds: ReadonlyMap<string, string>,
+    links: readonly { curriculumItemId: string; cloId: string }[],
+  ): Promise<(itemId: string, cloId: string) => string | null> {
+    const newItems = await tx.curriculumItem.findMany({
+      where: { id: { in: [...itemIds.values()] } },
+      select: { id: true, courseId: true, syllabusId: true },
+    });
+    const revisions = await revisionForItems(tx, newItems);
+    const oldClos = await tx.cLO.findMany({
+      where: { id: { in: [...new Set(links.map((link) => link.cloId))] } },
+      select: { id: true, cloCode: true },
+    });
+    const codeOf = new Map(oldClos.map((clo) => [clo.id, clo.cloCode]));
+    const revisionIds = [
+      ...new Set([...revisions.values()].flatMap((r) => (r ? [r.id] : []))),
+    ];
+    const newClos = await tx.cLO.findMany({
+      where: { syllabusId: { in: revisionIds } },
+      select: { id: true, syllabusId: true, cloCode: true },
+    });
+    const idByRevisionCode = new Map(
+      newClos.map((clo) => [`${clo.syllabusId}:${clo.cloCode}`, clo.id]),
+    );
+    return (oldItemId, cloId) => {
+      const revision = revisions.get(itemIds.get(oldItemId)!);
+      const code = codeOf.get(cloId);
+      return revision && code
+        ? (idByRevisionCode.get(`${revision.id}:${code}`) ?? null)
+        : null;
+    };
   }
 }

@@ -26,6 +26,8 @@ import { OutcomesModule } from './features/outcomes/outcomes.module.js';
 import { SyllabiModule } from './features/syllabi/syllabi.module.js';
 import { ChangeRequestsModule } from './features/change-requests/change-requests.module.js';
 import { NotificationsModule } from './features/notifications/notifications.module.js';
+import { ReleasesModule } from './features/releases/releases.module.js';
+import { SemestersModule } from './features/semesters/semesters.module.js';
 
 @Module({
   imports: [
@@ -51,6 +53,8 @@ import { NotificationsModule } from './features/notifications/notifications.modu
     SyllabiModule,
     ChangeRequestsModule,
     NotificationsModule,
+    SemestersModule,
+    ReleasesModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: CsrfGuard },

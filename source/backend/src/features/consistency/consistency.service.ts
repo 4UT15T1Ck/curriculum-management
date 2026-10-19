@@ -1,7 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ProgramVersionStatus } from '../../generated/prisma/client.js';
 import type { AccessContext } from '../../shared/authz/access-context.js';
+import { assertSchoolWideDirect } from '../../shared/authz/edit-path.js';
 import { PERMISSIONS } from '../../shared/authz/permission-codes.js';
+import {
+  canEditCorrection,
+  isCorrectionDraft,
+} from '../../shared/releases/correction-access.js';
 import {
   assertCopyWritable,
   canEditCopy,
@@ -25,7 +30,8 @@ function canAccept(version: CheckedVersion, access: AccessContext): boolean {
   if (version.status !== ProgramVersionStatus.DRAFT) {
     return false;
   }
-  // A request's working copy: only its creator, while the request is a Draft (F-13).
+  // A correction Draft: the academic office (F-15). A request's working copy: only its creator, while the request is a Draft (F-13).
+  if (isCorrectionDraft(version)) return canEditCorrection(access);
   return version.sourceRequest
     ? canEditCopy(
         access,
@@ -72,7 +78,9 @@ export class ConsistencyService {
     if (version.status !== ProgramVersionStatus.DRAFT) {
       throw new AppException(CONSISTENCY_FEATURE_ERRORS.VERSION_NOT_EDITABLE);
     }
-    if (version.sourceRequest) {
+    if (isCorrectionDraft(version)) {
+      assertSchoolWideDirect(access, PERMISSIONS.VERSION_CORRECT);
+    } else if (version.sourceRequest) {
       assertCopyWritable(
         access,
         PERMISSIONS.PROGRAM_EDIT_INFO,

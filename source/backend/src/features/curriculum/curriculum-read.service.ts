@@ -16,12 +16,18 @@ import {
   toWarningItem,
 } from '../../shared/curriculum/curriculum-warnings.js';
 import { programCredits } from '../../shared/curriculum/program-credits.js';
+import { rowCredits } from '../../shared/curriculum/row-course.js';
 import { AppException } from '../../shared/exception/app.exception.js';
 import { PrismaService } from '../../shared/prisma/prisma.service.js';
 import {
   programEditState,
   programTarget,
 } from '../../shared/programs/program-target.js';
+import {
+  canEditCorrection,
+  correctionEditPath,
+  isCorrectionDraft,
+} from '../../shared/releases/correction-access.js';
 import { itemTarget } from '../../shared/curriculum/item-target.js';
 import {
   holdsGroupScope,
@@ -82,21 +88,26 @@ export class CurriculumReadService {
     );
     const editable = version.status === ProgramVersionStatus.DRAFT;
     const copy = version.sourceRequest;
-    const editPath = copy
-      ? EDIT_PATH.DIRECT
-      : editPathFor(
-          access,
-          PERMISSIONS.CURRICULUM_EDIT,
-          programTarget(version.program),
-          state,
-        );
+    const correction = isCorrectionDraft(version);
+    const editPath = correction
+      ? correctionEditPath(access)
+      : copy
+        ? EDIT_PATH.DIRECT
+        : editPathFor(
+            access,
+            PERMISSIONS.CURRICULUM_EDIT,
+            programTarget(version.program),
+            state,
+          );
     // A request's working copy is editable by its creator while the request is a Draft; otherwise the old rule.
     const canEditRow = (target: ScopeTarget) =>
       editable &&
-      (copy
-        ? canEditCopy(access, PERMISSIONS.CURRICULUM_EDIT, target, copy)
-        : editPathFor(access, PERMISSIONS.CURRICULUM_EDIT, target, state) ===
-          EDIT_PATH.DIRECT);
+      (correction
+        ? canEditCorrection(access)
+        : copy
+          ? canEditCopy(access, PERMISSIONS.CURRICULUM_EDIT, target, copy)
+          : editPathFor(access, PERMISSIONS.CURRICULUM_EDIT, target, state) ===
+            EDIT_PATH.DIRECT);
     const canEditStructure = canEditRow(programTarget(version.program));
     // In memory over the caller's assignments, so a row each costs nothing.
     const items = rows.map((row, index) =>
@@ -110,7 +121,7 @@ export class CurriculumReadService {
     const totalsInput = rows.map((row) => ({
       plannedSemester: row.plannedSemester,
       isElective: row.isElective,
-      credits: row.course.credits,
+      credits: rowCredits(row),
       blockSymbol: row.blockSymbol,
     }));
     const warningItems = rows.map(toWarningItem);
@@ -125,14 +136,16 @@ export class CurriculumReadService {
       version: toCurriculumVersionDto(version),
       editPath,
       canEditStructure,
-      canAddItems: copy
-        ? editable &&
-          copy.createdById === access.userId &&
-          copy.status === ChangeRequestStatus.DRAFT &&
-          (canEditStructure || holdsGroupScope(access))
-        : editable &&
-          !state.released &&
-          (editPath === EDIT_PATH.DIRECT || holdsGroupScope(access)),
+      canAddItems: correction
+        ? editable && canEditCorrection(access)
+        : copy
+          ? editable &&
+            copy.createdById === access.userId &&
+            copy.status === ChangeRequestStatus.DRAFT &&
+            (canEditStructure || holdsGroupScope(access))
+          : editable &&
+            !state.released &&
+            (editPath === EDIT_PATH.DIRECT || holdsGroupScope(access)),
       items,
       semesters: semesterTotals(version.semesterCount, totalsInput),
       blocks: blockTotals(totalsInput, blockNames),
@@ -187,19 +200,21 @@ export class CurriculumReadService {
       blockNames: new Map(block ? [[block.blockCode, block.blockName]] : []),
       canEdit:
         row.version.status === ProgramVersionStatus.DRAFT &&
-        (row.version.sourceRequest
-          ? canEditCopy(
-              access,
-              PERMISSIONS.CURRICULUM_EDIT,
-              itemTarget(row.version, row.course),
-              row.version.sourceRequest,
-            )
-          : editPathFor(
-              access,
-              PERMISSIONS.CURRICULUM_EDIT,
-              itemTarget(row.version, row.course),
-              state,
-            ) === EDIT_PATH.DIRECT),
+        (isCorrectionDraft(row.version)
+          ? canEditCorrection(access)
+          : row.version.sourceRequest
+            ? canEditCopy(
+                access,
+                PERMISSIONS.CURRICULUM_EDIT,
+                itemTarget(row.version, row.course),
+                row.version.sourceRequest,
+              )
+            : editPathFor(
+                access,
+                PERMISSIONS.CURRICULUM_EDIT,
+                itemTarget(row.version, row.course),
+                state,
+              ) === EDIT_PATH.DIRECT),
     });
   }
 

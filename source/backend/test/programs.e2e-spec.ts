@@ -704,6 +704,7 @@ describe('programs and program directors', () => {
         ...draft,
         status: ProgramVersionStatus.ACTIVE,
         versionNumber: '1.0',
+        publishedAt: new Date(),
       },
     });
     await expect(
@@ -712,6 +713,7 @@ describe('programs and program directors', () => {
           ...draft,
           status: ProgramVersionStatus.ACTIVE,
           versionNumber: '1.1',
+          publishedAt: new Date(),
         },
       }),
     ).rejects.toThrow(/ProgramVersion_one_active/);
@@ -720,6 +722,7 @@ describe('programs and program directors', () => {
         ...draft,
         status: ProgramVersionStatus.HISTORICAL,
         versionNumber: '0.9',
+        publishedAt: new Date(),
       },
     });
   });

@@ -17,7 +17,7 @@ import {
   postRequest,
   publishedCourse,
   readRequest,
-  releaseAnotherVersionForTest,
+  releaseAnotherVersion,
   releasedProgram,
   returnAs,
   type RequestStep,
@@ -357,7 +357,11 @@ describe('change requests: authoring, routing and withdrawal', () => {
         .set(CSRF)
         .send({ plannedSemester: 2 })
         .expect(200);
-      const newer = await releaseAnotherVersionForTest(app, program.programId);
+      const newer = await releaseAnotherVersion(
+        admin,
+        program.programId,
+        program.versionId,
+      );
       const stale = await submitRequest(directorA, created.id).expect(409);
       expect(stale.body.code).toBe('STALE_BASE');
       const preview = await directorA

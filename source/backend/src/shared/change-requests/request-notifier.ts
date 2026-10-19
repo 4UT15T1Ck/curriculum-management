@@ -97,6 +97,27 @@ export class RequestNotifier {
     );
   }
 
+  // The request's changes are now in force (F-15): sent once, when its last version is Active, never with `approved`.
+  async effective(
+    tx: Prisma.TransactionClient,
+    request: NotifySubject,
+    semesterId: string,
+    actorId: string,
+  ): Promise<void> {
+    const semester = await tx.semester.findUniqueOrThrow({
+      where: { id: semesterId },
+      select: { semesterCode: true },
+    });
+    await this.send(
+      tx,
+      request,
+      [request.createdById],
+      NotificationType.REQUEST_EFFECTIVE,
+      NOTIFICATION_CONTENT.effective(request, semester.semesterCode),
+      actorId,
+    );
+  }
+
   async overridden(
     tx: Prisma.TransactionClient,
     request: NotifySubject,

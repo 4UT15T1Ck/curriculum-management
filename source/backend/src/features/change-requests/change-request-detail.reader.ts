@@ -3,6 +3,7 @@ import {
   ApprovalAction,
   ChangeRequestStatus,
   ChangeRequestType,
+  ProgramVersionStatus,
 } from '../../generated/prisma/client.js';
 import type { AccessContext } from '../../shared/authz/access-context.js';
 import { PERMISSIONS } from '../../shared/authz/permission-codes.js';
@@ -20,7 +21,8 @@ import {
 import { StaleChecker } from '../../shared/change-requests/stale-checker.js';
 import { AppException } from '../../shared/exception/app.exception.js';
 import { PrismaService } from '../../shared/prisma/prisma.service.js';
-import { todayDate } from '../../shared/time/today.js';
+import { toSemesterDto } from '../../shared/releases/semester.dto.js';
+import { toIsoDay, todayDate } from '../../shared/time/today.js';
 import { CHANGE_REQUEST_ERRORS } from './change-request-feature.errors.js';
 import {
   DOCUMENT_INCLUDE,
@@ -35,6 +37,7 @@ import {
 import type {
   ChangeRequestDetailDto,
   RequestActionsDto,
+  RequestReleaseDto,
   RequestWorkspaceDto,
 } from './change-request-response.dto.js';
 import { UPLOAD_STATUSES } from './change-request.constants.js';
@@ -43,6 +46,11 @@ import { targetKey } from './request-target.resolver.js';
 import { visibleWhere } from './request-visibility.js';
 
 const NO_NUMBER = 'chưa đánh số';
+// These end at level 3 with the plain Đồng ý; every other type is released on MH-43.
+const NO_FINAL_APPROVAL: readonly ChangeRequestType[] = [
+  ChangeRequestType.ORGANIZATION,
+  ChangeRequestType.GRADING_FORMULA,
+];
 const AUTHORED_ENTITIES: string[] = Object.values(AUTHORED_ENTITY);
 
 // Everything the edit page and the detail page show about one request, as the caller may see it.
@@ -79,6 +87,20 @@ export class ChangeRequestDetailReader {
           where: { entityType: { in: AUTHORED_ENTITIES } },
           orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
         },
+        decisionNumber: true,
+        signedDate: true,
+        pastSemesterAllowed: true,
+        effectiveSemester: true,
+        originatedVersions: {
+          select: {
+            id: true,
+            programId: true,
+            versionNumber: true,
+            status: true,
+            program: { select: { programCode: true } },
+          },
+          orderBy: { program: { programCode: 'asc' } },
+        },
         programCopy: {
           select: {
             id: true,
@@ -112,6 +134,7 @@ export class ChangeRequestDetailReader {
       steps: steps.map(toStepDto),
       conflicts: await this.conflicts.find(targetKey(toKey(row)), access, id),
       permissions: await this.actions(row, access, steps),
+      release: toReleaseDto(row),
     });
   }
 
@@ -190,6 +213,10 @@ export class ChangeRequestDetailReader {
         !approved,
       canUpload: isCreator && UPLOAD_STATUSES.includes(row.status),
       canApprove: decides && approvesHere,
+      canFinalApprove:
+        decides &&
+        level === APPROVAL_LEVEL.ACADEMIC_OFFICE &&
+        !NO_FINAL_APPROVAL.includes(row.requestType),
       canReturn: decides,
       canReject: decides,
       canOverride:
@@ -214,6 +241,37 @@ export class ChangeRequestDetailReader {
     );
     return rows.length > 0;
   }
+}
+
+function toReleaseDto(row: {
+  decisionNumber: string | null;
+  signedDate: Date | null;
+  pastSemesterAllowed: boolean;
+  effectiveSemester: Parameters<typeof toSemesterDto>[0] | null;
+  originatedVersions: {
+    id: string;
+    programId: string;
+    versionNumber: string | null;
+    status: ProgramVersionStatus;
+    program: { programCode: string };
+  }[];
+}): RequestReleaseDto | null {
+  if (row.decisionNumber === null || row.signedDate === null) return null;
+  return {
+    decisionNumber: row.decisionNumber,
+    signedDate: toIsoDay(row.signedDate),
+    effectiveSemester: row.effectiveSemester
+      ? toSemesterDto(row.effectiveSemester)
+      : null,
+    pastSemesterAllowed: row.pastSemesterAllowed,
+    versions: row.originatedVersions.map((version) => ({
+      id: version.id,
+      programId: version.programId,
+      programCode: version.program.programCode,
+      versionNumber: version.versionNumber,
+      status: version.status,
+    })),
+  };
 }
 
 function toKey(row: RequestSummaryRow) {

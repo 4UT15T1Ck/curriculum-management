@@ -11,6 +11,9 @@ export function setAppEnv(postgres: TestPostgres, redis: TestRedis): void {
   process.env.REDIS_HOST = redis.getHost();
   process.env.REDIS_PORT = String(redis.getPort());
   process.env.SESSION_SECRET = TEST_SESSION_SECRET;
+  // The Redis is shared by the spec files that run in parallel: each one gets queues of its own, so its worker
+  // never takes a job another file's database cannot answer.
+  process.env.BULLMQ_PREFIX = `test-${randomUUID()}`;
   // Attachments land in a folder of their own per spec file, created by the app and removed when the worker exits.
   const filesRoot = path.join(tmpdir(), `ctdt-files-${randomUUID()}`);
   process.env.FILES_ROOT = filesRoot;

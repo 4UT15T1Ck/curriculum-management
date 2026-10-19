@@ -21,6 +21,8 @@ export const NOTIFICATION_CONTENT = {
     `${actor} đã từ chối đề xuất ${request.requestCode}: ${remark}`,
   applied: (request: RequestHeadline) =>
     `Đề xuất ${request.requestCode} "${request.title}" đã được phê duyệt và áp dụng.`,
+  effective: (request: RequestHeadline, semesterCode: string) =>
+    `Đề xuất ${request.requestCode} "${request.title}" đã có hiệu lực từ học kỳ ${semesterCode}.`,
   overridden: (
     request: RequestHeadline,
     actor: string,

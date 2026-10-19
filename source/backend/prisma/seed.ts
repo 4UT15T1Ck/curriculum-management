@@ -13,6 +13,7 @@ import { ORG_UNIT_CODES } from './seed-data/org-units.js';
 import { seedApprovalLevels } from './seed-data/approval-levels.js';
 import { seedKnowledgeBlocks } from './seed-data/knowledge-blocks.js';
 import { seedPrograms } from './seed-data/programs.js';
+import { seedSemesters } from './seed-data/semesters.js';
 import { seedAccessControl } from './seed-data/seed-access-control.js';
 import { ROLE_CODES } from './seed-data/roles.js';
 
@@ -54,6 +55,7 @@ try {
   await seedApprovalLevels(prisma);
   await seedKnowledgeBlocks(prisma);
   await seedPrograms(prisma);
+  await seedSemesters(prisma);
   const academicOffice = await prisma.orgUnit.findUniqueOrThrow({
     where: { unitCode: ORG_UNIT_CODES.ACADEMIC_OFFICE },
   });

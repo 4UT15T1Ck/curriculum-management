@@ -21,6 +21,11 @@ import { ApprovalHistoryDto } from './approval-history.dto.js';
 import { ApprovalHistoryReader } from './approval-history.reader.js';
 import { ApprovalService } from './approval.service.js';
 import { ChangeRequestDetailDto } from './change-request-response.dto.js';
+import {
+  FinalApprovalPreviewDto,
+  FinalApproveDto,
+} from './final-approval.dto.js';
+import { FinalApprovalService } from './final-approval.service.js';
 import { CommentDto, CreateCommentDto } from './comment.dto.js';
 import { CommentsService } from './comments.service.js';
 import {
@@ -37,6 +42,7 @@ import {
 export class ApprovalController {
   constructor(
     private readonly approvals: ApprovalService,
+    private readonly finalApprovals: FinalApprovalService,
     private readonly comments: CommentsService,
     private readonly history: ApprovalHistoryReader,
   ) {}
@@ -50,6 +56,27 @@ export class ApprovalController {
     @CurrentAccess() access: AccessContext,
   ) {
     return this.approvals.approve(id, dto, access);
+  }
+
+  // MH-43: a data request at level 3 is approved here, with the decision number and the semester (US-072).
+  @Get(':id/final-approval')
+  @ApiOkResponse({ type: FinalApprovalPreviewDto })
+  finalApproval(
+    @Param('id') id: string,
+    @CurrentAccess() access: AccessContext,
+  ) {
+    return this.finalApprovals.preview(id, access);
+  }
+
+  @Post(':id/final-approve')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: ChangeRequestDetailDto })
+  finalApprove(
+    @Param('id') id: string,
+    @Body() dto: FinalApproveDto,
+    @CurrentAccess() access: AccessContext,
+  ) {
+    return this.finalApprovals.approve(id, dto, access);
   }
 
   @Post(':id/return')

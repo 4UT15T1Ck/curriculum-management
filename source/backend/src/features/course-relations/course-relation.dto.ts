@@ -1,13 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  CourseRelationType,
-  type Prisma,
-} from '../../generated/prisma/client.js';
+import { CourseRelationType } from '../../generated/prisma/client.js';
 import { EDIT_PATHS, type EditPath } from '../../shared/authz/edit-path.js';
-import {
-  RELATED_COURSE_SELECT,
-  RelatedCourseDto,
-} from '../../shared/courses/related-course.js';
+import { RelatedCourseDto } from '../../shared/courses/related-course.js';
 
 export class CourseRelationDto {
   @ApiProperty() id!: string;
@@ -20,31 +14,11 @@ export class CourseRelationDto {
   editPath!: EditPath | null;
 }
 
-const OWNER_SELECT = {
-  ...RELATED_COURSE_SELECT,
-  ownerFacultyId: true,
-  ownerGroupId: true,
-  ownerFaculty: { select: { unitCode: true } },
-} as const satisfies Prisma.CourseSelect;
-
-export const RELATION_INCLUDE = {
-  sourceCourse: { select: OWNER_SELECT },
-  targetCourse: { select: OWNER_SELECT },
-} as const satisfies Prisma.CourseRelationInclude;
-
-export type RelationRow = Prisma.CourseRelationGetPayload<{
-  include: typeof RELATION_INCLUDE;
-}>;
-export type OwnerCourseRow = Prisma.CourseGetPayload<{
-  select: typeof OWNER_SELECT;
-}>;
-export const RELATION_COURSE_SELECT = OWNER_SELECT;
-
-// The course that holds the requirement: the target, except a replacement belongs to the discontinued source.
-export function owningCourse(
-  row: Pick<RelationRow, 'relationType' | 'sourceCourse' | 'targetCourse'>,
-): OwnerCourseRow {
-  return row.relationType === CourseRelationType.REPLACEMENT
-    ? row.sourceCourse
-    : row.targetCourse;
-}
+// The row shapes live in shared/ because the approved-write path (F-15) reads the same rows.
+export {
+  owningCourse,
+  RELATION_COURSE_SELECT,
+  RELATION_INCLUDE,
+  type OwnerCourseRow,
+  type RelationRow,
+} from '../../shared/courses/relation-rows.js';

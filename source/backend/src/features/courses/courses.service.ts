@@ -2,10 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   CourseRelationType,
   CourseStatus,
-  OrgUnitStatus,
-  OrgUnitType,
   Prisma,
-  SubjectGroupStatus,
 } from '../../generated/prisma/client.js';
 import type { AccessContext } from '../../shared/authz/access-context.js';
 import {
@@ -14,6 +11,10 @@ import {
   type EditState,
 } from '../../shared/authz/edit-path.js';
 import { PERMISSIONS } from '../../shared/authz/permission-codes.js';
+import {
+  assertCourseOwners,
+  type Owners,
+} from '../../shared/courses/course.writer.js';
 import { courseEditState } from '../../shared/courses/course-edit-state.js';
 import { courseTarget } from '../../shared/courses/course-target.js';
 import { CourseUsageReader } from '../../shared/courses/course-usage.reader.js';
@@ -40,15 +41,9 @@ import {
   type CourseRow,
   type CourseSummaryDto,
 } from './course.dto.js';
-import { COURSE_ERRORS, OWNER_CONSTRAINT } from './courses.errors.js';
+import { COURSE_ERRORS } from './courses.errors.js';
 import { CreateCourseDto } from './create-course.dto.js';
 import { UpdateCourseDto } from './update-course.dto.js';
-
-interface Owners {
-  ownerFacultyId: string;
-  ownerGroupId: string | null;
-  isForeign: boolean;
-}
 
 @Injectable()
 export class CoursesService {
@@ -362,47 +357,11 @@ export class CoursesService {
     return released || results;
   }
 
-  private async assertOwners(
+  private assertOwners(
     ownerFacultyId: string,
     ownerGroupId: string | null,
   ): Promise<Owners> {
-    const faculty = await this.prisma.orgUnit.findUnique({
-      where: { id: ownerFacultyId },
-    });
-    if (
-      !faculty ||
-      faculty.unitType !== OrgUnitType.FACULTY ||
-      faculty.status !== OrgUnitStatus.ACTIVE
-    ) {
-      throw new AppException(COURSE_ERRORS.OWNER_FACULTY_INVALID, [
-        {
-          field: 'ownerFacultyId',
-          constraints: [OWNER_CONSTRAINT.ACTIVE_FACULTY],
-        },
-      ]);
-    }
-    if (ownerGroupId !== null) {
-      const group = await this.prisma.subjectGroup.findUnique({
-        where: { id: ownerGroupId },
-      });
-      if (
-        !group ||
-        group.status !== SubjectGroupStatus.ACTIVE ||
-        group.facultyId !== ownerFacultyId
-      ) {
-        throw new AppException(COURSE_ERRORS.OWNER_GROUP_INVALID, [
-          {
-            field: 'ownerGroupId',
-            constraints: [OWNER_CONSTRAINT.GROUP_OF_FACULTY],
-          },
-        ]);
-      }
-    }
-    return {
-      ownerFacultyId,
-      ownerGroupId,
-      isForeign: faculty.unitCode !== HOME_FACULTY_CODE,
-    };
+    return assertCourseOwners(this.prisma, ownerFacultyId, ownerGroupId);
   }
 
   private async findOrThrow(courseId: string): Promise<CourseRow> {

@@ -40,6 +40,12 @@ export async function createProgram(
           electiveCredits: '10',
           status: fixture.versionStatus ?? ProgramVersionStatus.DRAFT,
           versionNumber: fixture.versionNumber ?? null,
+          // A version past Draft carries its publication time (ProgramVersion_published_has_time).
+          publishedAt:
+            (fixture.versionStatus ?? ProgramVersionStatus.DRAFT) ===
+            ProgramVersionStatus.DRAFT
+              ? null
+              : new Date(),
         },
       },
     },

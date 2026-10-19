@@ -41,6 +41,7 @@ export class VersionInfoEditDto extends ProgramVersionInfoDto {
 export const VERSION_INFO_ROW_SELECT = {
   ...VERSION_INFO_SELECT,
   programId: true,
+  correctionOfId: true,
   program: {
     select: { id: true, facultyId: true, programCode: true, degreeLevel: true },
   },

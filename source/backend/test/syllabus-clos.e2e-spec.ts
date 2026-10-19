@@ -6,14 +6,12 @@ import { PrismaService } from '../src/shared/prisma/prisma.service.js';
 import { createAccount, loginAgent } from './fixtures/accounts.js';
 import { createCourse } from './fixtures/courses.js';
 import { createClo } from './fixtures/outcomes.js';
+import { publishSyllabusViaRelease } from './fixtures/releases.js';
 import {
   addMembership,
   createSubjectGroup,
 } from './fixtures/subject-groups.js';
-import {
-  createSyllabusDraft,
-  publishSyllabusForTest,
-} from './fixtures/syllabi.js';
+import { createSyllabusDraft } from './fixtures/syllabi.js';
 import { startPostgres, startRedis } from './containers.js';
 import type { TestPostgres, TestRedis } from './containers.js';
 import { createTestApp } from './test-app.js';
@@ -221,7 +219,7 @@ describe('CLOs in the syllabus', () => {
     const flag = await syllabusOf(viewer, course.id).expect(200);
     expect(flag.body.canEditClos).toBe(false);
 
-    await publishSyllabusForTest(app, draft.id);
+    await publishSyllabusViaRelease(app, admin, course.id);
     const published = await admin
       .patch(`/api/clos/${clo.id}`)
       .set(CSRF)
