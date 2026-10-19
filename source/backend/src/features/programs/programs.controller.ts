@@ -24,6 +24,7 @@ import { AssignDirectorDto, EndDirectorDto } from './assign-director.dto.js';
 import { CloneProgramDto } from './clone-program.dto.js';
 import { CreateProgramDto } from './create-program.dto.js';
 import { ProgramDirectorDto } from './program-director.dto.js';
+import { ProgramCloneService } from './program-clone.service.js';
 import { ProgramDirectorsService } from './program-directors.service.js';
 import { ProgramQueryDto } from './program-query.dto.js';
 import { ProgramDetailDto, ProgramPageDto } from './program.dto.js';
@@ -37,6 +38,7 @@ export class ProgramsController {
   constructor(
     private readonly programs: ProgramsService,
     private readonly directors: ProgramDirectorsService,
+    private readonly cloning: ProgramCloneService,
   ) {}
 
   @Get()
@@ -110,7 +112,7 @@ export class ProgramsController {
     @Body() dto: CloneProgramDto,
     @CurrentAccess() access: AccessContext,
   ) {
-    return this.programs.clone(programId, dto, access);
+    return this.cloning.clone(programId, dto, access);
   }
 
   @Get(':programId/directors')

@@ -51,6 +51,3 @@ export const COURSE_RELATION_ERRORS = {
       'Đây là học phần thay thế duy nhất của một học phần đang Ngừng mở lớp; hãy thêm học phần thay thế khác hoặc mở lại học phần đó trước.',
   },
 } as const satisfies Record<string, ErrorDefinition>;
-
-// Constraint keys in `details`, the same style as class-validator keys (FieldErrorDto).
-export const RELATION_CONSTRAINT = { GRADE_POINT: 'gradePoint' } as const;

@@ -166,23 +166,25 @@ model SubjectGroup {
 }
 
 model Course {
-  id                 String                 @id @default(cuid(2))
-  courseCode         String                 @unique
-  courseName         String
-  englishName        String?
-  credits            Decimal                @db.Decimal(5, 2)
-  courseType         CourseType
-  status             CourseStatus           @default(ACTIVE)
-  ownerFacultyId     String
-  ownerFaculty       OrgUnit                @relation("CourseOwnerFaculty", fields: [ownerFacultyId], references: [id], onDelete: Restrict)
-  ownerGroupId       String?
-  ownerGroup         SubjectGroup?          @relation("CourseOwnerGroup", fields: [ownerGroupId], references: [id], onDelete: Restrict)
-  equivalenceGroupId String?
-  equivalenceGroup   EquivalentCourseGroup? @relation("CourseEquivalence", fields: [equivalenceGroupId], references: [id], onDelete: SetNull)
-  relationsAsSource  CourseRelation[]       @relation("RelationSource")
-  relationsAsTarget  CourseRelation[]       @relation("RelationTarget")
-  createdAt          DateTime               @default(now())
-  updatedAt          DateTime               @updatedAt
+  id                   String                 @id @default(cuid(2))
+  courseCode           String                 @unique
+  courseName           String
+  englishName          String?
+  credits              Decimal                @db.Decimal(5, 2)
+  courseType           CourseType
+  status               CourseStatus           @default(ACTIVE)
+  ownerFacultyId       String
+  ownerFaculty         OrgUnit                @relation("CourseOwnerFaculty", fields: [ownerFacultyId], references: [id], onDelete: Restrict)
+  ownerGroupId         String?
+  ownerGroup           SubjectGroup?          @relation("CourseOwnerGroup", fields: [ownerGroupId], references: [id], onDelete: Restrict)
+  equivalenceGroupId   String?
+  equivalenceGroup     EquivalentCourseGroup? @relation("CourseEquivalence", fields: [equivalenceGroupId], references: [id], onDelete: SetNull)
+  relationsAsSource    CourseRelation[]       @relation("RelationSource")
+  relationsAsTarget    CourseRelation[]       @relation("RelationTarget")
+  curriculumItems      CurriculumItem[]       @relation("CurriculumItemCourse")
+  curriculumRequisites CurriculumRequisite[]  @relation("CurriculumRequisiteSource")
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
 
   @@index([ownerFacultyId])
   @@index([ownerGroupId])
@@ -277,6 +279,8 @@ model ProgramVersion {
   compulsoryCredits Decimal              @db.Decimal(5, 2)
   electiveCredits   Decimal              @db.Decimal(5, 2)
   clones            Program[]            @relation("ProgramClonedFrom")
+  electiveGroups    ElectiveGroup[]
+  curriculumItems   CurriculumItem[]
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt
 
@@ -375,4 +379,75 @@ model Session {
 
   @@index([expire], map: "IDX_session_expire")
   @@map("session")
+}
+
+// Global list of knowledge blocks; a row's free-text blockSymbol is matched to blockCode when one exists, not enforced (F07-02).
+model KnowledgeBlock {
+  id              String   @id @default(cuid(2))
+  blockCode       String   @unique
+  blockName       String
+  requiredCredits Decimal? @db.Decimal(5, 2)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// With both minimums set, a student must meet both. Deleting a group leaves its rows elective with no group.
+// A CHECK (at least one minimum) is added by hand in the migration: see database_and_models.md.
+model ElectiveGroup {
+  id         String           @id @default(cuid(2))
+  versionId  String
+  version    ProgramVersion   @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  groupCode  String
+  groupName  String
+  minCredits Decimal?         @db.Decimal(5, 2)
+  minCourses Int?
+  items      CurriculumItem[]
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  @@unique([versionId, groupCode])
+}
+
+// sortOrder orders rows inside one semester; the "TT" number is derived. Credits and names are read live from Course until F-15 snapshots them.
+// Five CHECK constraints are added by hand in the migration (not modelled by Prisma): see database_and_models.md.
+model CurriculumItem {
+  id               String                @id @default(cuid(2))
+  versionId        String
+  version          ProgramVersion        @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  plannedSemester  Int
+  sortOrder        Int
+  courseId         String
+  course           Course                @relation("CurriculumItemCourse", fields: [courseId], references: [id], onDelete: Restrict)
+  blockSymbol      String?
+  isElective       Boolean
+  electiveGroupId  String?
+  electiveGroup    ElectiveGroup?        @relation(fields: [electiveGroupId], references: [id], onDelete: SetNull)
+  htDa             Boolean               @default(false)
+  tqDa             Boolean               @default(false)
+  minStudiedScore  Decimal?              @db.Decimal(4, 2)
+  minTransferScore Decimal?              @db.Decimal(4, 2)
+  note             String?
+  requisites       CurriculumRequisite[]
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+
+  @@unique([versionId, courseId])
+  @@index([versionId, plannedSemester, sortOrder])
+  @@index([courseId])
+  @@index([electiveGroupId])
+}
+
+// Per-curriculum requisites, seeded from CourseRelation when the row is added and edited for this curriculum only.
+model CurriculumRequisite {
+  id             String             @id @default(cuid(2))
+  itemId         String
+  item           CurriculumItem     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  sourceCourseId String
+  sourceCourse   Course             @relation("CurriculumRequisiteSource", fields: [sourceCourseId], references: [id], onDelete: Restrict)
+  relationType   CourseRelationType
+  minScore       Decimal?           @db.Decimal(4, 2)
+  createdAt      DateTime           @default(now())
+
+  @@unique([itemId, sourceCourseId, relationType])
+  @@index([sourceCourseId])
 }

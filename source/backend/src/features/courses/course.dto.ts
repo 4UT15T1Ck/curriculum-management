@@ -41,6 +41,7 @@ export class CourseUsageDto {
   @ApiProperty() programCode!: string;
   @ApiProperty() programName!: string;
   @ApiProperty({ nullable: true, type: String }) versionLabel!: string | null;
+  @ApiProperty() plannedSemester!: number;
 }
 
 export class CourseEquivalenceDto {

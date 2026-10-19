@@ -32,6 +32,11 @@ export const PROGRAM_ERRORS = {
     code: 'PROGRAM_STATUS_UNCHANGED',
     message: 'Chương trình đã ở trạng thái này.',
   },
+  SEMESTERS_BELOW_CURRICULUM: {
+    status: HttpStatus.CONFLICT,
+    code: 'SEMESTERS_BELOW_CURRICULUM',
+    message: 'Khung chương trình đã có học phần ở học kỳ',
+  },
   SOURCE_VERSION_INVALID: {
     status: HttpStatus.BAD_REQUEST,
     code: 'SOURCE_VERSION_INVALID',
@@ -66,4 +71,5 @@ export const PROGRAM_CONSTRAINT = {
   ACTIVE_FACULTY: 'activeFaculty',
   ACTIVE_USER: 'activeUser',
   CREDITS_SUM: 'creditsSum',
+  SEMESTERS_COVER_CURRICULUM: 'semestersCoverCurriculum',
 } as const;

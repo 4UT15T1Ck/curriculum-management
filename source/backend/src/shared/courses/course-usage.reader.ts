@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import {
   CourseRelationType,
   CourseStatus,
+  ProgramStatus,
+  ProgramVersionStatus,
   type Prisma,
 } from '../../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -11,25 +13,65 @@ export interface CourseUsage {
   programCode: string;
   programName: string;
   versionLabel: string | null;
+  plannedSemester: number;
 }
 
 // Answers questions about a course whose facts live in other features' tables.
 // Each method returns "none" until the table it reads exists:
-// F-07 fills programsUsing, F-15 inReleasedVersion, F-17 hasStudyResults. F-05 filled hasActiveReplacement.
+// F-05 filled hasActiveReplacement; F-07 filled programsUsing and inReleasedVersion from the curriculum rows;
+// F-17 fills hasStudyResults.
 @Injectable()
 export class CourseUsageReader {
   constructor(private readonly prisma: PrismaService) {}
 
-  async inReleasedVersion(_courseId: string): Promise<boolean> {
-    return false;
+  // The course sits in a version that has left Draft (Pending, Active or Historical).
+  async inReleasedVersion(courseId: string): Promise<boolean> {
+    const row = await this.prisma.curriculumItem.findFirst({
+      where: {
+        courseId,
+        version: { status: { not: ProgramVersionStatus.DRAFT } },
+      },
+      select: { id: true },
+    });
+    return row !== null;
   }
 
   async hasStudyResults(_courseId: string): Promise<boolean> {
     return false;
   }
 
-  async programsUsing(_courseId: string): Promise<CourseUsage[]> {
-    return [];
+  // Versions still in play (Draft, Pending, Active) of programs in use; one entry per row, so one per program version.
+  async programsUsing(courseId: string): Promise<CourseUsage[]> {
+    const rows = await this.prisma.curriculumItem.findMany({
+      where: {
+        courseId,
+        version: {
+          status: { not: ProgramVersionStatus.HISTORICAL },
+          program: { status: ProgramStatus.ACTIVE },
+        },
+      },
+      select: {
+        plannedSemester: true,
+        version: {
+          select: {
+            programName: true,
+            versionNumber: true,
+            program: { select: { id: true, programCode: true } },
+          },
+        },
+      },
+      orderBy: [
+        { version: { program: { programCode: 'asc' } } },
+        { version: { createdAt: 'asc' } },
+      ],
+    });
+    return rows.map(({ plannedSemester, version }) => ({
+      programId: version.program.id,
+      programCode: version.program.programCode,
+      programName: version.programName,
+      versionLabel: version.versionNumber,
+      plannedSemester,
+    }));
   }
 
   // A REPLACEMENT relation from this course to an ACTIVE course (HP-02).

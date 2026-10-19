@@ -9,7 +9,7 @@ import {
   MaxLength,
 } from 'class-validator';
 import { CourseStatus, CourseType } from '../../generated/prisma/client.js';
-import { trimString } from '../../shared/dtos/transforms.js';
+import { toArray, trimString } from '../../shared/dtos/transforms.js';
 import { PageQueryDto } from '../../shared/pagination/page-query.dto.js';
 import { COURSE_FIELD_LIMITS } from './create-course.dto.js';
 
@@ -46,10 +46,15 @@ export class CourseQueryDto extends PageQueryDto {
   @IsEnum(CourseType)
   courseType?: CourseType;
 
-  @ApiPropertyOptional({ enum: CourseStatus, enumName: 'CourseStatus' })
+  @ApiPropertyOptional({
+    enum: CourseStatus,
+    enumName: 'CourseStatus',
+    isArray: true,
+  })
+  @Transform(toArray)
   @IsOptional()
-  @IsEnum(CourseStatus)
-  status?: CourseStatus;
+  @IsEnum(CourseStatus, { each: true })
+  status?: CourseStatus[];
 
   @ApiPropertyOptional({ type: Boolean })
   @Transform(({ value }: { value: unknown }) =>

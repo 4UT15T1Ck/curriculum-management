@@ -106,6 +106,19 @@ describe('permission table', () => {
         ? prisma.programDirectorAssignment.count()
         : prisma.program.count();
     }
+    if (path.startsWith('/api/curriculum-items')) {
+      return path.endsWith('/requisites')
+        ? prisma.curriculumRequisite.count()
+        : prisma.curriculumItem.count();
+    }
+    if (path.startsWith('/api/elective-groups')) {
+      return prisma.electiveGroup.count();
+    }
+    if (path.startsWith('/api/program-versions')) {
+      return path.includes('/elective-groups')
+        ? prisma.electiveGroup.count()
+        : prisma.curriculumItem.count();
+    }
     if (path.startsWith('/api/subject-groups')) {
       return path.includes('/members')
         ? prisma.subjectGroupMember.count()

@@ -210,6 +210,18 @@ describe('CoursesService', () => {
       expect(course.findMany.mock.calls[1][0].where.AND).toEqual([]);
     });
 
+    it('filters by a list of statuses', async () => {
+      await service.list(
+        query({ status: [CourseStatus.ACTIVE, CourseStatus.DISCONTINUED] }),
+        R1,
+      );
+      expect(course.findMany.mock.calls[0][0].where.status).toEqual({
+        in: [CourseStatus.ACTIVE, CourseStatus.DISCONTINUED],
+      });
+      await service.list(query(), R1);
+      expect(course.findMany.mock.calls[1][0].where.status).toBeUndefined();
+    });
+
     it.each([
       [true, { not: HOME_FACULTY_CODE }],
       [false, HOME_FACULTY_CODE],

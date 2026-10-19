@@ -20,6 +20,7 @@ import { CoursesModule } from './features/courses/courses.module.js';
 import { CourseRelationsModule } from './features/course-relations/course-relations.module.js';
 import { EquivalenceGroupsModule } from './features/equivalence-groups/equivalence-groups.module.js';
 import { ProgramsModule } from './features/programs/programs.module.js';
+import { CurriculumModule } from './features/curriculum/curriculum.module.js';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { ProgramsModule } from './features/programs/programs.module.js';
     CourseRelationsModule,
     EquivalenceGroupsModule,
     ProgramsModule,
+    CurriculumModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: CsrfGuard },

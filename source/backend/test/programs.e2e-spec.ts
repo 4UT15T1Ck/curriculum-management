@@ -18,6 +18,7 @@ import { PrismaService } from '../src/shared/prisma/prisma.service.js';
 import { toIsoDay } from '../src/shared/time/today.js';
 import { createAccount, loginAgent } from './fixtures/accounts.js';
 import { createCourse } from './fixtures/courses.js';
+import { addCurriculumItem, readCurriculum } from './fixtures/curriculum.js';
 import { createProgram } from './fixtures/programs.js';
 import {
   addMembership,
@@ -560,6 +561,132 @@ describe('programs and program directors', () => {
     ).toBe(0);
   });
 
+  it('clones the curriculum with its groups and requisites, leaving the source untouched (US-022 AC1)', async () => {
+    const source = await createProgram(app, { programCode: 'P_CLONE_ROWS' });
+    const sourceVersion = source.versions[0].id;
+    const [a, b, c] = await Promise.all(
+      ['CLR_A', 'CLR_B', 'CLR_C'].map((courseCode) =>
+        createCourse(app, { courseCode }),
+      ),
+    );
+    await prisma.courseRelation.create({
+      data: {
+        sourceCourseId: a.id,
+        targetCourseId: b.id,
+        relationType: 'PREREQUISITE',
+        minScore: '2',
+      },
+    });
+    const rowA = await addCurriculumItem(admin, sourceVersion, {
+      courseId: a.id,
+      plannedSemester: 1,
+      blockSymbol: 'CSN',
+    });
+    await addCurriculumItem(admin, sourceVersion, {
+      courseId: b.id,
+      plannedSemester: 2,
+    });
+    const rowC = await addCurriculumItem(admin, sourceVersion, {
+      courseId: c.id,
+      plannedSemester: 2,
+      isElective: true,
+    });
+    const group = await admin
+      .post(`/api/program-versions/${sourceVersion}/elective-groups`)
+      .set(CSRF)
+      .send({ groupCode: 'TC1', groupName: 'Tự chọn 1', minCredits: '3' })
+      .expect(201);
+    await admin
+      .put(`/api/elective-groups/${group.body.id}/items`)
+      .set(CSRF)
+      .send({ itemIds: [rowC.id] })
+      .expect(200);
+    const before = await readCurriculum(admin, sourceVersion);
+
+    const cloned = await admin
+      .post(`/api/programs/${source.id}/clone`)
+      .set(CSRF)
+      .send({ programCode: 'P_CLONE_ROWS2', programName: 'Bản sao có khung' })
+      .expect(201);
+
+    const copy = await readCurriculum(admin, cloned.body.draftVersion.id);
+    expect(copy.items).toHaveLength(3);
+    expect(
+      copy.items.map(
+        (item: { course: { courseCode: string } }) => item.course.courseCode,
+      ),
+    ).toEqual(['CLR_A', 'CLR_B', 'CLR_C']);
+    expect(copy.items[0]).toMatchObject({
+      blockSymbol: 'CSN',
+      plannedSemester: 1,
+    });
+    expect(copy.items[1].requisites).toEqual([
+      expect.objectContaining({
+        relationType: 'PREREQUISITE',
+        minScore: '2',
+        sourceSemester: 1,
+        sourceCourse: expect.objectContaining({ courseCode: 'CLR_A' }),
+      }),
+    ]);
+    expect(copy.electiveGroups).toHaveLength(1);
+    const copiedGroup = copy.electiveGroups[0];
+    expect(copiedGroup).toMatchObject({
+      groupCode: 'TC1',
+      minCredits: '3',
+      itemCount: 1,
+    });
+    expect(copiedGroup.id).not.toBe(group.body.id);
+    expect(copy.items[2].electiveGroup).toEqual({
+      id: copiedGroup.id,
+      groupCode: 'TC1',
+    });
+    expect(copy.items.map((item: { id: string }) => item.id)).not.toContain(
+      rowA.id,
+    );
+
+    // Editing the copy leaves the source alone.
+    await admin
+      .delete(`/api/curriculum-items/${copy.items[0].id}`)
+      .set(CSRF)
+      .expect(204);
+    const after = await readCurriculum(admin, sourceVersion);
+    expect(after.items).toEqual(before.items);
+    expect(after.electiveGroups).toEqual(before.electiveGroups);
+    expect(
+      (await readCurriculum(admin, cloned.body.draftVersion.id)).items,
+    ).toHaveLength(2);
+  });
+
+  it('refuses a semester count below a planned row and accepts one that covers it (EC-08)', async () => {
+    const program = await createProgram(app, { programCode: 'P_SEM_GUARD' });
+    const row = await createCourse(app, { courseCode: 'SEM_A' });
+    await addCurriculumItem(admin, program.versions[0].id, {
+      courseId: row.id,
+      plannedSemester: 8,
+    });
+    const refused = await admin
+      .patch(`/api/programs/${program.id}`)
+      .set(CSRF)
+      .send({ semesterCount: 7 })
+      .expect(409);
+    expect(refused.body.code).toBe('SEMESTERS_BELOW_CURRICULUM');
+    expect(refused.body.message).toContain('8');
+    expect(refused.body.details).toEqual([
+      expect.objectContaining({ field: 'semesterCount' }),
+    ]);
+    await admin
+      .patch(`/api/programs/${program.id}`)
+      .set(CSRF)
+      .send({ semesterCount: 8 })
+      .expect(200);
+    const empty = await createProgram(app, { programCode: 'P_SEM_EMPTY' });
+    await admin
+      .patch(`/api/programs/${empty.id}`)
+      .set(CSRF)
+      .send({ semesterCount: 4 })
+      .expect(200);
+  });
+
   it('allows one Draft and one Active version per program at the database (D9)', async () => {
     const program = await createProgram(app, { programCode: 'P_INDEX' });
     const draft = {
@@ -617,5 +744,26 @@ describe('programs and program directors', () => {
     ]);
     const listed = await admin.get('/api/programs?q=1024034').expect(200);
     expect(listed.body.items[0].currentVersion.versionNumber).toBeNull();
+    // The placeholder curriculum is written once and fits the placeholder program (10 semesters).
+    const curriculum = await readCurriculum(admin, seeded[0].versions[0].id);
+    expect(curriculum.items).toHaveLength(6);
+    expect(curriculum.semesters).toHaveLength(10);
+    expect(curriculum.electiveGroups).toEqual([
+      expect.objectContaining({
+        groupCode: 'TC1',
+        itemCount: 2,
+        listedCredits: '6',
+      }),
+    ]);
+    expect(
+      curriculum.warnings.some(
+        (w: { code: string }) => w.code === 'REQUISITE_NOT_EARLIER',
+      ),
+    ).toBe(false);
+    expect(
+      await prisma.course.count({
+        where: { courseCode: { startsWith: 'DEMO' } },
+      }),
+    ).toBe(6);
   });
 });

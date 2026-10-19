@@ -14,6 +14,11 @@ import { PrismaService } from '../src/shared/prisma/prisma.service.js';
 import { createAccount, loginAgent } from './fixtures/accounts.js';
 import { createCourse, createForeignFaculty } from './fixtures/courses.js';
 import {
+  addCurriculumItem,
+  releaseVersionForTest,
+} from './fixtures/curriculum.js';
+import { createProgram } from './fixtures/programs.js';
+import {
   addMembership,
   createSubjectGroup,
 } from './fixtures/subject-groups.js';
@@ -453,6 +458,69 @@ describe('course catalog', () => {
     expect(paged.body).toMatchObject({ total: 3, page: 2, pageSize: 2 });
     expect(paged.body.items).toHaveLength(1);
     await admin.get('/api/courses?sort=passwordHash').expect(400);
+  });
+
+  it('filters by one status or a list of statuses', async () => {
+    await createCourse(app, { courseCode: 'STL_ACT' });
+    await createCourse(app, {
+      courseCode: 'STL_OLD',
+      status: CourseStatus.DISCONTINUED,
+    });
+    const codes = (response: { body: { items: { courseCode: string }[] } }) =>
+      response.body.items.map((course) => course.courseCode);
+    expect(
+      codes(await admin.get('/api/courses?q=STL_&status=ACTIVE').expect(200)),
+    ).toEqual(['STL_ACT']);
+    expect(
+      codes(
+        await admin
+          .get('/api/courses?q=STL_&status=ACTIVE&status=DISCONTINUED')
+          .expect(200),
+      ),
+    ).toEqual(['STL_ACT', 'STL_OLD']);
+    await admin.get('/api/courses?status=NOPE').expect(400);
+  });
+
+  it('lists the programs using a course, with the semester, and freezes it once released (US-028, KB-026)', async () => {
+    const course = await createCourse(app, { courseCode: 'USE_X' });
+    const lonely = await createCourse(app, { courseCode: 'USE_NONE' });
+    const program = await createProgram(app, { programCode: 'USE_PROG' });
+    const versionId = program.versions[0].id;
+    await addCurriculumItem(admin, versionId, {
+      courseId: course.id,
+      plannedSemester: 4,
+    });
+
+    const detail = await admin.get(`/api/courses/${course.id}`).expect(200);
+    expect(detail.body.programsUsing).toEqual([
+      {
+        programId: program.id,
+        programCode: 'USE_PROG',
+        programName: 'Chương trình USE_PROG',
+        versionLabel: null,
+        plannedSemester: 4,
+      },
+    ]);
+    const unused = await admin.get(`/api/courses/${lonely.id}`).expect(200);
+    expect(unused.body.programsUsing).toEqual([]);
+
+    // Still a Draft: the course is edited directly.
+    await admin
+      .patch(`/api/courses/${course.id}`)
+      .set(CSRF)
+      .send({ courseName: 'Tên sửa trực tiếp' })
+      .expect(200);
+
+    await releaseVersionForTest(app, versionId);
+    const released = await admin.get(`/api/courses/${course.id}`).expect(200);
+    expect(released.body.programsUsing[0].versionLabel).toBe('1.0');
+    expect(released.body.editPath).toBe('VIA_REQUEST');
+    const refused = await admin
+      .patch(`/api/courses/${course.id}`)
+      .set(CSRF)
+      .send({ courseName: 'Tên sau ban hành' })
+      .expect(409);
+    expect(refused.body.code).toBe('CHANGE_REQUEST_REQUIRED');
   });
 
   it('answers a catalog lookup on 500 courses within the budget (CV-035)', async () => {

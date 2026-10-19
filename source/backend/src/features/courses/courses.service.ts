@@ -296,7 +296,7 @@ export class CoursesService {
       ownerFacultyId: query.ownerFacultyId,
       ownerGroupId: query.ownerGroupId,
       courseType: query.courseType,
-      status: query.status,
+      status: query.status ? { in: query.status } : undefined,
       AND: and,
     };
   }

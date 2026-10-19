@@ -23,12 +23,12 @@ import {
   programTarget,
 } from '../../shared/programs/program-target.js';
 import { todayDate } from '../../shared/time/today.js';
-import { VersionContentCopier } from '../../shared/programs/version-content.copier.js';
-import { CloneProgramDto } from './clone-program.dto.js';
+import { CurriculumFactsReader } from '../../shared/curriculum/curriculum-facts.reader.js';
 import { assertCreditsAddUp } from './credits-check.js';
+import { assertSemestersCoverCurriculum } from './semester-check.js';
+import { versionData } from './version-data.js';
 import { CreateProgramDto } from './create-program.dto.js';
 import {
-  currentVersion,
   draftVersion,
   programInclude,
   toProgramDetailDto,
@@ -38,12 +38,9 @@ import {
   type ProgramSummaryDto,
 } from './program.dto.js';
 import { ProgramQueryDto } from './program-query.dto.js';
+import { findProgramOrThrow } from './program-reader.js';
 import { PROGRAM_CONSTRAINT, PROGRAM_ERRORS } from './programs.errors.js';
 import { UpdateProgramDto } from './update-program.dto.js';
-
-type VersionFields = Partial<
-  Omit<CreateProgramDto, 'programCode' | 'facultyId' | 'degreeLevel'>
->;
 
 @Injectable()
 export class ProgramsService {
@@ -51,7 +48,7 @@ export class ProgramsService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly copier: VersionContentCopier,
+    private readonly curriculumFacts: CurriculumFactsReader,
   ) {}
 
   async list(
@@ -155,6 +152,11 @@ export class ProgramsService {
       throw new AppException(COMMON_ERRORS.CHANGE_REQUEST_REQUIRED);
     }
     const { degreeLevel, ...fields } = dto;
+    await assertSemestersCoverCurriculum(
+      this.curriculumFacts,
+      draft.id,
+      fields.semesterCount,
+    );
     assertCreditsAddUp({
       totalCredits: fields.totalCredits ?? draft.totalCredits.toString(),
       compulsoryCredits:
@@ -203,59 +205,6 @@ export class ProgramsService {
     return this.toDetail(await this.findOrThrow(row.id), access);
   }
 
-  // One transaction, so a failed copier step leaves no half-made program.
-  async clone(
-    programId: string,
-    dto: CloneProgramDto,
-    access: AccessContext,
-  ): Promise<ProgramDetailDto> {
-    const source = await this.findOrThrow(programId);
-    const version = dto.sourceVersionId
-      ? source.versions.find(
-          (candidate) => candidate.id === dto.sourceVersionId,
-        )
-      : currentVersion(source);
-    if (!version) {
-      throw new AppException(PROGRAM_ERRORS.SOURCE_VERSION_INVALID);
-    }
-    try {
-      const created = await this.prisma.$transaction(async (tx) => {
-        const program = await tx.program.create({
-          data: {
-            programCode: dto.programCode,
-            facultyId: source.facultyId,
-            degreeLevel: source.degreeLevel,
-            clonedFromId: version.id,
-            versions: {
-              create: {
-                programName: dto.programName,
-                majorCode: version.majorCode,
-                majorName: version.majorName,
-                semesterCount: version.semesterCount,
-                totalCredits: version.totalCredits,
-                compulsoryCredits: version.compulsoryCredits,
-                electiveCredits: version.electiveCredits,
-              },
-            },
-          },
-          select: { id: true, versions: { select: { id: true } } },
-        });
-        await this.copier.copy(tx, version.id, program.versions[0].id);
-        return program;
-      });
-      this.logger.log(
-        `Program ${source.programCode} cloned to ${dto.programCode} by ${access.userId}`,
-      );
-      return await this.toDetail(await this.findOrThrow(created.id), access);
-    } catch (error) {
-      throw mapUniqueViolation(
-        error,
-        PROGRAM_ERRORS.PROGRAM_CODE_TAKEN,
-        'programCode',
-      );
-    }
-  }
-
   private async toDetail(
     row: ProgramRow,
     access: AccessContext,
@@ -273,15 +222,16 @@ export class ProgramsService {
     });
   }
 
-  private async findOrThrow(programId: string): Promise<ProgramRow> {
-    const row = await this.prisma.program.findUnique({
-      where: { id: programId },
-      include: programInclude(todayDate()),
-    });
-    if (!row) {
-      throw new AppException(PROGRAM_ERRORS.PROGRAM_NOT_FOUND);
-    }
-    return row;
+  // The detail the caller sees after a write by a sibling service; the caller's own permission was checked there.
+  async detailOf(
+    programId: string,
+    access: AccessContext,
+  ): Promise<ProgramDetailDto> {
+    return this.toDetail(await this.findOrThrow(programId), access);
+  }
+
+  private findOrThrow(programId: string): Promise<ProgramRow> {
+    return findProgramOrThrow(this.prisma, programId);
   }
 
   // The faculty must be an active FACULTY unit; omitted means the home faculty.
@@ -304,26 +254,4 @@ export class ProgramsService {
     }
     return faculty.id;
   }
-}
-
-// Prisma decimals accept strings and ignores undefined, so a partial update passes through unchanged.
-function versionData(fields: VersionFields): Prisma.ProgramVersionUpdateInput {
-  const {
-    programName,
-    majorCode,
-    majorName,
-    semesterCount,
-    totalCredits,
-    compulsoryCredits,
-    electiveCredits,
-  } = fields;
-  return {
-    programName,
-    majorCode,
-    majorName,
-    semesterCount,
-    totalCredits,
-    compulsoryCredits,
-    electiveCredits,
-  };
 }

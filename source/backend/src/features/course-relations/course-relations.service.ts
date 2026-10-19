@@ -15,6 +15,7 @@ import {
   CYCLE_CHECKED_TYPES,
   findRequisiteCycle,
   lockRequisiteGraph,
+  RELATION_CONSTRAINT,
 } from '../../shared/courses/requisite-graph.js';
 import { toWireDecimal } from '../../shared/decimal/decimal.js';
 import { AppException } from '../../shared/exception/app.exception.js';
@@ -28,10 +29,7 @@ import {
   type OwnerCourseRow,
   type RelationRow,
 } from './course-relation.dto.js';
-import {
-  COURSE_RELATION_ERRORS,
-  RELATION_CONSTRAINT,
-} from './course-relations.errors.js';
+import { COURSE_RELATION_ERRORS } from './course-relations.errors.js';
 import { CreateCourseRelationDto } from './create-course-relation.dto.js';
 import { UpdateCourseRelationDto } from './update-course-relation.dto.js';
 

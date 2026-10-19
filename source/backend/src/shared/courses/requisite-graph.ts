@@ -3,6 +3,9 @@ import {
   type Prisma,
 } from '../../generated/prisma/client.js';
 
+// Constraint key in `details` for a threshold on the 4-point scale, shared by catalog relations and curriculum requisites.
+export const RELATION_CONSTRAINT = { GRADE_POINT: 'gradePoint' } as const;
+
 export interface RequisiteEdge {
   sourceCourseId: string;
   targetCourseId: string;

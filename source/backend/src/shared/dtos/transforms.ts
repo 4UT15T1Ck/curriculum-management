@@ -16,3 +16,8 @@ export function emptyToNull({ value }: TransformFnParams): unknown {
   const trimmed = value.trim();
   return trimmed === '' ? null : trimmed;
 }
+
+// `?status=A` arrives as a string, `?status=A&status=B` as an array.
+export function toArray({ value }: TransformFnParams): unknown {
+  return value === undefined || Array.isArray(value) ? value : [value];
+}

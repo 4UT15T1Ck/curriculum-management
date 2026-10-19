@@ -20,7 +20,7 @@ import {
 } from '../../shared/authz/permission-codes.js';
 import { HOME_FACULTY_CODE } from '../../shared/org-units/home-faculty.js';
 import { PrismaService } from '../../shared/prisma/prisma.service.js';
-import { VersionContentCopier } from '../../shared/programs/version-content.copier.js';
+import { CurriculumFactsReader } from '../../shared/curriculum/curriculum-facts.reader.js';
 import { activeDirectorWhere } from '../../shared/programs/active-director.js';
 import { todayDate } from '../../shared/time/today.js';
 import type { CreateProgramDto } from './create-program.dto.js';
@@ -144,7 +144,7 @@ describe('ProgramsService', () => {
   >;
   let programVersion: Record<'findFirst' | 'update', ReturnType<typeof vi.fn>>;
   let orgUnit: { findUnique: ReturnType<typeof vi.fn> };
-  let copier: { copy: ReturnType<typeof vi.fn> };
+  let curriculumFacts: { maxPlannedSemester: ReturnType<typeof vi.fn> };
   let service: ProgramsService;
 
   beforeEach(() => {
@@ -166,7 +166,9 @@ describe('ProgramsService', () => {
         status: OrgUnitStatus.ACTIVE,
       }),
     };
-    copier = { copy: vi.fn().mockResolvedValue(undefined) };
+    curriculumFacts = {
+      maxPlannedSemester: vi.fn().mockResolvedValue(null),
+    };
     const client: Record<string, unknown> = {
       program,
       programVersion,
@@ -178,7 +180,7 @@ describe('ProgramsService', () => {
         : Promise.all(work as Promise<unknown>[]);
     service = new ProgramsService(
       client as unknown as PrismaService,
-      copier as unknown as VersionContentCopier,
+      curriculumFacts as unknown as CurriculumFactsReader,
     );
   });
 
@@ -450,6 +452,39 @@ describe('ProgramsService', () => {
       ).resolves.toBeDefined();
     });
 
+    it('refuses a semester count below a planned row, naming the semester (EC-08)', async () => {
+      curriculumFacts.maxPlannedSemester.mockResolvedValue(8);
+      await expect(
+        service.update('p1', { semesterCount: 7 }, R1),
+      ).rejects.toMatchObject({
+        code: 'SEMESTERS_BELOW_CURRICULUM',
+        message: expect.stringContaining('8'),
+        details: [{ field: 'semesterCount' }],
+      });
+      expect(programVersion.update).not.toHaveBeenCalled();
+      expect(curriculumFacts.maxPlannedSemester).toHaveBeenCalledWith('v1');
+    });
+
+    it('accepts a semester count that still covers the last planned row', async () => {
+      curriculumFacts.maxPlannedSemester.mockResolvedValue(8);
+      await expect(
+        service.update('p1', { semesterCount: 8 }, R1),
+      ).resolves.toBeDefined();
+      expect(programVersion.update).toHaveBeenCalledOnce();
+    });
+
+    it('accepts any semester count while the curriculum is empty', async () => {
+      await expect(
+        service.update('p1', { semesterCount: 4 }, R1),
+      ).resolves.toBeDefined();
+    });
+
+    it('does not read the curriculum when the semester count is not sent', async () => {
+      curriculumFacts.maxPlannedSemester.mockResolvedValue(8);
+      await service.update('p1', { programName: 'Tên mới' }, R1);
+      expect(curriculumFacts.maxPlannedSemester).not.toHaveBeenCalled();
+    });
+
     it('moves the degree level on the program in the same transaction', async () => {
       await service.update('p1', { degreeLevel: DegreeLevel.BACHELOR }, R1);
       expect(program.update).toHaveBeenCalledWith({
@@ -478,107 +513,6 @@ describe('ProgramsService', () => {
       await expect(
         service.setStatus('p1', ProgramStatus.INACTIVE, r3Directing(['p1'])),
       ).rejects.toMatchObject({ code: 'PERMISSION_DENIED' });
-    });
-  });
-
-  describe('clone', () => {
-    const OLD_ACTIVE = version({
-      id: 'active',
-      versionNumber: '1.0',
-      status: ProgramVersionStatus.ACTIVE,
-      semesterCount: 9,
-    });
-
-    beforeEach(() => {
-      program.create.mockResolvedValue({ id: 'p2', versions: [{ id: 'new' }] });
-    });
-
-    it('copies the Active version by default and records it as the source', async () => {
-      program.findUnique.mockResolvedValue(
-        row({ versions: [version({ id: 'draft' }), OLD_ACTIVE] }),
-      );
-      await service.clone(
-        'p1',
-        { programCode: '1024035', programName: 'Bản sao' },
-        R1,
-      );
-      const data = program.create.mock.calls[0][0].data;
-      expect(data).toMatchObject({
-        programCode: '1024035',
-        facultyId: FACULTY.id,
-        degreeLevel: DegreeLevel.ENGINEER,
-        clonedFromId: 'active',
-      });
-      expect(data.versions.create).toMatchObject({
-        programName: 'Bản sao',
-        semesterCount: 9,
-      });
-    });
-
-    it('falls back to the newest version when none is Active', async () => {
-      await service.clone(
-        'p1',
-        { programCode: '1024035', programName: 'Bản sao' },
-        R1,
-      );
-      expect(program.create.mock.calls[0][0].data.clonedFromId).toBe('v1');
-    });
-
-    it('takes the version the caller picked', async () => {
-      program.findUnique.mockResolvedValue(
-        row({ versions: [version({ id: 'draft' }), OLD_ACTIVE] }),
-      );
-      await service.clone(
-        'p1',
-        {
-          programCode: '1024035',
-          programName: 'Bản sao',
-          sourceVersionId: 'draft',
-        },
-        R1,
-      );
-      expect(program.create.mock.calls[0][0].data.clonedFromId).toBe('draft');
-    });
-
-    it('refuses a version of another program', async () => {
-      await expect(
-        service.clone(
-          'p1',
-          {
-            programCode: '1024035',
-            programName: 'Bản sao',
-            sourceVersionId: 'foreign',
-          },
-          R1,
-        ),
-      ).rejects.toMatchObject({ code: 'SOURCE_VERSION_INVALID' });
-      expect(program.create).not.toHaveBeenCalled();
-    });
-
-    it('calls the copier with the source version and the new Draft', async () => {
-      await service.clone(
-        'p1',
-        { programCode: '1024035', programName: 'Bản sao' },
-        R1,
-      );
-      expect(copier.copy).toHaveBeenCalledWith(expect.anything(), 'v1', 'new');
-    });
-
-    it('maps a duplicate code to PROGRAM_CODE_TAKEN', async () => {
-      program.create.mockRejectedValue(
-        new Prisma.PrismaClientKnownRequestError('dup', {
-          code: 'P2002',
-          clientVersion: 'test',
-        }),
-      );
-      await expect(
-        service.clone(
-          'p1',
-          { programCode: '1024034', programName: 'Bản sao' },
-          R1,
-        ),
-      ).rejects.toMatchObject({ code: 'PROGRAM_CODE_TAKEN' });
-      expect(copier.copy).not.toHaveBeenCalled();
     });
   });
 });
