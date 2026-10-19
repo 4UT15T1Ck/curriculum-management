@@ -1,10 +1,10 @@
 import { Card, Col, Flex, Row, Tag, Tooltip, Typography } from 'antd';
 import { groupByLevel } from '../utils/groupByLevel';
 import type { ApprovalStep } from '../api/changeRequests';
+import { STEP_COLORS, STEP_KIND_LABELS } from '../constants/approvalLabels';
 import {
   ACADEMIC_OFFICE_LABEL,
   ACTION_LABELS,
-  SKIPPED_LABEL,
 } from '../constants/changeRequestLabels';
 import { formatDateTime } from '../utils/format';
 
@@ -12,7 +12,8 @@ interface StepProgressProps {
   steps: readonly ApprovalStep[];
 }
 
-function StepLine({ step }: { step: ApprovalStep }) {
+// One approver row; shared by the current round here and every round of the history.
+export function StepLine({ step }: { step: ApprovalStep }) {
   const who = step.approver?.fullName ?? ACADEMIC_OFFICE_LABEL;
   const scope = step.forSubjectGroup?.groupCode ?? step.forProgram?.programCode;
   return (
@@ -22,12 +23,15 @@ function StepLine({ step }: { step: ApprovalStep }) {
         {scope && <Typography.Text type="secondary">({scope})</Typography.Text>}
         {step.isSkipped ? (
           <Tooltip title={step.skipReason}>
-            <Tag>{SKIPPED_LABEL}</Tag>
+            <Tag>{STEP_KIND_LABELS.SKIPPED}</Tag>
           </Tooltip>
         ) : (
-          <Tag color={step.action === 'PENDING' ? 'default' : 'success'}>
+          <Tag color={STEP_COLORS[step.action]}>
             {ACTION_LABELS[step.action]}
           </Tag>
+        )}
+        {step.kind === 'OVERRIDE' && (
+          <Tag color="purple">{STEP_KIND_LABELS.OVERRIDE}</Tag>
         )}
         {!step.isSkipped && step.recordedAt && (
           <Typography.Text type="secondary">
@@ -35,6 +39,11 @@ function StepLine({ step }: { step: ApprovalStep }) {
           </Typography.Text>
         )}
       </Flex>
+      {step.kind === 'OVERRIDE' && step.performedBy && (
+        <Typography.Text type="secondary">
+          Người duyệt: {who} · Thực hiện: {step.performedBy.fullName}
+        </Typography.Text>
+      )}
       {step.isSkipped && step.skipReason && (
         <Typography.Text type="secondary">{step.skipReason}</Typography.Text>
       )}

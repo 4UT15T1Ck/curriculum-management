@@ -4,13 +4,13 @@
 
 - **Last updated**: 2026-10-19
 - **Active area**: dựng bản MVP (`docs/planning/epics.md` §0)
-- **Start here**: dựng F-14 (phê duyệt và thông báo; xem `docs/implementation/` và README). F-13 đã xong mã: `RoutingPlanner` tạo sẵn các dòng `ApprovalStep` theo từng vòng gửi, F-14 thêm hành động Duyệt / Trả lại / Từ chối, bộ lọc hàng chờ và thông báo; F-15 ban hành bản nháp làm việc (`sourceRequestId` → `originRequestId`) và dùng `StaleChecker`. Chi tiết hook ở báo cáo dựng F-13.
+- **Start here**: dựng F-15 (ban hành, ảnh chụp phiên bản; xem `docs/implementation/` và README). F-14 đã xong mã: `ApprovalRecorder` / `RequestNotifier` dùng chung cho phê duyệt cuối, đề xuất dữ liệu ở cấp 3 đang trả `FINAL_APPROVAL_REQUIRED` chờ MH-43 của F-15; F-15 thêm `REQUEST_EFFECTIVE` và `canFinalApprove`. Chi tiết hook ở báo cáo dựng F-14.
 
 ---
 
 ## Active Item: Dựng bản MVP
 
-**Status**: F-01 xong 2026-10-18; F-02..F-08 và F-10 mã xong 2026-10-19, còn nợ đi thử bằng trình duyệt; 6 tính năng MVP còn lại chưa dựng.
+**Status**: F-01 xong 2026-10-18; F-02..F-08, F-10, F-11, F-13 và F-14 mã xong 2026-10-19, còn nợ đi thử bằng trình duyệt; F-15 còn lại chưa dựng.
 
 ### Còn nợ
 - F-02: người dùng đi thử 6 bước kế hoạch §7 bằng trình duyệt (chọn để sau) — `docs/implement-report/f-02-accounts-roles-permissions-implement-report.md`.
@@ -27,6 +27,7 @@
 - F-08: người dùng đi thử 8 bước kế hoạch §7 bằng trình duyệt (thẻ credit, chấp nhận chênh lệch kèm lý do, xóa dòng thấy cảnh báo trở lại, vòng danh mục–khung, "Tới chỗ sửa", dòng tổng chương trình, thẻ ở tổng quan, đăng nhập R2) và áp migration `20261019092846_credit_mismatch_acceptance` (`pnpm prisma:migrate`) — `docs/implement-report/f-08-consistency-check-implement-report.md`.
 - F-11: người dùng đi thử bằng trình duyệt (PLO thêm / trùng mã / xóa có đếm, ma trận học phần–PLO nhập `0,5` và `1,5`, xóa ô có liên kết CLO, ma trận CLO–PLO cột bị khóa, kiểm tra phủ đăng nhập R4, tab CLO và bật EN, nhân bản chương trình, R6) và áp migration `20261019102707_outcomes` (`pnpm prisma:migrate`) — `docs/implement-report/f-11-plo-clo-matrices-implement-report.md`.
 - F-13: người dùng đi thử bằng trình duyệt NT-B4-01/03/09 với R1–R5 (tạo đề xuất từng loại, sửa bản nháp làm việc, so sánh, gửi duyệt, rút) và áp migration `20261019110535_change_requests` (`pnpm prisma:migrate` rồi `pnpm prisma:seed`) — `docs/implement-report/f-13-change-requests-implement-report.md`.
+- F-14: người dùng đi thử NT-B4-04 bằng trình duyệt (R5 gửi, R4 và R3 đồng ý, R1 Trả lại ở cấp 3, gửi lại, Duyệt thay, bình luận, chuông, MH-42, đề xuất tổ chức, tab mở 61 phút); migration `20261019122753_approval_comments_notifications` đã áp lên `ctdt-dev-pg` — `docs/implement-report/f-14-three-level-approval-notifications-implement-report.md`.
 - F-10: người dùng đi thử 7 bước kế hoạch §7 bằng trình duyệt (tạo Nháp, soạn đậm / danh sách / bảng, dán `<script>`, tuần kéo thả, bật EN và "Chưa dịch", tệp PDF tên tiếng Việt và tệp bị từ chối, hai chương trình cùng đề cương, R5 khác nhóm, R6) và áp migration `20261019095730_syllabi` (`pnpm prisma:migrate`); đặt `FILES_ROOT` vào ổ bền — `docs/implement-report/f-10-syllabus-implement-report.md`.
 
 ### Agreed Approach
@@ -44,6 +45,6 @@
 
 ## Up Next
 
-1. **Dựng F-08, F-10, F-11, F-13, F-14, F-15** — theo thứ tự trong README.
+1. **Dựng F-15** — theo thứ tự trong README.
 2. **Template** — sửa bốn lỗi của `E:\claude-code-templates` đã ghi ở báo cáo khởi tạo (hook chỉ dùng jq, sai đường dẫn migration, agent dùng npm/Biome, trùng tên agent giữa hai stack); cần người dùng đồng ý.
 3. **Volta** — `volta install pnpm@10.23.0` để pnpm chạy trên Node 22; cần người dùng đồng ý.

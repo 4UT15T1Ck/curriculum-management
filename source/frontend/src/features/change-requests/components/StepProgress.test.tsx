@@ -68,4 +68,27 @@ describe('groupByLevel', () => {
       [3, 1],
     ]);
   });
+
+  it('names both people on an override row and tags it', () => {
+    render(
+      <StepProgress
+        steps={[
+          step('1', 1, {
+            approver: { id: 'a', fullName: 'Điều phối An' },
+            action: 'APPROVE',
+            isOverride: true,
+            kind: 'OVERRIDE',
+            performedBy: { id: 'o', fullName: 'Chuyên viên Phòng ĐT' },
+            recordedAt: '2026-10-19T03:30:00.000Z',
+          }),
+        ]}
+      />,
+    );
+    expect(screen.getByText('Phòng Đào tạo duyệt thay')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Người duyệt: Điều phối An · Thực hiện: Chuyên viên Phòng ĐT/,
+      ),
+    ).toBeInTheDocument();
+  });
 });

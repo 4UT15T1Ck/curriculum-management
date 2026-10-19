@@ -32,6 +32,11 @@ export const ACTIONS: ChangeRequestDetail['permissions'] = {
   canSubmit: true,
   canWithdraw: false,
   canUpload: true,
+  canApprove: false,
+  canReturn: false,
+  canReject: false,
+  canOverride: false,
+  canComment: true,
 };
 
 export function summary(
@@ -46,6 +51,8 @@ export function summary(
     status: 'DRAFT',
     origin: 'FACULTY',
     submissionRound: 0,
+    levelEnteredAt: null,
+    daysWaiting: null,
     createdBy: { id: 'u1', fullName: 'Giảng viên A' },
     createdAt: '2026-10-19T03:00:00.000Z',
     updatedAt: '2026-10-19T04:00:00.000Z',
@@ -96,6 +103,9 @@ export function step(
     skipReason: null,
     remark: null,
     recordedAt: null,
+    performedBy: null,
+    isOverride: false,
+    kind: 'NORMAL',
     ...patch,
   };
 }

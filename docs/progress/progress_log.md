@@ -176,3 +176,12 @@ Format:
 - Giao diện MH-38..MH-41, banner bản nháp, `CreateRequestButton` thay cho nút "Tạo đề xuất" bị khóa.
 - Kiểm tra: backend đơn vị 638, đầu-cuối 304; frontend 344; tsc, oxlint, Prettier, build sạch.
 - Còn nợ: đi thử bằng trình duyệt, áp migration. Chi tiết ở báo cáo dựng.
+
+## [F-14] Duyệt ba cấp và thông báo — dựng mã
+**Date**: 2026-10-19
+**Files changed**: `source/backend/prisma/{schema.prisma,migrations/20261019122753_approval_comments_notifications}`, `source/backend/src/features/{change-requests,notifications,subject-groups,programs}/*`, `source/backend/src/shared/{change-requests,notifications,session,auth,subject-groups,programs,time}/*`, `source/backend/test/*`, `source/frontend/src/features/{change-requests,notifications}/*`, `source/frontend/src/shared/{notifications,layout,api,auth}/*`, `source/frontend/src/{routes.ts,router.tsx}`
+- Bảng `Comment`, `Notification`, cột `ChangeRequest.levelEnteredAt`; Đồng ý / Trả lại / Từ chối / Duyệt thay qua `ApprovalRecorder` (giành dòng đề xuất trước, cấp qua khi hết dòng PENDING), duyệt cấp 3 đề xuất tổ chức áp ngay qua `membership.writer` / `director.writer` rút từ F-03 và F-06; Từ chối và Rút xóa bản làm việc.
+- Thông báo ghi trong cùng giao dịch (`RequestNotifier`); `@PassiveRequest()` và `lastActivityAt` để thăm dò số chưa đọc không giữ phiên; hàng chờ, lịch sử theo lần gửi, bình luận, lọc "chờ từ N ngày".
+- Giao diện: bảng xử lý và hộp lý do ở MH-41, lịch sử và bình luận, MH-42, chuông và MH-04, cột "Số ngày chờ" ở MH-38.
+- Kiểm tra: backend đơn vị 707, đầu-cuối 330; frontend 376; tsc, oxlint, Prettier, build sạch. Migration đã áp lên `ctdt-dev-pg`.
+- Còn nợ: đi thử bằng trình duyệt. Điểm lệch kế hoạch ở báo cáo dựng.

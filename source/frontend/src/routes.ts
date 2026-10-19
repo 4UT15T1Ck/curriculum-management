@@ -34,6 +34,8 @@ export const ROUTES = {
   changeRequestOrganizationalNew: '/change-requests/new-organizational',
   changeRequestDetail: '/change-requests/:requestId',
   changeRequestEdit: '/change-requests/:requestId/edit',
+  approvalQueue: '/approval-queue',
+  notifications: '/notifications',
 } as const;
 
 // Row or group to scroll to and highlight on arrival; set by the consistency result list.

@@ -19,6 +19,17 @@ export type RequestOrigin = Schemas['RequestOrigin'];
 export type ChangeDocumentType = Schemas['ChangeDocumentType'];
 export type ChangeRequestDocument = Schemas['ChangeRequestDocumentDto'];
 export type ApprovalStep = Schemas['ApprovalStepDto'];
+export type ApprovalAction = Schemas['ApprovalAction'];
+export type ApprovalStepKind = Schemas['ApprovalStepKind'];
+export type OverrideAction = Schemas['OverrideAction'];
+export type OverrideDecisionBody = Schemas['OverrideDecisionDto'];
+export type ApprovalHistory = Schemas['ApprovalHistoryDto'];
+export type ApprovalRound = Schemas['ApprovalRoundDto'];
+export type ChangeRequestComment = Schemas['CommentDto'];
+export type ApprovalQueueItem = Schemas['ApprovalQueueItemDto'];
+export type ApprovalQueueQuery = NonNullable<
+  operations['ApprovalQueueController_read']['parameters']['query']
+>;
 export type Conflict = Schemas['ConflictDto'];
 export type RequestWorkspace = Schemas['RequestWorkspaceDto'];
 export type AuthoredItem = Schemas['AuthoredItemDto'];
@@ -109,6 +120,31 @@ export const submitChangeRequest = (id: string) =>
   sendJson<ChangeRequestDetail>('POST', `${requestPath(id)}/submit`);
 export const withdrawChangeRequest = (id: string) =>
   sendJson<ChangeRequestDetail>('POST', `${requestPath(id)}/withdraw`);
+
+export const approveChangeRequest = (id: string, remark?: string) =>
+  sendJson<ChangeRequestDetail>('POST', `${requestPath(id)}/approve`, {
+    remark,
+  });
+export const returnChangeRequest = (id: string, remark: string) =>
+  sendJson<ChangeRequestDetail>('POST', `${requestPath(id)}/return`, {
+    remark,
+  });
+export const rejectChangeRequest = (id: string, remark: string) =>
+  sendJson<ChangeRequestDetail>('POST', `${requestPath(id)}/reject`, {
+    remark,
+  });
+export const overrideChangeRequest = (id: string, body: OverrideDecisionBody) =>
+  sendJson<ChangeRequestDetail>('POST', `${requestPath(id)}/override`, body);
+export const getApprovalHistory = (id: string) =>
+  getJson<ApprovalHistory>(`${requestPath(id)}/history`);
+export const listComments = (id: string) =>
+  getJson<ChangeRequestComment[]>(`${requestPath(id)}/comments`);
+export const createComment = (id: string, content: string) =>
+  sendJson<ChangeRequestComment>('POST', `${requestPath(id)}/comments`, {
+    content,
+  });
+export const getApprovalQueue = (query: ApprovalQueueQuery) =>
+  getJson<ApprovalQueueItem[]>(withQuery('/approval-queue', { ...query }));
 
 export function uploadDocument(
   id: string,

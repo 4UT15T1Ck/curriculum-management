@@ -25,6 +25,8 @@ export const PERMISSIONS = {
   changeRequestView: 'changeRequest.view',
   changeRequestCreate: 'changeRequest.create',
   changeRequestCreateOrganizational: 'changeRequest.createOrganizational',
+  changeRequestOverride: 'changeRequest.override',
+  changeRequestComment: 'changeRequest.comment',
 } as const satisfies Record<string, PermissionCode>;
 
 export function hasPermission(

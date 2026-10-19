@@ -59,6 +59,12 @@ export const APP_MENU: readonly AppMenuItem[] = [
     permission: PERMISSIONS.changeRequestView,
   },
   {
+    path: ROUTES.approvalQueue,
+    label: 'Chờ tôi duyệt',
+    permission: PERMISSIONS.changeRequestView,
+  },
+  { path: ROUTES.notifications, label: 'Thông báo' },
+  {
     path: ROUTES.permissionMatrix,
     label: 'Ma trận quyền',
     permission: PERMISSIONS.permissionView,

@@ -1508,6 +1508,182 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/change-requests/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ApprovalController_approve'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/change-requests/{id}/return': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ApprovalController_returnToDraft'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/change-requests/{id}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ApprovalController_reject'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/change-requests/{id}/override': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ApprovalController_override'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/change-requests/{id}/history': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ApprovalController_readHistory'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/change-requests/{id}/comments': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ApprovalController_listComments'];
+    put?: never;
+    post: operations['ApprovalController_createComment'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/approval-queue': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ApprovalQueueController_read'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/notifications': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['NotificationsController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/notifications/unread-count': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['NotificationsController_unreadCount'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/notifications/read-all': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['NotificationsController_markAllRead'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/notifications/{id}/read': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['NotificationsController_markRead'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2805,6 +2981,9 @@ export interface components {
       origin: components['schemas']['RequestOrigin'];
       /** @description 0 = never submitted */
       submissionRound: number;
+      /** @description When the request entered its current level; null outside PENDING_* */
+      levelEnteredAt: string | null;
+      daysWaiting: number | null;
       createdBy: components['schemas']['UserRefDto'];
       createdAt: string;
       updatedAt: string;
@@ -2891,6 +3070,8 @@ export interface components {
     };
     /** @enum {string} */
     ApprovalAction: 'PENDING' | 'APPROVE' | 'RETURN' | 'REJECT';
+    /** @enum {string} */
+    ApprovalStepKind: 'NORMAL' | 'SKIPPED' | 'OVERRIDE';
     ApprovalStepDto: {
       id: string;
       /** @enum {number} */
@@ -2904,6 +3085,10 @@ export interface components {
       skipReason: string | null;
       remark: string | null;
       recordedAt: string | null;
+      /** @description Who acted; differs from approver on an override */
+      performedBy: components['schemas']['UserRefDto'] | null;
+      isOverride: boolean;
+      kind: components['schemas']['ApprovalStepKind'];
     };
     RequestActionsDto: {
       canEdit: boolean;
@@ -2911,6 +3096,11 @@ export interface components {
       canSubmit: boolean;
       canWithdraw: boolean;
       canUpload: boolean;
+      canApprove: boolean;
+      canReturn: boolean;
+      canReject: boolean;
+      canOverride: boolean;
+      canComment: boolean;
     };
     ChangeRequestDetailDto: {
       id: string;
@@ -2922,6 +3112,9 @@ export interface components {
       origin: components['schemas']['RequestOrigin'];
       /** @description 0 = never submitted */
       submissionRound: number;
+      /** @description When the request entered its current level; null outside PENDING_* */
+      levelEnteredAt: string | null;
+      daysWaiting: number | null;
       createdBy: components['schemas']['UserRefDto'];
       createdAt: string;
       updatedAt: string;
@@ -3013,6 +3206,81 @@ export interface components {
       documentType: components['schemas']['ChangeDocumentType'];
       /** Format: binary */
       file: string;
+    };
+    ApproveDecisionDto: {
+      remark?: Record<string, never>;
+    };
+    DecisionRemarkDto: {
+      remark: string;
+    };
+    /** @enum {string} */
+    OverrideAction: 'APPROVE' | 'RETURN' | 'REJECT';
+    OverrideDecisionDto: {
+      action: components['schemas']['OverrideAction'];
+      reason: string;
+    };
+    ApprovalRoundDto: {
+      submissionRound: number;
+      /** @description ISO time the round was submitted */
+      submittedAt: string;
+      steps: components['schemas']['ApprovalStepDto'][];
+    };
+    ApprovalHistoryDto: {
+      /** @description Newest round first */
+      rounds: components['schemas']['ApprovalRoundDto'][];
+    };
+    CommentDto: {
+      id: string;
+      author: components['schemas']['UserRefDto'];
+      content: string;
+      createdAt: string;
+    };
+    CreateCommentDto: {
+      content: string;
+    };
+    ApprovalQueueItemDto: {
+      requestId: string;
+      requestCode: string;
+      title: string;
+      requestType: components['schemas']['ChangeRequestType'];
+      status: components['schemas']['ChangeRequestStatus'];
+      /** @enum {number} */
+      approvalLevel: 1 | 2 | 3;
+      /** @description Group or program codes the caller stands for; null at level 3 */
+      standsFor: string | null;
+      createdBy: components['schemas']['UserRefDto'];
+      /** @description ISO time the round was submitted */
+      submittedAt: string;
+      /** @description Whole days since the request entered its level */
+      daysWaiting: number;
+    };
+    /** @enum {string} */
+    NotificationType:
+      | 'REQUEST_AWAITING_YOU'
+      | 'REQUEST_RETURNED'
+      | 'REQUEST_REJECTED'
+      | 'REQUEST_APPROVED'
+      | 'REQUEST_OVERRIDDEN'
+      | 'REQUEST_COMMENTED';
+    /** @enum {string} */
+    NotificationReadStatus: 'UNREAD' | 'READ';
+    NotificationDto: {
+      id: string;
+      notificationType: components['schemas']['NotificationType'];
+      content: string;
+      changeRequestId: string | null;
+      readStatus: components['schemas']['NotificationReadStatus'];
+      createdAt: string;
+      readAt: string | null;
+    };
+    NotificationPageDto: {
+      items: components['schemas']['NotificationDto'][];
+      total: number;
+      page: number;
+      pageSize: number;
+    };
+    UnreadCountDto: {
+      count: number;
     };
   };
   responses: never;
@@ -5462,6 +5730,8 @@ export interface operations {
         origin?: components['schemas']['RequestOrigin'];
         createdById?: string;
         mine?: boolean;
+        /** @description Only requests waiting at their current level for this many days or more */
+        minDaysWaiting?: number;
       };
       header?: never;
       path?: never;
@@ -5800,6 +6070,277 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  ApprovalController_approve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ApproveDecisionDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChangeRequestDetailDto'];
+        };
+      };
+    };
+  };
+  ApprovalController_returnToDraft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DecisionRemarkDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChangeRequestDetailDto'];
+        };
+      };
+    };
+  };
+  ApprovalController_reject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DecisionRemarkDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChangeRequestDetailDto'];
+        };
+      };
+    };
+  };
+  ApprovalController_override: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['OverrideDecisionDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChangeRequestDetailDto'];
+        };
+      };
+    };
+  };
+  ApprovalController_readHistory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ApprovalHistoryDto'];
+        };
+      };
+    };
+  };
+  ApprovalController_listComments: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CommentDto'][];
+        };
+      };
+    };
+  };
+  ApprovalController_createComment: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateCommentDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CommentDto'];
+        };
+      };
+    };
+  };
+  ApprovalQueueController_read: {
+    parameters: {
+      query?: {
+        requestType?: components['schemas']['ChangeRequestType'];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ApprovalQueueItemDto'][];
+        };
+      };
+    };
+  };
+  NotificationsController_list: {
+    parameters: {
+      query?: {
+        page?: number;
+        pageSize?: number;
+        /** @description Only unread ones */
+        unread?: boolean;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NotificationPageDto'];
+        };
+      };
+    };
+  };
+  NotificationsController_unreadCount: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['UnreadCountDto'];
+        };
+      };
+    };
+  };
+  NotificationsController_markAllRead: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['UnreadCountDto'];
+        };
+      };
+    };
+  };
+  NotificationsController_markRead: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NotificationDto'];
+        };
       };
     };
   };

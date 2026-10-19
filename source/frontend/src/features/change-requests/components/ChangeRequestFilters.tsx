@@ -1,4 +1,4 @@
-import { Flex, Select, Switch, Typography } from 'antd';
+import { Flex, InputNumber, Select, Space, Switch, Typography } from 'antd';
 import { REQUEST_STATUS_LABELS } from '../../../shared/change-requests/requestStatus';
 import type {
   ChangeRequestQuery,
@@ -22,7 +22,7 @@ const options = <T extends string>(labels: Record<T, string>) =>
     label: labels[key],
   }));
 
-// Filters of MH-38: status, type, origin (US-055 AC4) and "my requests".
+// Filters of MH-38: status, type, origin (US-055 AC4), days waiting (US-070 AC4) and "my requests".
 export function ChangeRequestFilters({
   value,
   onChange,
@@ -56,6 +56,20 @@ export function ChangeRequestFilters({
         options={options(ORIGIN_LABELS)}
         onChange={(origin) => onChange({ origin })}
       />
+      <Space.Compact>
+        <Space.Addon>Chờ từ</Space.Addon>
+        <InputNumber
+          min={1}
+          precision={0}
+          aria-label="Số ngày chờ tối thiểu"
+          style={{ width: 80 }}
+          value={value.minDaysWaiting}
+          onChange={(minDaysWaiting) =>
+            onChange({ minDaysWaiting: minDaysWaiting ?? undefined })
+          }
+        />
+        <Space.Addon>ngày</Space.Addon>
+      </Space.Compact>
       <Flex gap="small" align="center">
         <Switch
           aria-label="Chỉ đề xuất của tôi"

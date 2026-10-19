@@ -23,11 +23,12 @@ describe('ChangeRequestDetailPage', () => {
     renderDetail(
       detail({
         permissions: {
+          ...ACTIONS,
           canEdit: false,
           canDelete: false,
           canSubmit: false,
-          canWithdraw: false,
           canUpload: false,
+          canComment: false,
         },
       }),
     );
@@ -56,5 +57,43 @@ describe('ChangeRequestDetailPage', () => {
     expect(
       await screen.findByRole('button', { name: 'Rút đề xuất' }),
     ).toBeInTheDocument();
+  });
+
+  it('shows the approval panel with "Duyệt thay" to the academic office on a level-1 request', async () => {
+    renderDetail(
+      detail({
+        status: 'PENDING_COORDINATOR',
+        submissionRound: 1,
+        permissions: {
+          ...ACTIONS,
+          canEdit: false,
+          canOverride: true,
+          canComment: false,
+        },
+      }),
+    );
+    expect(
+      await screen.findByRole('button', { name: 'Duyệt thay' }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Đồng ý' })).toBeNull();
+  });
+
+  it('shows Đồng ý, Trả lại and Từ chối to the approver of the level', async () => {
+    renderDetail(
+      detail({
+        status: 'PENDING_COORDINATOR',
+        submissionRound: 1,
+        permissions: {
+          ...ACTIONS,
+          canEdit: false,
+          canApprove: true,
+          canReturn: true,
+          canReject: true,
+        },
+      }),
+    );
+    for (const name of ['Đồng ý', 'Trả lại', 'Từ chối']) {
+      expect(await screen.findByRole('button', { name })).toBeInTheDocument();
+    }
   });
 });

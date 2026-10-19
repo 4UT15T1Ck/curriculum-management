@@ -50,4 +50,17 @@ describe('app menu', () => {
       ROUTES.programs,
     );
   });
+
+  it('shows the notifications to everyone and the approval queue only to holders of changeRequest.view', () => {
+    const without = toMenuItems(APP_MENU, ['course.view']).map(
+      (item) => item.key,
+    );
+    expect(without).toContain(ROUTES.notifications);
+    expect(without).not.toContain(ROUTES.approvalQueue);
+    const withView = toMenuItems(APP_MENU, ['changeRequest.view']).map(
+      (item) => item.key,
+    );
+    expect(withView).toContain(ROUTES.approvalQueue);
+    expect(withView).toContain(ROUTES.notifications);
+  });
 });

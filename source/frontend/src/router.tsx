@@ -143,6 +143,16 @@ const ChangeRequestDetailPage = lazy(() =>
     (module) => ({ default: module.ChangeRequestDetailPage }),
   ),
 );
+const ApprovalQueuePage = lazy(() =>
+  import('./features/change-requests/pages/ApprovalQueuePage').then(
+    (module) => ({ default: module.ApprovalQueuePage }),
+  ),
+);
+const NotificationsPage = lazy(() =>
+  import('./features/notifications/pages/NotificationsPage').then((module) => ({
+    default: module.NotificationsPage,
+  })),
+);
 const ChangeRequestEditPage = lazy(() =>
   import('./features/change-requests/pages/ChangeRequestEditPage').then(
     (module) => ({ default: module.ChangeRequestEditPage }),
@@ -328,6 +338,15 @@ export const router = createBrowserRouter([
               </RequirePermission>
             ),
           },
+          {
+            path: ROUTES.approvalQueue,
+            element: (
+              <RequirePermission code={PERMISSIONS.changeRequestView}>
+                <ApprovalQueuePage />
+              </RequirePermission>
+            ),
+          },
+          { path: ROUTES.notifications, element: <NotificationsPage /> },
           {
             path: ROUTES.equivalenceGroups,
             element: (

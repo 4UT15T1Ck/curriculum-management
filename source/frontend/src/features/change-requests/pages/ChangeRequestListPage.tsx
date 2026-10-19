@@ -71,6 +71,11 @@ const COLUMNS: TableColumnsType<ChangeRequestSummary> = [
     ),
   },
   {
+    title: 'Số ngày chờ',
+    dataIndex: 'daysWaiting',
+    render: (days: number | null) => days ?? '—',
+  },
+  {
     title: 'Cập nhật',
     dataIndex: 'updatedAt',
     render: (iso: string) => formatDateTime(iso),

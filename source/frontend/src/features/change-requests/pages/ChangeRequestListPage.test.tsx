@@ -11,6 +11,8 @@ const PAGE = {
       id: 'r2',
       requestCode: 'DX-2026-0002',
       status: 'PENDING_COORDINATOR',
+      levelEnteredAt: '2026-10-15T03:00:00.000Z',
+      daysWaiting: 4,
       submissionRound: 2,
       origin: 'UNIVERSITY',
       title: 'Theo yêu cầu Trường',
@@ -85,6 +87,24 @@ describe('ChangeRequestListPage', () => {
     );
     await waitFor(() =>
       expect(reads.some((url) => url.includes('mine=true'))).toBe(true),
+    );
+  });
+
+  it('shows the days a pending request has waited and filters by them (US-070 AC4)', async () => {
+    const { reads } = renderList(['changeRequest.view']);
+    const second = (
+      await screen.findByRole('link', { name: 'DX-2026-0002' })
+    ).closest('tr')!;
+    expect(within(second).getByText('4')).toBeInTheDocument();
+    const first = screen
+      .getByRole('link', { name: 'DX-2026-0001' })
+      .closest('tr')!;
+    expect(within(first).getByText('—')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Số ngày chờ tối thiểu'), {
+      target: { value: '3' },
+    });
+    await waitFor(() =>
+      expect(reads.some((url) => url.includes('minDaysWaiting=3'))).toBe(true),
     );
   });
 });

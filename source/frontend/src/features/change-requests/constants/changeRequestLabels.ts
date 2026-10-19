@@ -47,7 +47,6 @@ export const ACTION_LABELS = {
   RETURN: 'Trả lại',
   REJECT: 'Từ chối',
 } as const;
-export const SKIPPED_LABEL = 'Bỏ qua';
 export const ACADEMIC_OFFICE_LABEL = 'Phòng Đào tạo';
 
 export const DELETE_REQUEST_CONFIRM =

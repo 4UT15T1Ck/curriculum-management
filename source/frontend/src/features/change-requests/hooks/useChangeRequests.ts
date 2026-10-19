@@ -27,6 +27,7 @@ import {
   updateChangeRequest,
   uploadDocument,
   withdrawChangeRequest,
+  type ApprovalQueueQuery,
   type AuthoredItemInput,
   type ChangeDocumentType,
   type ChangeRequestDetail,
@@ -50,6 +51,12 @@ export const CHANGE_REQUEST_QUERY_KEYS = {
   programs: (q: string) =>
     [...CHANGE_REQUEST_QUERY_ROOT, 'programs', q] as const,
   subjectGroups: [...CHANGE_REQUEST_QUERY_ROOT, 'subject-groups'] as const,
+  history: (id: string) =>
+    [...CHANGE_REQUEST_QUERY_ROOT, 'history', id] as const,
+  comments: (id: string) =>
+    [...CHANGE_REQUEST_QUERY_ROOT, 'comments', id] as const,
+  queue: (query: ApprovalQueueQuery) =>
+    [...CHANGE_REQUEST_QUERY_ROOT, 'queue', query] as const,
 };
 
 export function useChangeRequests(query: ChangeRequestQuery) {
@@ -114,7 +121,7 @@ export const useSubjectGroupOptions = (enabled: boolean) =>
   });
 
 // Every request mutation that returns the detail replaces the cached detail and refetches the rest of the root.
-function useRequestMutation<TVariables>(
+export function useRequestMutation<TVariables>(
   mutationFn: (variables: TVariables) => Promise<ChangeRequestDetail>,
 ) {
   const queryClient = useQueryClient();

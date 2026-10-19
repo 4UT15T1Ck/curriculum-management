@@ -16,6 +16,9 @@ import { ApiError } from '../../../shared/api/client';
 import { RequestStatusTag } from '../../../shared/change-requests/RequestStatusTag';
 import { errorMessage } from '../../../shared/forms/applyFieldErrors';
 import type { ChangeRequestDetail } from '../api/changeRequests';
+import { ApprovalHistory } from '../components/ApprovalHistory';
+import { ApprovalPanel } from '../components/ApprovalPanel';
+import { CommentsCard } from '../components/CommentsCard';
 import { ConflictAlert } from '../components/ConflictAlert';
 import { DocumentsCard } from '../components/DocumentsCard';
 import { RequestDiff } from '../components/RequestDiff';
@@ -42,7 +45,7 @@ function targetLink(request: ChangeRequestDetail): string | null {
   return generatePath(ROUTES.subjectGroupDetail, { groupId: id });
 }
 
-// MH-41: the request as everyone with visibility reads it. F-14 adds the approval panel to this page.
+// MH-41: the request as everyone with visibility reads it, with the approval panel for whoever may decide.
 export function ChangeRequestDetailPage() {
   const { requestId = '' } = useParams();
   const { message } = App.useApp();
@@ -143,10 +146,19 @@ export function ChangeRequestDetailPage() {
           <StepProgress steps={request.steps} />
         </Card>
       )}
+      <ApprovalPanel request={request} />
+      <ApprovalHistory
+        requestId={requestId}
+        submissionRound={request.submissionRound}
+      />
       <Card title="Thay đổi so với bản đang áp dụng">
         <RequestDiff requestId={requestId} />
       </Card>
       <DocumentsCard request={request} />
+      <CommentsCard
+        requestId={requestId}
+        canComment={request.permissions.canComment}
+      />
     </Flex>
   );
 }

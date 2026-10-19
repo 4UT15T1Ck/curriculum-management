@@ -1,10 +1,11 @@
 import { Suspense } from 'react';
 import { UserOutlined } from '@ant-design/icons';
-import { Button, Dropdown, Layout, Menu, Spin, Typography } from 'antd';
+import { Button, Dropdown, Layout, Menu, Space, Spin, Typography } from 'antd';
 import type { MenuProps } from 'antd';
 import { Link, Outlet, useLocation } from 'react-router';
 import { useMe } from '../auth/useMe';
 import { useLogout } from '../auth/useLogout';
+import { NotificationBell } from '../notifications/NotificationBell';
 import { ROUTES } from '../../routes';
 import {
   APP_MENU,
@@ -42,11 +43,18 @@ export function AppLayout() {
         <Typography.Title level={4} style={{ color: '#fff', margin: 0 }}>
           Quản lý Chương trình đào tạo
         </Typography.Title>
-        <Dropdown menu={{ items: userMenu }} trigger={['click']}>
-          <Button type="text" icon={<UserOutlined />} style={{ color: '#fff' }}>
-            {me?.fullName}
-          </Button>
-        </Dropdown>
+        <Space>
+          <NotificationBell />
+          <Dropdown menu={{ items: userMenu }} trigger={['click']}>
+            <Button
+              type="text"
+              icon={<UserOutlined />}
+              style={{ color: '#fff' }}
+            >
+              {me?.fullName}
+            </Button>
+          </Dropdown>
+        </Space>
       </Layout.Header>
       <Layout>
         <Layout.Sider breakpoint="lg" collapsedWidth={0} theme="light">
