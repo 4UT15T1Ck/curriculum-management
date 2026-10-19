@@ -65,6 +65,8 @@ Migration `20261018141101_auth_session` (F-01) sinh bằng `prisma migrate diff 
 
 Migration `20261019024639_subject_groups` (F-03) thêm `SubjectGroup`, `SubjectGroupMember` và hai enum; chỉ thêm, không đụng hàng của F-02.
 
+Migration `20261019072717_courses` (F-04) sinh bằng `prisma migrate dev --name courses` trên PostgreSQL 18 thật (ICU `vi-VN`); thêm `Course` và hai enum `CourseType`, `CourseStatus`; chỉ thêm, không đụng bảng cũ. Đã áp trên PostgreSQL của Testcontainers trong kiểm thử đầu-cuối (4 migration); chưa áp lên cơ sở dữ liệu phát triển của người dùng.
+
 Migration `20261018151319_access_control` (F-02) sinh bằng `prisma migrate dev --create-only --name access_control`; đã áp trên cơ sở dữ liệu phát triển. Thêm `OrgUnit` tối thiểu, `Role`, `Permission`, `RolePermission`, `RoleAssignment` và `User.orgUnitId`.
 
 ### `User` — table `User`
@@ -93,7 +95,7 @@ Migration `20261018151319_access_control` (F-02) sinh bằng `prisma migrate dev
 | `status` | `OrgUnitStatus` | Mặc định `ACTIVE` |
 | `createdAt` / `updatedAt` | `DateTime` | |
 
-Cột không đổi từ F-02; F-03 thêm quan hệ ngược `subjectGroups`. Loại đơn vị cha hợp lệ là hằng `ALLOWED_PARENT_TYPES` (`features/org-units/org-unit-hierarchy.ts`): `FACULTY` và `OFFICE` chỉ nằm dưới `UNIVERSITY`; đổi cha chạy kiểm chu trình ở service. Không có thao tác xóa đơn vị — chỉ `INACTIVE` / `ACTIVE`.
+Cột không đổi từ F-02; F-03 thêm quan hệ ngược `subjectGroups`, F-04 thêm `ownedCourses`. Loại đơn vị cha hợp lệ là hằng `ALLOWED_PARENT_TYPES` (`features/org-units/org-unit-hierarchy.ts`): `FACULTY` và `OFFICE` chỉ nằm dưới `UNIVERSITY`; đổi cha chạy kiểm chu trình ở service. Không có thao tác xóa đơn vị — chỉ `INACTIVE` / `ACTIVE`.
 
 ### `SubjectGroup` — table `SubjectGroup`
 | Column | Type | Notes |
@@ -119,6 +121,22 @@ Cột không đổi từ F-02; F-03 thêm quan hệ ngược `subjectGroups`. Lo
 
 Không có ràng buộc duy nhất hay loại trừ ở cơ sở dữ liệu: service chặn hai hàng chưa thu hồi cùng (nhóm, người, vai trò) chồng thời gian (`MEMBERSHIP_OVERLAP`) và đòi hàng `COORDINATOR` nằm trọn trong một hàng `MEMBER` cùng người, cùng nhóm (`COORDINATOR_NOT_MEMBER`). Một nhóm có thể có nhiều Điều phối. Kết thúc thành viên chỉ rút ngắn `validTo` và cắt các hàng Điều phối bên trong; hàng không bị xóa hay kéo dài.
 
+### `Course` — table `Course`
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `String` | `cuid(2)` |
+| `courseCode` | `String` | Duy nhất (`Course_courseCode_key`); cắt khoảng trắng, viết hoa khi ghi; không sửa sau khi tạo (DTO sửa không có trường này) |
+| `courseName` | `String` | Tiếng Việt; chỉ mục (`Course_courseName_idx`) cho sắp xếp |
+| `englishName` | `String?` | Rỗng lưu `null` |
+| `credits` | `Decimal(5,2)` | `numeric(5,2)`; gửi và nhận dạng chuỗi (`"2.5"`, `"0"`), `toWireDecimal` bỏ số 0 thừa |
+| `courseType` | `CourseType` | |
+| `status` | `CourseStatus` | Mặc định `ACTIVE`; `CANCELLED` là trạng thái cuối |
+| `ownerFacultyId` | `String` | FK `OrgUnit` (`Restrict`), chỉ mục; phải là `FACULTY` đang hoạt động (kiểm ở service) |
+| `ownerGroupId` | `String?` | FK `SubjectGroup` (`Restrict`), chỉ mục; nếu có phải là nhóm `ACTIVE` của chính `ownerFaculty` (kiểm ở service) |
+| `createdAt` / `updatedAt` | `DateTime` | |
+
+Không có thao tác xóa học phần — chỉ chuyển trạng thái. Quan hệ ngược: `OrgUnit.ownedCourses`, `SubjectGroup.ownedCourses`. "Học phần khoa khác" = `ownerFaculty.unitCode` khác `HOME_FACULTY_CODE` (`KHOA_CNTT`, `src/shared/org-units/home-faculty.ts`); không lưu thành cột. Cột `equivalenceGroup` chưa có — F-05 thêm cùng bảng nhóm tương đương. Tìm kiếm: `ILIKE '%q%'` trên mã và tên không dùng được chỉ mục; chấp nhận ở quy mô vài trăm dòng (đo 500 dòng trong đầu-cuối).
+
 ### `Role` — table `Role`
 | Column | Type | Notes |
 |---|---|---|
@@ -127,9 +145,7 @@ Không có ràng buộc duy nhất hay loại trừ ở cơ sở dữ liệu: se
 | `roleName` | `String` | |
 | `description` | `String?` | |
 | `isSystemRole` | `Boolean` | Mặc định `false` |
-| `scopeSource` | `SubjectGroupStatus` | `ACTIVE`, `INACTIVE` |
-| `SubjectGroupMemberRole` | `MEMBER`, `COORDINATOR` |
-| `ScopeSource` | Mặc định `NONE`; khác `NONE` là vai trò suy ra, không có hàng `RoleAssignment` |
+| `scopeSource` | `ScopeSource` | Mặc định `NONE`; khác `NONE` là vai trò suy ra, không có hàng `RoleAssignment` |
 | `createdAt` / `updatedAt` | `DateTime` | |
 
 ### `Permission` — table `Permission`
@@ -193,6 +209,10 @@ Hình dạng do `connect-pg-simple` quy định (`createTableIfMissing: false`, 
 | `PermissionMode` | `DIRECT`, `VIA_REQUEST` |
 | `PermissionScope` | `ALL`, `SCOPED` |
 | `ScopeType` | `SYSTEM`, `UNIT`, `ASSIGNMENT` |
+| `SubjectGroupStatus` | `ACTIVE`, `INACTIVE` |
+| `SubjectGroupMemberRole` | `MEMBER`, `COORDINATOR` |
+| `CourseType` | `THEORY`, `PRACTICE`, `LAB`, `PROJECT`, `CAPSTONE`, `INTERNSHIP`, `CONDITIONAL` |
+| `CourseStatus` | `ACTIVE`, `DISCONTINUED`, `CANCELLED` |
 
 Các enum sau Giá trị liệt kê lưu ở dạng `SCREAMING_SNAKE` như từ điển dữ liệu ghi (ví dụ `DRAFT`, `PENDING`, `ACTIVE`, `HISTORICAL`).
 

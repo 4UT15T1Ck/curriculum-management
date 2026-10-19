@@ -112,7 +112,7 @@ Kế hoạch: `docs/implementation/f-03-org-units-subject-groups-implementation-
 
 ### Backend — `src/features/subject-groups/`
 - `GET /api/subject-groups` (`subjectGroup.view`, lọc theo phạm vi, `?facultyId&status`) và `GET /api/subject-groups/:groupId` (404 trước, ngoài phạm vi → 403 `OUT_OF_SCOPE`; kèm mọi hàng thành viên đã có). Tóm tắt có `activeMemberCount`, `activeCoordinators`, `hasActiveCoordinator`.
-- Ghi nhóm cần `orgUnit.manage`: tạo, sửa (`groupCode` không sửa), `GET .../deactivation-impact` (thành viên, Điều phối; `courses: []` đến F-04), `.../deactivate`, `.../activate` (từ chối khi khoa ngừng). Nhóm ngừng giữ nguyên hàng; thành viên mất phạm vi ngay.
+- Ghi nhóm cần `orgUnit.manage`: tạo, sửa (`groupCode` không sửa), `GET .../deactivation-impact` (thành viên, Điều phối, các học phần chưa hủy của nhóm theo mã — đọc bảng `Course` qua Prisma, không import tính năng học phần), `.../deactivate`, `.../activate` (từ chối khi khoa ngừng). Nhóm ngừng giữ nguyên hàng; thành viên mất phạm vi ngay.
 - Thành viên: `POST .../members` (nhóm và người đang hoạt động; chồng thời gian → 409 `MEMBERSHIP_OVERLAP`; Điều phối không phủ bởi thành viên → 400 `COORDINATOR_NOT_MEMBER`), `POST .../members/:memberId/end` (trả mọi hàng bị đổi; cắt hoặc thu hồi hàng Điều phối bên trong), `.../revoke` (từ chối khi còn Điều phối phụ thuộc → 409 `MEMBER_HAS_COORDINATOR`). `GET /api/subject-group-memberships?userId=` (`orgUnit.manage` hoặc `user.manage`) cho MH-06.
 - Vai trò R4, R5 tự theo hàng: hết kỳ Điều phối thì `me.roles` mất R4 ở yêu cầu kế tiếp, R5 giữ.
 
@@ -129,3 +129,26 @@ Kế hoạch: `docs/implementation/f-03-org-units-subject-groups-implementation-
 #### MH-06 — `UserSubjectGroupsCard`
 - Thẻ nhóm chuyên môn của một tài khoản trên trang chi tiết tài khoản.
 
+---
+
+## 4. Danh mục học phần (F-04)
+
+Kế hoạch: `docs/implementation/f-04-course-catalog-implementation-plan.md`; báo cáo dựng: `docs/implement-report/f-04-course-catalog-implement-report.md`. Mã xong, chưa đi thử bằng trình duyệt.
+
+### Backend — `src/features/courses/`
+- `GET /api/courses` (`course.view`, mọi vai trò xem cả danh mục, không lọc phạm vi): `?q` (không phân biệt hoa thường, không bỏ dấu, trên mã và tên), `ownerFacultyId`, `ownerGroupId`, `courseType`, `status`, `foreign`, `sort` (`courseCode|courseName|credits|updatedAt`) và `order`, kèm `page`, `pageSize`; mã luôn là khóa phụ để phân trang ổn định. Học phần `CANCELLED` chỉ hiện cho người có `course.edit`.
+- `GET /api/courses/:courseId` trả `CourseDetailDto`: `editPath` (`DIRECT` | `VIA_REQUEST` | `null`) và `canChangeStatus` tính cho người gọi, `programsUsing` (luôn `[]` đến F-07). Học phần đã hủy → 404 `COURSE_NOT_FOUND` với người không có `course.edit`, trước khi kiểm phạm vi.
+- `POST /api/courses`, `PATCH /api/courses/:courseId` (cần `course.edit`; `UpdateCourseDto` không có `courseCode`, gửi vào → 400 `VALIDATION_FAILED`). Mục tiêu phạm vi của học phần là `{ subjectGroupIds: [nhóm], orgUnitIds: [khoa] }`; nhóm chuyên môn phải đang hoạt động và thuộc khoa (`OWNER_GROUP_INVALID`), khoa phải đang hoạt động (`OWNER_FACULTY_INVALID`), mã trùng → 409 `COURSE_CODE_TAKEN`. Chỉ kiểm lại chủ sở hữu khi giá trị thật sự đổi. Tín chỉ là chuỗi khớp `CREDITS_PATTERN`.
+- `POST /api/courses/:courseId/{discontinue,reopen,cancel}`: bảng `COURSE_TRANSITIONS`; chỉ khi chế độ gốc của người gọi trên học phần là `DIRECT` (R1), nếu không → 409 `CHANGE_REQUEST_REQUIRED`. Ngừng mở lớp cần `CourseUsageReader.hasActiveReplacement` (đến F-05 luôn sai → 409 `REPLACEMENT_REQUIRED`); hủy bị chặn bởi `inReleasedVersion` / `hasStudyResults` (→ 409 `COURSE_IN_USE`); `CANCELLED` là cuối (409 `COURSE_CANCELLED`). Không có route xóa.
+- Quy tắc sửa: học phần của khoa khác chỉ R1 sửa trực tiếp (R3 → `CHANGE_REQUEST_REQUIRED`, R4/R5 → 403 `OUT_OF_SCOPE`); học phần của Khoa CNTT chưa ban hành thì R3..R5 sửa trực tiếp trong phạm vi; đã ban hành (F-15) thì mọi người qua đề xuất.
+- Dùng chung (`src/shared/`): `authz/edit-path.ts` (`editPathFor`, `resolveEditPath`, `assertDirectEdit`), `courses/` (`CourseUsageReader`, `CoursesSharedModule`), `org-units/home-faculty.ts`, `decimal/decimal.ts`, `dtos/ref.dto.ts` (`SubjectGroupRefDto`, `CourseRefDto`), `dtos/transforms.ts`.
+
+### Frontend — `src/features/courses/`
+#### `CourseListPage` — MH-16 Danh mục học phần (`/courses`)
+- Cần `course.view`. Ô tìm kiếm (trễ 300 ms), lọc khoa, nhóm (chỉ khi có `subjectGroup.view`), loại, trạng thái (`Đã hủy` chỉ khi có `course.edit`), và "Tất cả / Của Khoa / Khoa khác"; sắp xếp theo mã, tên, tín chỉ; mọi lần đổi bộ lọc về trang 1. Thẻ "Khoa khác" cạnh tên. "Thêm học phần" khi có `course.edit`.
+
+#### `CourseDetailPage` — MH-17 (`/courses/:courseId`)
+- `CourseInfoCard`, `ProgramsUsingList` (ẩn khi rỗng), `CourseEditButton` (từ `editPath`: "Sửa", "Tạo đề xuất" bị khóa kèm chú thích đến F-13, hoặc ẩn) và `CourseStatusActions` (menu "Đổi trạng thái", hộp xác nhận `App.useApp().modal`; hủy có cảnh báo không hoàn tác). Quyền lấy từ máy chủ, không suy từ vai trò.
+
+#### `CourseFormPage` — MH-18 (`/courses/new`, `/courses/:courseId/edit`)
+- Trang, không phải hộp thoại. AntD `rules` (`schema/courseRules.ts`, khớp bản phía máy chủ), tín chỉ là ô chữ gửi nguyên chuỗi; mã bị khóa khi sửa; đổi khoa xóa nhóm; ô nhóm chỉ hiện khi có `subjectGroup.view` và khi đó mới gửi `ownerGroupId`. Lỗi nghiệp vụ có `details.field` (`COURSE_CODE_TAKEN`, `OWNER_GROUP_INVALID`) đặt dưới ô tương ứng qua `shared/forms/applyFieldErrors.ts`.

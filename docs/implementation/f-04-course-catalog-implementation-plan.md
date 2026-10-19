@@ -13,7 +13,7 @@ It deliberately excludes course relations and equivalence groups (F-05; so the h
 > - Builds on: `docs/implementation/f-01-auth-session-implementation-plan.md` (`ErrorDefinition`, `COMMON_ERRORS`, `AppException`, `getJson`/`sendJson`), `docs/implementation/f-02-accounts-roles-permissions-implementation-plan.md` (BE-01 pagination, BE-03 `PERMISSIONS`, BE-04 `AccessContext`, BE-06 seed, BE-07 `ref.dto.ts`, BE-10 fixtures; FE-01..FE-04), `docs/implementation/f-03-org-units-subject-groups-implementation-plan.md` (BE-01 `SubjectGroup`, BE-02 `activeMembershipWhere`, BE-04 `deactivationImpact`, `groupTarget`; FE-02 `useSubjectGroups`; FE-04 `OrgUnitSelect` `types` prop)
 > - Tests: `docs/planning/test-plan.md:150-152` (KB-001..KB-003), `:157` (KB-008), `:159` (KB-010), `:253` (KB-084), `:282` (NT-B1-03), `:284` (NT-B1-05)
 
-**Status**: Not started
+**Status**: Mã xong 2026-10-19 (BE-01..BE-06, FE-01..FE-05, DOC-01); còn nợ đi thử bằng trình duyệt (§7). Điểm lệch: `docs/implement-report/f-04-course-catalog-implement-report.md`
 
 ---
 

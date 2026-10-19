@@ -93,3 +93,14 @@ Format:
 - Hoàn thiện: sửa 6 ca kiểm thử giao diện hỏng (`UserSelect` đẩy thừa đối số, kiểm thử trang thiếu router/`retry:false`, cây đơn vị không mở nút cha vừa có con), bỏ mục menu trùng.
 - Kiểm tra: backend tsc 0, oxlint 0, đơn vị 101/101, đầu-cuối 69/69 (Testcontainers); frontend tsc 0, oxlint 0, đơn vị 44/44, `vite build` ổn; Prettier sạch ở cả hai.
 - Còn nợ: đi thử bằng trình duyệt (kế hoạch §7); áp migration lên cơ sở dữ liệu phát triển. Chi tiết sự cố ở báo cáo dựng.
+
+## [F-04] Danh mục học phần — dựng mã
+**Date**: 2026-10-19
+**Files changed**: `source/backend/prisma/{schema.prisma,seed-data/org-units.ts,migrations/20261019072717_courses}`, `source/backend/src/shared/{authz/edit-path*,courses,decimal,org-units,dtos,exception}/*`, `source/backend/src/features/{courses,subject-groups}/*`, `source/backend/src/app.module.ts`, `source/backend/test/*`, `source/frontend/src/shared/{api,auth,layout,forms}/*`, `source/frontend/src/features/courses/*`, `source/frontend/src/{router.tsx,routes.ts}`, `docs/architecture/*`, `docs/implementation/{README.md,f-04-course-catalog-implementation-plan.md}`, `docs/implement-report/f-04-course-catalog-implement-report.md`, `docs/progress/*`
+- Bảng `Course` (`Decimal(5,2)`, mã duy nhất, không sửa mã), `CourseType`, `CourseStatus` — migration `20261019072717_courses` sinh bằng `prisma migrate dev` trên PostgreSQL 18 thật; seed chạy hai lần không đổi.
+- Quy tắc "sửa trực tiếp hay qua đề xuất" lần đầu viết thành hàm dùng chung `resolveEditPath` / `assertDirectEdit` (`shared/authz/edit-path.ts`) và lỗi 409 `CHANGE_REQUEST_REQUIRED`; `CourseUsageReader` trả "không có" cho bốn sự thật của F-05, F-07, F-15, F-17; `HOME_FACULTY_CODE` định nghĩa "khoa khác".
+- API danh mục (tìm, lọc, sắp xếp, phân trang), chi tiết kèm `editPath` / `canChangeStatus`, thêm, sửa, ngừng mở lớp / mở lại / hủy (không xóa); danh sách ảnh hưởng khi ngừng nhóm nay liệt kê học phần chưa hủy của nhóm. `SubjectGroupRefDto`, `CourseRefDto` chuyển sang `shared/dtos/ref.dto.ts`.
+- Màn hình MH-16 (danh sách), MH-17 (chi tiết, đổi trạng thái có hộp xác nhận), MH-18 (biểu mẫu); menu "Học phần", route theo quyền; `applyFieldErrors` dùng chung.
+- Kiểm tra: backend tsc 0, oxlint 0, đơn vị 149/149 (24 tệp), đầu-cuối 97/97 (8 tệp, Testcontainers, gồm ca đo 500 học phần dưới 2 giây); frontend tsc 0, oxlint 0, đơn vị 65/65 (19 tệp), `vite build` ổn; Prettier sạch ở cả hai.
+- Còn nợ: đi thử bằng trình duyệt (kế hoạch §7) và áp migration lên cơ sở dữ liệu phát triển. Điểm lệch kế hoạch ở báo cáo dựng.
+

@@ -56,6 +56,7 @@ src/
 │   ├── permissions/       vai trò, ma trận vai trò × quyền (F-02)
 │   ├── org-units/         danh sách đơn vị cho ô chọn (F-02); thêm, sửa, chuyển, ngừng, kích hoạt đơn vị (F-03)
 │   ├── subject-groups/    nhóm chuyên môn, thành viên, Điều phối (F-03)
+│   ├── courses/           danh mục học phần, trạng thái HP-01..HP-04 (F-04)
 │   └── health/            trạng thái hệ thống
 ├── shared/
 │   ├── config/            env.validation.ts — lớp Env (class-validator); sai thì dừng khi khởi động
@@ -64,16 +65,19 @@ src/
 │   ├── session/           SessionStoreService: express-session + connect-pg-simple (bảng session); regenerate/destroy
 │   ├── password/          PasswordService (Argon2id), chính sách mật khẩu
 │   ├── auth/              @Public, @AllowPendingPasswordChange, @CurrentUser, CsrfGuard, AuthenticatedGuard
-│   ├── authz/             @RequirePermission, @AnyAuthenticated, @CurrentAccess, PermissionGuard, ScopeService, AccessContext, PERMISSIONS, LOCKED_CELLS
+│   ├── authz/             @RequirePermission, @AnyAuthenticated, @CurrentAccess, PermissionGuard, ScopeService, AccessContext, PERMISSIONS, LOCKED_CELLS, edit-path.ts (editPathFor, resolveEditPath, assertDirectEdit)
 │   ├── pagination/        PageQueryDto + Page<T>
+│   ├── courses/           CourseUsageReader — các sự thật về học phần nằm ở bảng của tính năng sau (F-05, F-07, F-15, F-17 điền), CoursesSharedModule
+│   ├── decimal/           CREDITS_PATTERN, toWireDecimal — số thập phân gửi dạng chuỗi
+│   ├── org-units/         home-faculty.ts — HOME_FACULTY_CODE, định nghĩa "khoa khác"
 │   ├── time/              todayDate() — ngày hôm nay theo Asia/Ho_Chi_Minh; validity.ts — validityState, parsePeriod, overlapsPeriod dùng chung cho mọi bảng có khoảng hiệu lực
 │   ├── subject-groups/    active-membership.ts — một bộ dựng điều kiện "hàng thành viên đang hiệu lực" cho bộ đọc phạm vi, tóm tắt nhóm
 │   ├── exception/         AppException, ErrorDefinition, COMMON_ERRORS, validation-exception.factory
 │   ├── filter/            AllExceptionsFilter — mọi lỗi ra dạng ErrorResponseDto
-│   └── dtos/              ErrorResponseDto, RefDto
+│   └── dtos/              ErrorResponseDto, RefDto (OrgUnit, User, Role, SubjectGroup, Course), transforms.ts (trimString, emptyToNull, trimUpperCase)
 └── generated/prisma/      Prisma Client sinh ra (không sửa tay, không đưa vào git)
 prisma/
-├── schema.prisma          User, Session, OrgUnit, Role, Permission, RolePermission, RoleAssignment
+├── schema.prisma          User, Session, OrgUnit, SubjectGroup, SubjectGroupMember, Course, Role, Permission, RolePermission, RoleAssignment
 ├── migrations/            migration của Prisma
 ├── seed-data/             đơn vị, vai trò, danh mục 41 quyền + ma trận ban đầu
 └── seed.ts                tài khoản R1 đầu tiên, quyền và vai trò (`pnpm prisma:seed`)
@@ -95,6 +99,8 @@ test/                      đầu-cuối: Testcontainers dựng PostgreSQL + Red
 | CSRF | `CsrfGuard`: phương thức khác GET/HEAD/OPTIONS phải có `X-Requested-With: XMLHttpRequest`, thiếu → 403 `CSRF_HEADER_MISSING` |
 | Phân quyền | `PermissionGuard` từ chối mặc định: route không `@Public` phải có `@RequirePermission(...codes)` (đủ một trong các mã) hoặc `@AnyAuthenticated()`, thiếu cả hai → 403. Quyền nạp lại mỗi yêu cầu, không cache |
 | Phạm vi | `ScopeService.loadAccess()` dựng `AccessContext` một lần mỗi yêu cầu, gắn vào `request.access`; service lấy bằng `@CurrentAccess()` và kiểm phạm vi đồng bộ trên đó. Vai trò `scopeSource = NONE` lấy từ hàng `RoleAssignment` (`SYSTEM`/`UNIT`); vai trò khác suy ra qua `ScopeSourceReader`: F-03 đã điền `SUBJECT_GROUP_MEMBER` (R5) và `SUBJECT_GROUP_COORDINATOR` (R4) từ hàng đang hiệu lực trong nhóm `ACTIVE`; F-06, F-17 điền tiếp |
+| Đường sửa | `src/shared/authz/edit-path.ts` quyết định một đối tượng được sửa trực tiếp (`DIRECT`) hay chỉ qua đề xuất (`VIA_REQUEST`) từ chế độ ô quyền và trạng thái đối tượng `{ released, draftOpenToRequestHolders }` (H-4, FR-55): đã ban hành → luôn qua đề xuất; chưa ban hành → ô `DIRECT` sửa thẳng, ô `VIA_REQUEST` sửa thẳng khi dữ liệu mở cho họ (với học phần: của Khoa CNTT). Service ghi gọi `assertDirectEdit`, ném 409 `CHANGE_REQUEST_REQUIRED`. F-06, F-07, F-10, F-11, F-12 dùng lại; F-13 nhận cùng thân yêu cầu làm mục thay đổi |
+| Sự thật của tính năng sau | `CourseUsageReader` (`src/shared/courses/`) trả "không có" cho `inReleasedVersion`, `hasStudyResults`, `programsUsing`, `hasActiveReplacement` đến khi F-15, F-17, F-07, F-05 điền; tính năng không import nhau |
 | Mã quyền | Hằng `PERMISSIONS` (`shared/authz/permission-codes.ts`); không viết cứng mã vai trò trong mã |
 | Người dùng hiện tại | `@CurrentUser()`; không đọc `req.session` trong controller |
 | Kiểm thử | Đơn vị `*.spec.ts` cạnh tệp; đầu-cuối `test/*.e2e-spec.ts` dùng `configureApp` chung với `main.ts` |
@@ -117,12 +123,13 @@ src/
 │   ├── hooks/             useQuery / useMutation
 │   ├── pages/<Name>Page.tsx   một tệp cho mỗi màn hình, test cạnh tệp
 │   └── schema/            `rules` cho AntD Form
-│   (auth, health, home, users, permissions, org-units, subject-groups)
+│   (auth, health, home, users, permissions, org-units, subject-groups, courses)
 ├── shared/
 │   ├── api/               client.ts (getJson, sendJson, ApiError, header CSRF), queryClient.ts, errorCodes.ts, schema.d.ts (sinh từ OpenAPI, có trong git)
 │   ├── auth/              me.ts, useMe, useLogout, RequireAuth, permissions.ts, useCan, RequirePermission
 │   ├── org-units/         orgUnits.ts, useOrgUnits, OrgUnitSelect — dùng chung cho mọi ô chọn đơn vị
-│   ├── subject-groups/    subjectGroups.ts, useSubjectGroups — danh sách nhóm dùng chung (cây đơn vị, trang nhóm, F-04)
+│   ├── subject-groups/    subjectGroups.ts, useSubjectGroups — danh sách nhóm dùng chung (cây đơn vị, trang nhóm, bộ lọc và biểu mẫu học phần)
+│   ├── forms/             applyFieldErrors.ts — đặt lỗi nghiệp vụ của máy chủ dưới ô theo `details.field`; errorMessage
 │   ├── users/             userOptions.ts, UserSelect — ô tìm tài khoản đang hoạt động
 │   ├── validity/          nhãn, màu và định dạng ngày của trạng thái hiệu lực
 │   └── layout/            AppLayout.tsx (Header, Sider, Content), menuItems.tsx (mục menu kèm quyền cần)

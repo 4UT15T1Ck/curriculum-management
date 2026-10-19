@@ -4,18 +4,20 @@
 
 - **Last updated**: 2026-10-19
 - **Active area**: dựng bản MVP (`docs/planning/epics.md` §0)
-- **Start here**: dựng F-04 (`docs/implementation/f-04-course-catalog-implementation-plan.md`) — danh mục học phần; F-04 điền `courses` trong danh sách ảnh hưởng khi ngừng nhóm (F-03 trả `[]`) và lọc `OrgUnitSelect` theo `FACULTY`.
+- **Start here**: dựng F-05 (`docs/implementation/f-05-course-relations-equivalence-implementation-plan.md`) — quan hệ học phần, nhóm tương đương; F-05 điền `CourseUsageReader.hasActiveReplacement` (để ngừng mở lớp đi được đường thành công, KB-008), thêm cột `Course.equivalenceGroup`, và nâng hộp xác nhận ngừng mở lớp của `CourseStatusActions` thành hộp chọn học phần thay thế.
 
 ---
 
 ## Active Item: Dựng bản MVP
 
-**Status**: F-01 xong 2026-10-18; F-02, F-03 mã xong 2026-10-19, còn nợ đi thử bằng trình duyệt; 10 tính năng MVP còn lại chưa dựng.
+**Status**: F-01 xong 2026-10-18; F-02, F-03, F-04 mã xong 2026-10-19, còn nợ đi thử bằng trình duyệt; 9 tính năng MVP còn lại chưa dựng.
 
 ### Còn nợ
 - F-02: người dùng đi thử 6 bước kế hoạch §7 bằng trình duyệt (chọn để sau) — `docs/implement-report/f-02-accounts-roles-permissions-implement-report.md`.
 
 - F-03: người dùng đi thử bằng trình duyệt (kế hoạch §7) và áp migration `20261019024639_subject_groups` lên cơ sở dữ liệu phát triển (`pnpm prisma:migrate`) — `docs/implement-report/f-03-org-units-subject-groups-implement-report.md`.
+
+- F-04: người dùng đi thử bằng trình duyệt (kế hoạch §7) và áp migration `20261019072717_courses` lên cơ sở dữ liệu phát triển (`pnpm prisma:migrate`) — `docs/implement-report/f-04-course-catalog-implement-report.md`.
 
 ### Agreed Approach
 - MVP = F-01..F-08, F-10, F-11, F-13, F-14, F-15 (13 tính năng, 298 điểm); F-09, F-12, F-16, F-26, B5, B6 làm sau.
@@ -32,6 +34,6 @@
 
 ## Up Next
 
-1. **Dựng F-04..F-08, F-10, F-11, F-13, F-14, F-15** — theo thứ tự trong README.
+1. **Dựng F-05..F-08, F-10, F-11, F-13, F-14, F-15** — theo thứ tự trong README.
 2. **Template** — sửa bốn lỗi của `E:\claude-code-templates` đã ghi ở báo cáo khởi tạo (hook chỉ dùng jq, sai đường dẫn migration, agent dùng npm/Biome, trùng tên agent giữa hai stack); cần người dùng đồng ý.
 3. **Volta** — `volta install pnpm@10.23.0` để pnpm chạy trên Node 22; cần người dùng đồng ý.
