@@ -15,3 +15,11 @@ export function mapUniqueViolation(
   }
   return error;
 }
+
+// A row refers to one that is gone (or was never there): P2003.
+export function isForeignKeyViolation(error: unknown): boolean {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === 'P2003'
+  );
+}

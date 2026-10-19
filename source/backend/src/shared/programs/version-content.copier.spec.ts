@@ -10,6 +10,10 @@ function txWith(source: {
   requisites: object[];
   newGroups?: object[];
   newItems?: object[];
+  plos?: object[];
+  newPlos?: object[];
+  cells?: object[];
+  links?: object[];
 }) {
   const groupFind = vi
     .fn()
@@ -20,7 +24,20 @@ function txWith(source: {
     .mockResolvedValueOnce(source.items)
     .mockResolvedValueOnce(source.newItems ?? []);
   const requisiteFind = vi.fn().mockResolvedValue(source.requisites);
+  const ploFind = vi
+    .fn()
+    .mockResolvedValueOnce(source.plos ?? [])
+    .mockResolvedValueOnce(source.newPlos ?? []);
   const tx = {
+    pLO: { findMany: ploFind, createMany: vi.fn() },
+    coursePLOMapping: {
+      findMany: vi.fn().mockResolvedValue(source.cells ?? []),
+      createMany: vi.fn(),
+    },
+    cLOPLOMapping: {
+      findMany: vi.fn().mockResolvedValue(source.links ?? []),
+      createMany: vi.fn(),
+    },
     electiveGroup: { findMany: groupFind, createMany: vi.fn() },
     curriculumItem: { findMany: itemFind, createMany: vi.fn() },
     curriculumRequisite: { findMany: requisiteFind, createMany: vi.fn() },
@@ -219,5 +236,75 @@ describe('VersionContentCopier.copy', () => {
       created.every((row: { versionId: string }) => row.versionId === 'to'),
     ).toBe(true);
     expect(tx.curriculumRequisite.createMany).not.toHaveBeenCalled();
+  });
+
+  it('remaps PLO ids by code, cells on both ids with the weight kept, and links with the CLO id unchanged', async () => {
+    const item = (id: string, courseId: string) => ({
+      id,
+      courseId,
+      plannedSemester: 1,
+      sortOrder: 1,
+      blockSymbol: null,
+      isElective: false,
+      electiveGroupId: null,
+      htDa: false,
+      tqDa: false,
+      minStudiedScore: null,
+      minTransferScore: null,
+      note: null,
+    });
+    const { tx, copy } = txWith({
+      groups: [],
+      items: [item('i1', 'c1')],
+      newItems: [{ id: 'ni1', courseId: 'c1' }],
+      requisites: [],
+      plos: [
+        {
+          id: 'p1',
+          ploCode: 'PLO1',
+          description: 'Mô tả',
+          englishDescription: null,
+          competencyGroup: 'Kiến thức',
+          sortOrder: 1,
+        },
+        {
+          id: 'p2',
+          ploCode: 'PLO2',
+          description: 'Mô tả 2',
+          englishDescription: 'Desc 2',
+          competencyGroup: null,
+          sortOrder: 2,
+        },
+      ],
+      newPlos: [
+        { id: 'np2', ploCode: 'PLO2' },
+        { id: 'np1', ploCode: 'PLO1' },
+      ],
+      cells: [{ curriculumItemId: 'i1', ploId: 'p2', weight: dec('0.5') }],
+      links: [{ curriculumItemId: 'i1', ploId: 'p2', cloId: 'clo-shared' }],
+    });
+
+    await copy();
+
+    expect(tx.pLO.createMany.mock.calls[0][0].data[1]).toEqual({
+      versionId: 'to',
+      ploCode: 'PLO2',
+      description: 'Mô tả 2',
+      englishDescription: 'Desc 2',
+      competencyGroup: null,
+      sortOrder: 2,
+    });
+    expect(tx.coursePLOMapping.createMany).toHaveBeenCalledWith({
+      data: [{ curriculumItemId: 'ni1', ploId: 'np2', weight: dec('0.5') }],
+    });
+    expect(tx.cLOPLOMapping.createMany).toHaveBeenCalledWith({
+      data: [{ curriculumItemId: 'ni1', ploId: 'np2', cloId: 'clo-shared' }],
+    });
+    const order = [
+      tx.pLO.createMany,
+      tx.coursePLOMapping.createMany,
+      tx.cLOPLOMapping.createMany,
+    ].map((fn) => fn.mock.invocationCallOrder[0]);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
   });
 });

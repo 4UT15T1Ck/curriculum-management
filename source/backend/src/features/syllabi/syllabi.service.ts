@@ -94,6 +94,14 @@ export class SyllabiService {
         !hasAnyRevision &&
         course.status !== CourseStatus.CANCELLED &&
         editPath === EDIT_PATH.DIRECT,
+      canEditClos:
+        draft !== null &&
+        editPathFor(
+          access,
+          PERMISSIONS.CLO_EDIT,
+          courseTarget(course),
+          state,
+        ) === EDIT_PATH.DIRECT,
       editPath,
       attachmentRules: this.attachmentRules(),
     };

@@ -15,9 +15,9 @@ import {
   programEditState,
   programTarget,
 } from '../../shared/programs/program-target.js';
+import { itemTarget } from '../../shared/curriculum/item-target.js';
 import {
   holdsGroupScope,
-  itemTarget,
   VERSION_SELECT,
   type VersionRow,
 } from './curriculum-access.js';

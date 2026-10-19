@@ -8,7 +8,10 @@ import {
   assertDirectEdit,
   type EditState,
 } from '../../shared/authz/edit-path.js';
-import { PERMISSIONS } from '../../shared/authz/permission-codes.js';
+import {
+  PERMISSIONS,
+  type PermissionCode,
+} from '../../shared/authz/permission-codes.js';
 import { courseTarget } from '../../shared/courses/course-target.js';
 import { AppException } from '../../shared/exception/app.exception.js';
 import { HOME_FACULTY_CODE } from '../../shared/org-units/home-faculty.js';
@@ -91,16 +94,17 @@ export function assertRevisionVisible(
   assertCourseVisible(row.course, access);
 }
 
-// Every write to a revision or its rows goes through here, in this order.
+// Every write to a revision or its rows goes through here, in this order. CLO writes pass clo.edit.
 export async function assertDraftWrite(
   prisma: Pick<PrismaService, 'syllabus'>,
   access: AccessContext,
   row: SyllabusAccessRow | null,
+  permission: PermissionCode = PERMISSIONS.SYLLABUS_EDIT,
 ): Promise<SyllabusAccessRow> {
   assertRevisionVisible(row, access);
   assertDirectEdit(
     access,
-    PERMISSIONS.SYLLABUS_EDIT,
+    permission,
     courseTarget(row.course),
     await syllabusEditState(prisma, row.course),
   );
@@ -111,4 +115,15 @@ export async function assertDraftWrite(
     throw new AppException(SYLLABUS_ERRORS.COURSE_CANCELLED);
   }
   return row;
+}
+
+// Every write to a revision's rows touches the revision's updatedAt ("Cập nhật lúc").
+export function touchSyllabus(
+  client: Pick<PrismaService, 'syllabus'>,
+  syllabusId: string,
+): Promise<unknown> {
+  return client.syllabus.update({
+    where: { id: syllabusId },
+    data: { updatedAt: new Date() },
+  });
 }

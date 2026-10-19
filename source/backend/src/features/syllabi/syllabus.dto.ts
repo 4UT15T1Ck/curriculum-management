@@ -14,7 +14,12 @@ import {
   SyllabusAttachmentDto,
   toAttachmentDto,
 } from './syllabus-attachment.dto.js';
-import { toWeeklyContentDto, WeeklyContentDto } from './weekly-content.dto.js';
+import { CLO_INCLUDE, CloDto, toCloDto } from './clo.dto.js';
+import {
+  toWeeklyContentDto,
+  WEEKLY_CONTENT_INCLUDE,
+  WeeklyContentDto,
+} from './weekly-content.dto.js';
 
 export class SyllabusCourseDto {
   @ApiProperty() id!: string;
@@ -49,6 +54,8 @@ export class SyllabusDto {
   weeklyContents!: WeeklyContentDto[];
   @ApiProperty({ type: [SyllabusAttachmentDto] })
   attachments!: SyllabusAttachmentDto[];
+  @ApiProperty({ type: [CloDto] })
+  clos!: CloDto[];
 }
 
 export class CourseSyllabusDto {
@@ -59,6 +66,10 @@ export class CourseSyllabusDto {
   @ApiProperty({ type: SyllabusDto, nullable: true })
   draft!: SyllabusDto | null;
   @ApiProperty() canCreate!: boolean;
+  @ApiProperty({
+    description: 'A Draft exists and its CLOs are directly editable',
+  })
+  canEditClos!: boolean;
   @ApiProperty({ enum: EDIT_PATHS, enumName: 'EditPath', nullable: true })
   editPath!: EditPath | null;
   @ApiProperty({ type: AttachmentRulesDto })
@@ -66,10 +77,17 @@ export class CourseSyllabusDto {
 }
 
 export const SYLLABUS_INCLUDE = {
-  weeklyContents: { orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }] },
+  weeklyContents: {
+    include: WEEKLY_CONTENT_INCLUDE,
+    orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
+  },
   attachments: {
     include: { uploadedBy: { select: USER_REF_SELECT } },
     orderBy: [{ recordedAt: 'asc' }, { id: 'asc' }],
+  },
+  clos: {
+    include: CLO_INCLUDE,
+    orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
   },
 } as const satisfies Prisma.SyllabusInclude;
 export type SyllabusRow = Prisma.SyllabusGetPayload<{
@@ -104,6 +122,7 @@ export function toSyllabusDto(
     publishedAt: row.publishedAt?.toISOString() ?? null,
     updatedAt: row.updatedAt.toISOString(),
     weeklyContents: row.weeklyContents.map(toWeeklyContentDto),
+    clos: row.clos.map(toCloDto),
     attachments: row.attachments.map((attachment) =>
       toAttachmentDto(attachment, canDeleteFrom(attachment.uploadedBy.id)),
     ),

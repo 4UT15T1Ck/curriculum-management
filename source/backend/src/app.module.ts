@@ -22,6 +22,7 @@ import { EquivalenceGroupsModule } from './features/equivalence-groups/equivalen
 import { ProgramsModule } from './features/programs/programs.module.js';
 import { ConsistencyModule } from './features/consistency/consistency.module.js';
 import { CurriculumModule } from './features/curriculum/curriculum.module.js';
+import { OutcomesModule } from './features/outcomes/outcomes.module.js';
 import { SyllabiModule } from './features/syllabi/syllabi.module.js';
 
 @Module({
@@ -44,6 +45,7 @@ import { SyllabiModule } from './features/syllabi/syllabi.module.js';
     ProgramsModule,
     CurriculumModule,
     ConsistencyModule,
+    OutcomesModule,
     SyllabiModule,
   ],
   providers: [

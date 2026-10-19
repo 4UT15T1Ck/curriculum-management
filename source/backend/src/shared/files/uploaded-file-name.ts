@@ -1,4 +1,6 @@
 export const FILE_NAME_MAX = 255;
+// The control characters are exactly what is being stripped.
+// oxlint-disable-next-line no-control-regex
 const CONTROL_CHARS = /[\u0000-\u001f\u007f]/g;
 const UNNAMED_FILE = 'tep-dinh-kem';
 

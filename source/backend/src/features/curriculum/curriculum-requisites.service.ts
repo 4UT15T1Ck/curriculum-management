@@ -13,8 +13,9 @@ import {
   type RequisiteEdge,
 } from '../../shared/courses/requisite-graph.js';
 import { AppException } from '../../shared/exception/app.exception.js';
+import { itemTarget } from '../../shared/curriculum/item-target.js';
 import { PrismaService } from '../../shared/prisma/prisma.service.js';
-import { assertCurriculumWrite, itemTarget } from './curriculum-access.js';
+import { assertCurriculumWrite } from './curriculum-access.js';
 import { CurriculumReadService } from './curriculum-read.service.js';
 import type { CurriculumItemDto } from './curriculum.dto.js';
 import { CURRICULUM_ERRORS } from './curriculum.errors.js';

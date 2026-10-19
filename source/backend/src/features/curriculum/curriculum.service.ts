@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { CourseStatus, type Prisma } from '../../generated/prisma/client.js';
 import type { AccessContext } from '../../shared/authz/access-context.js';
 import { AppException } from '../../shared/exception/app.exception.js';
+import { itemTarget } from '../../shared/curriculum/item-target.js';
 import { PrismaService } from '../../shared/prisma/prisma.service.js';
 import { mapUniqueViolation } from '../../shared/prisma/unique-violation.js';
 import { programTarget } from '../../shared/programs/program-target.js';
@@ -9,7 +10,6 @@ import {
   assertCurriculumWrite,
   assertDraft,
   assertSemesterInRange,
-  itemTarget,
 } from './curriculum-access.js';
 import { CurriculumReadService } from './curriculum-read.service.js';
 import { CurriculumRequisitesService } from './curriculum-requisites.service.js';

@@ -5,7 +5,6 @@ export const FILE_ERRORS = {
   FILE_MISSING: {
     status: HttpStatus.NOT_FOUND,
     code: 'FILE_MISSING',
-    message:
-      'Không tìm thấy tệp trên máy chủ. Hãy báo quản trị viên hệ thống.',
+    message: 'Không tìm thấy tệp trên máy chủ. Hãy báo quản trị viên hệ thống.',
   },
 } as const satisfies Record<string, ErrorDefinition>;

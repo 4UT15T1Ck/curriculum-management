@@ -290,6 +290,7 @@ model ProgramVersion {
   clones                      Program[]            @relation("ProgramClonedFrom")
   electiveGroups              ElectiveGroup[]
   curriculumItems             CurriculumItem[]
+  plos                        PLO[]
   createdAt                   DateTime             @default(now())
   updatedAt                   DateTime             @updatedAt
 
@@ -437,6 +438,7 @@ model CurriculumItem {
   minTransferScore Decimal?              @db.Decimal(4, 2)
   note             String?
   requisites       CurriculumRequisite[]
+  ploMappings      CoursePLOMapping[]
   createdAt        DateTime              @default(now())
   updatedAt        DateTime              @updatedAt
 
@@ -496,6 +498,7 @@ model Syllabus {
   updatedAt          DateTime             @updatedAt
   weeklyContents     WeeklyContent[]
   attachments        SyllabusAttachment[]
+  clos               CLO[]
 
   @@unique([courseId, revisionNumber])
 }
@@ -508,6 +511,7 @@ model WeeklyContent {
   sortOrder          Int
   content            String
   teachingActivities String?
+  cloLinks           WeeklyContentCLO[]
 
   @@index([syllabusId, sortOrder])
 }
@@ -526,4 +530,81 @@ model SyllabusAttachment {
   recordedAt   DateTime           @default(now())
 
   @@index([syllabusId, recordedAt])
+}
+
+model PLO {
+  id                 String             @id @default(cuid(2))
+  versionId          String
+  version            ProgramVersion     @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  ploCode            String
+  description        String
+  englishDescription String?
+  competencyGroup    String?
+  sortOrder          Int
+  courseMappings     CoursePLOMapping[]
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@unique([versionId, ploCode])
+  @@index([versionId, sortOrder])
+}
+
+// A CLO belongs to a syllabus revision, so every program using the course shares it (DEC-03).
+model CLO {
+  id                 String             @id @default(cuid(2))
+  syllabusId         String
+  syllabus           Syllabus           @relation(fields: [syllabusId], references: [id], onDelete: Cascade)
+  cloCode            String
+  description        String
+  englishDescription String?
+  cognitiveLevel     String?
+  sortOrder          Int
+  ploLinks           CLOPLOMapping[]
+  weeklyLinks        WeeklyContentCLO[]
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@unique([syllabusId, cloCode])
+  @@index([syllabusId, sortOrder])
+}
+
+model WeeklyContentCLO {
+  id              String        @id @default(cuid(2))
+  weeklyContentId String
+  weeklyContent   WeeklyContent @relation(fields: [weeklyContentId], references: [id], onDelete: Cascade)
+  cloId           String
+  clo             CLO           @relation(fields: [cloId], references: [id], onDelete: Cascade)
+
+  @@unique([weeklyContentId, cloId])
+  @@index([cloId])
+}
+
+// weight in (0, 1], two decimals: CHECK "CoursePLOMapping_weight_range" is appended to the migration by hand.
+model CoursePLOMapping {
+  id               String          @id @default(cuid(2))
+  curriculumItemId String
+  curriculumItem   CurriculumItem  @relation(fields: [curriculumItemId], references: [id], onDelete: Cascade)
+  ploId            String
+  plo              PLO             @relation(fields: [ploId], references: [id], onDelete: Cascade)
+  weight           Decimal         @db.Decimal(3, 2)
+  cloLinks         CLOPLOMapping[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@unique([curriculumItemId, ploId])
+  @@index([ploId])
+}
+
+// Item and PLO are reached through the course cell: a link cannot outlive the cell it refines.
+model CLOPLOMapping {
+  id               String           @id @default(cuid(2))
+  curriculumItemId String
+  ploId            String
+  coursePlo        CoursePLOMapping @relation(fields: [curriculumItemId, ploId], references: [curriculumItemId, ploId], onDelete: Cascade)
+  cloId            String
+  clo              CLO              @relation(fields: [cloId], references: [id], onDelete: Cascade)
+  createdAt        DateTime         @default(now())
+
+  @@unique([curriculumItemId, cloId, ploId])
+  @@index([cloId])
 }

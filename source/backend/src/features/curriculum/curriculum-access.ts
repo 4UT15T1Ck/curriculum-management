@@ -10,10 +10,7 @@ import { assertDirectEdit } from '../../shared/authz/edit-path.js';
 import { PERMISSIONS } from '../../shared/authz/permission-codes.js';
 import { AppException } from '../../shared/exception/app.exception.js';
 import type { PrismaService } from '../../shared/prisma/prisma.service.js';
-import {
-  programEditState,
-  programTarget,
-} from '../../shared/programs/program-target.js';
+import { programEditState } from '../../shared/programs/program-target.js';
 import {
   CURRICULUM_CONSTRAINT,
   CURRICULUM_ERRORS,
@@ -35,17 +32,6 @@ export const VERSION_SELECT = {
 export type VersionRow = Prisma.ProgramVersionGetPayload<{
   select: typeof VERSION_SELECT;
 }>;
-
-// A row is reachable through its program (R1, R3) or through its course's subject group (R4, R5).
-export function itemTarget(
-  version: VersionRow,
-  course: { ownerGroupId: string | null },
-): ScopeTarget {
-  return {
-    ...programTarget(version.program),
-    subjectGroupIds: course.ownerGroupId ? [course.ownerGroupId] : [],
-  };
-}
 
 export function assertDraft(version: Pick<VersionRow, 'status'>): void {
   if (version.status !== ProgramVersionStatus.DRAFT) {

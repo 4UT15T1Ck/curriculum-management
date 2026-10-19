@@ -122,6 +122,7 @@ function revisionRow(status: SyllabusStatus, patch = {}) {
     updatedAt: new Date(),
     weeklyContents: [],
     attachments: [],
+    clos: [],
     ...patch,
   };
 }

@@ -30,6 +30,13 @@ import { PERMISSIONS } from '../../shared/authz/permission-codes.js';
 import { RequirePermission } from '../../shared/authz/require-permission.decorator.js';
 import { ATTACHMENT_MIMES } from '../../shared/files/attachment-types.js';
 import { sendFile } from '../../shared/files/send-file.js';
+import {
+  CloDto,
+  CreateCloDto,
+  ReorderClosDto,
+  UpdateCloDto,
+} from './clo.dto.js';
+import { ClosService } from './clos.service.js';
 import { SyllabusAttachmentsService } from './syllabus-attachments.service.js';
 import {
   SyllabusAttachmentDto,
@@ -54,6 +61,7 @@ export class SyllabiController {
     private readonly syllabi: SyllabiService,
     private readonly weeks: WeeklyContentsService,
     private readonly attachments: SyllabusAttachmentsService,
+    private readonly clos: ClosService,
   ) {}
 
   @Get('courses/:courseId/syllabus')
@@ -130,6 +138,50 @@ export class SyllabiController {
     @CurrentAccess() access: AccessContext,
   ) {
     return this.weeks.remove(weeklyContentId, access);
+  }
+
+  @Post('syllabi/:syllabusId/clos')
+  @HttpCode(HttpStatus.CREATED)
+  @RequirePermission(PERMISSIONS.CLO_EDIT)
+  @ApiCreatedResponse({ type: CloDto })
+  createClo(
+    @Param('syllabusId') syllabusId: string,
+    @Body() dto: CreateCloDto,
+    @CurrentAccess() access: AccessContext,
+  ) {
+    return this.clos.create(syllabusId, dto, access);
+  }
+
+  @Put('syllabi/:syllabusId/clos/order')
+  @RequirePermission(PERMISSIONS.CLO_EDIT)
+  @ApiOkResponse({ type: [CloDto] })
+  reorderClos(
+    @Param('syllabusId') syllabusId: string,
+    @Body() dto: ReorderClosDto,
+    @CurrentAccess() access: AccessContext,
+  ) {
+    return this.clos.reorder(syllabusId, dto, access);
+  }
+
+  @Patch('clos/:cloId')
+  @RequirePermission(PERMISSIONS.CLO_EDIT)
+  @ApiOkResponse({ type: CloDto })
+  updateClo(
+    @Param('cloId') cloId: string,
+    @Body() dto: UpdateCloDto,
+    @CurrentAccess() access: AccessContext,
+  ) {
+    return this.clos.update(cloId, dto, access);
+  }
+
+  @Delete('clos/:cloId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @RequirePermission(PERMISSIONS.CLO_EDIT)
+  removeClo(
+    @Param('cloId') cloId: string,
+    @CurrentAccess() access: AccessContext,
+  ) {
+    return this.clos.remove(cloId, access);
   }
 
   @Post('syllabi/:syllabusId/attachments')

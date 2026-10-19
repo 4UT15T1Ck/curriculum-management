@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import type { Prisma } from '../../generated/prisma/client.js';
 import type { AccessContext } from '../../shared/authz/access-context.js';
 import { AppException } from '../../shared/exception/app.exception.js';
 import { COMMON_ERRORS } from '../../shared/exception/error-codes.js';
@@ -7,6 +8,7 @@ import { sanitizeRichText } from '../../shared/rich-text/sanitize-rich-text.js';
 import {
   assertDraftWrite,
   SYLLABUS_ACCESS_SELECT,
+  touchSyllabus,
   type SyllabusAccessRow,
 } from './syllabus-access.js';
 import {
@@ -17,6 +19,7 @@ import {
 } from './syllabus.errors.js';
 import {
   toWeeklyContentDto,
+  WEEKLY_CONTENT_INCLUDE,
   type CreateWeeklyContentDto,
   type ReorderWeeklyContentsDto,
   type UpdateWeeklyContentDto,
@@ -41,11 +44,13 @@ export class WeeklyContentsService {
       await this.findRevision(syllabusId),
     );
     const content = requiredRichText(dto.content);
+    const cloIds = dto.cloIds ?? [];
     return this.prisma.$transaction(async (tx) => {
       const count = await tx.weeklyContent.count({ where: { syllabusId } });
       if (count >= SYLLABUS_LIMITS.WEEKLY_ROWS_MAX) {
         throw new AppException(SYLLABUS_ERRORS.WEEKLY_ROWS_LIMIT);
       }
+      await assertClosInSyllabus(tx, syllabusId, cloIds);
       const created = await tx.weeklyContent.create({
         data: {
           syllabusId,
@@ -53,9 +58,13 @@ export class WeeklyContentsService {
           sortOrder: count + 1,
           content,
           teachingActivities: sanitizeRichText(dto.teachingActivities),
+          cloLinks: {
+            createMany: { data: cloIds.map((cloId) => ({ cloId })) },
+          },
         },
+        include: WEEKLY_CONTENT_INCLUDE,
       });
-      await touch(tx, syllabusId);
+      await touchSyllabus(tx, syllabusId);
       return toWeeklyContentDto(created);
     });
   }
@@ -68,6 +77,14 @@ export class WeeklyContentsService {
     const row = await this.findRow(weeklyContentId);
     await assertDraftWrite(this.prisma, access, row.syllabus);
     return this.prisma.$transaction(async (tx) => {
+      // undefined = not sent: the links stay as they are.
+      if (dto.cloIds !== undefined) {
+        await assertClosInSyllabus(tx, row.syllabusId, dto.cloIds);
+        await tx.weeklyContentCLO.deleteMany({ where: { weeklyContentId } });
+        await tx.weeklyContentCLO.createMany({
+          data: dto.cloIds.map((cloId) => ({ weeklyContentId, cloId })),
+        });
+      }
       const updated = await tx.weeklyContent.update({
         where: { id: weeklyContentId },
         data: {
@@ -79,8 +96,9 @@ export class WeeklyContentsService {
             teachingActivities: sanitizeRichText(dto.teachingActivities),
           }),
         },
+        include: WEEKLY_CONTENT_INCLUDE,
       });
-      await touch(tx, row.syllabusId);
+      await touchSyllabus(tx, row.syllabusId);
       return toWeeklyContentDto(updated);
     });
   }
@@ -102,7 +120,7 @@ export class WeeklyContentsService {
           data: { sortOrder: index + 1 },
         });
       }
-      await touch(tx, row.syllabusId);
+      await touchSyllabus(tx, row.syllabusId);
     });
   }
 
@@ -135,10 +153,11 @@ export class WeeklyContentsService {
           data: { sortOrder: index + 1 },
         });
       }
-      await touch(tx, syllabusId);
+      await touchSyllabus(tx, syllabusId);
       const ordered = await tx.weeklyContent.findMany({
         where: { syllabusId },
         orderBy: [...BY_ORDER],
+        include: WEEKLY_CONTENT_INCLUDE,
       });
       return ordered.map(toWeeklyContentDto);
     });
@@ -166,14 +185,25 @@ export class WeeklyContentsService {
   }
 }
 
-function touch(
-  client: Pick<PrismaService, 'syllabus'>,
+async function assertClosInSyllabus(
+  tx: Prisma.TransactionClient,
   syllabusId: string,
-): Promise<unknown> {
-  return client.syllabus.update({
-    where: { id: syllabusId },
-    data: { updatedAt: new Date() },
+  cloIds: readonly string[],
+): Promise<void> {
+  if (cloIds.length === 0) {
+    return;
+  }
+  const found = await tx.cLO.count({
+    where: { id: { in: [...cloIds] }, syllabusId },
   });
+  if (found !== cloIds.length) {
+    throw new AppException(SYLLABUS_ERRORS.CLO_NOT_IN_SYLLABUS, [
+      {
+        field: SYLLABUS_FIELD.WEEKLY_CLOS,
+        constraints: [SYLLABUS_ERRORS.CLO_NOT_IN_SYLLABUS.message],
+      },
+    ]);
+  }
 }
 
 function requiredRichText(html: string): string {

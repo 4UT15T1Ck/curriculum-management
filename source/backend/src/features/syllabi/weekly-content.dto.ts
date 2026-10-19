@@ -10,6 +10,7 @@ import {
   Length,
   MaxLength,
 } from 'class-validator';
+import type { Prisma } from '../../generated/prisma/client.js';
 import { trimString } from '../../shared/dtos/transforms.js';
 import { SYLLABUS_LIMITS } from './syllabus.errors.js';
 
@@ -30,6 +31,17 @@ export class CreateWeeklyContentDto {
   @IsString()
   @MaxLength(SYLLABUS_LIMITS.RICH_TEXT_MAX)
   teachingActivities?: string | null;
+
+  @ApiPropertyOptional({
+    type: [String],
+    description: 'CLOs of the same syllabus this week covers; omitted = keep',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(SYLLABUS_LIMITS.CLOS_MAX)
+  @ArrayUnique()
+  @IsString({ each: true })
+  cloIds?: string[];
 }
 
 export class UpdateWeeklyContentDto extends PartialType(
@@ -53,20 +65,26 @@ export class WeeklyContentDto {
   @ApiProperty({ description: 'Sanitized HTML' }) content!: string;
   @ApiProperty({ nullable: true, type: String })
   teachingActivities!: string | null;
+  @ApiProperty({ type: [String], description: 'In CLO order' })
+  cloIds!: string[];
 }
 
-export function toWeeklyContentDto(row: {
-  id: string;
-  weekLabel: string;
-  sortOrder: number;
-  content: string;
-  teachingActivities: string | null;
-}): WeeklyContentDto {
+export const WEEKLY_CONTENT_INCLUDE = {
+  cloLinks: { select: { cloId: true, clo: { select: { sortOrder: true } } } },
+} as const satisfies Prisma.WeeklyContentInclude;
+export type WeeklyContentRow = Prisma.WeeklyContentGetPayload<{
+  include: typeof WEEKLY_CONTENT_INCLUDE;
+}>;
+
+export function toWeeklyContentDto(row: WeeklyContentRow): WeeklyContentDto {
   return {
     id: row.id,
     weekLabel: row.weekLabel,
     sortOrder: row.sortOrder,
     content: row.content,
     teachingActivities: row.teachingActivities,
+    cloIds: [...row.cloLinks]
+      .sort((a, b) => a.clo.sortOrder - b.clo.sortOrder)
+      .map((link) => link.cloId),
   };
 }

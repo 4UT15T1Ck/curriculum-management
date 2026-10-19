@@ -91,6 +91,14 @@ describe('permission table', () => {
 
   async function countWrites(path: string): Promise<number> {
     if (path.startsWith('/api/org-units')) return prisma.orgUnit.count();
+    if (path.startsWith('/api/clos') || path.includes('/clos')) {
+      return prisma.cLO.count();
+    }
+    if (path.startsWith('/api/plos') || path.endsWith('/plos')) {
+      return prisma.pLO.count();
+    }
+    if (path.includes('/plo-weights')) return prisma.coursePLOMapping.count();
+    if (path.endsWith('/clo-plo-links')) return prisma.cLOPLOMapping.count();
     if (path.includes('/syllabus') || path.startsWith('/api/syllabi')) {
       return prisma.syllabus.count();
     }

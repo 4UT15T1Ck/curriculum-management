@@ -5,6 +5,7 @@ import type { Env } from '../../shared/config/env.validation.js';
 import { CoursesSharedModule } from '../../shared/courses/courses-shared.module.js';
 import { BYTES_PER_MB } from '../../shared/files/attachment-types.js';
 import { FilesModule } from '../../shared/files/files.module.js';
+import { ClosService } from './clos.service.js';
 import { SyllabiController } from './syllabi.controller.js';
 import { SyllabiService } from './syllabi.service.js';
 import { SyllabusAttachmentsService } from './syllabus-attachments.service.js';
@@ -30,6 +31,7 @@ import { WeeklyContentsService } from './weekly-contents.service.js';
   providers: [
     SyllabiService,
     WeeklyContentsService,
+    ClosService,
     SyllabusAttachmentsService,
   ],
 })

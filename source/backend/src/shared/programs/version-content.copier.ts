@@ -3,8 +3,8 @@ import type { Prisma } from '../../generated/prisma/client.js';
 
 // Copies everything that hangs off a program version into another version, inside the caller's transaction.
 // Each feature that adds version-owned tables adds its step here: clone (FR-25) and the Draft of a change request depend on it.
-// F-07 added the elective groups, curriculum rows and their requisites; F-11 adds the PLO and matrices after them
-// (the old id -> new id map of the rows is what a matrix step needs).
+// F-07 added the elective groups, curriculum rows and their requisites; F-11 added the PLOs and both matrices after them
+// (the old id -> new id maps of the rows and PLOs are what a matrix step needs).
 @Injectable()
 export class VersionContentCopier {
   async copy(
@@ -24,6 +24,9 @@ export class VersionContentCopier {
       groupIds,
     );
     await this.copyRequisites(tx, itemIds);
+    const ploIds = await this.copyPlos(tx, fromVersionId, toVersionId);
+    await this.copyCoursePloMappings(tx, itemIds, ploIds);
+    await this.copyCloPloLinks(tx, itemIds, ploIds);
   }
 
   // Returns old id -> new id, matched back through the natural key (groupCode) because createMany returns no rows.
@@ -124,6 +127,83 @@ export class VersionContentCopier {
           minScore,
         }),
       ),
+    });
+  }
+
+  // Returns old id -> new id, matched back through the natural key (ploCode).
+  private async copyPlos(
+    tx: Prisma.TransactionClient,
+    from: string,
+    to: string,
+  ): Promise<Map<string, string>> {
+    const plos = await tx.pLO.findMany({ where: { versionId: from } });
+    if (plos.length === 0) {
+      return new Map();
+    }
+    await tx.pLO.createMany({
+      data: plos.map(
+        ({
+          ploCode,
+          description,
+          englishDescription,
+          competencyGroup,
+          sortOrder,
+        }) => ({
+          versionId: to,
+          ploCode,
+          description,
+          englishDescription,
+          competencyGroup,
+          sortOrder,
+        }),
+      ),
+    });
+    const created = await tx.pLO.findMany({
+      where: { versionId: to },
+      select: { id: true, ploCode: true },
+    });
+    const newIdByCode = new Map(created.map((plo) => [plo.ploCode, plo.id]));
+    return new Map(plos.map((plo) => [plo.id, newIdByCode.get(plo.ploCode)!]));
+  }
+
+  private async copyCoursePloMappings(
+    tx: Prisma.TransactionClient,
+    itemIds: ReadonlyMap<string, string>,
+    ploIds: ReadonlyMap<string, string>,
+  ): Promise<void> {
+    if (itemIds.size === 0 || ploIds.size === 0) {
+      return;
+    }
+    const cells = await tx.coursePLOMapping.findMany({
+      where: { curriculumItemId: { in: [...itemIds.keys()] } },
+    });
+    await tx.coursePLOMapping.createMany({
+      data: cells.map(({ curriculumItemId, ploId, weight }) => ({
+        curriculumItemId: itemIds.get(curriculumItemId)!,
+        ploId: ploIds.get(ploId)!,
+        weight,
+      })),
+    });
+  }
+
+  // CLO ids are kept: the clone shares the syllabus, so it shares its CLOs.
+  private async copyCloPloLinks(
+    tx: Prisma.TransactionClient,
+    itemIds: ReadonlyMap<string, string>,
+    ploIds: ReadonlyMap<string, string>,
+  ): Promise<void> {
+    if (itemIds.size === 0 || ploIds.size === 0) {
+      return;
+    }
+    const links = await tx.cLOPLOMapping.findMany({
+      where: { curriculumItemId: { in: [...itemIds.keys()] } },
+    });
+    await tx.cLOPLOMapping.createMany({
+      data: links.map(({ curriculumItemId, ploId, cloId }) => ({
+        curriculumItemId: itemIds.get(curriculumItemId)!,
+        ploId: ploIds.get(ploId)!,
+        cloId,
+      })),
     });
   }
 }
