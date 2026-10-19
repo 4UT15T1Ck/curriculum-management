@@ -4,13 +4,13 @@
 
 - **Last updated**: 2026-10-19
 - **Active area**: dựng bản MVP (`docs/planning/epics.md` §0)
-- **Start here**: dựng F-06 (`docs/implementation/f-06-programs-directors-implementation-plan.md`) — thông tin chương trình, Giám đốc CTĐT; F-06 dùng lại `assertSchoolWideDirect` và `useCanEditSchoolWide` do F-05 thêm, và điền bộ đọc phạm vi "CTĐT tôi phụ trách" cho R3.
+- **Start here**: dựng F-07 (`docs/implementation/f-07-curriculum-elective-groups-implementation-plan.md`) — khung chương trình, nhóm tự chọn; F-07 thêm bước vào `VersionContentCopier.copy` (F-06) để nhân bản chép cả khung, kiểm `semesterCount` trong `ProgramsService.update`, dùng `lockRequisiteGraph`/`findRequisiteCycle` (F-05) và `activeDirectorWhere`/`programTarget` (F-06); seed chương trình 1024034 ở `prisma/seed-data/programs.ts`.
 
 ---
 
 ## Active Item: Dựng bản MVP
 
-**Status**: F-01 xong 2026-10-18; F-02, F-03, F-04, F-05 mã xong 2026-10-19, còn nợ đi thử bằng trình duyệt; 8 tính năng MVP còn lại chưa dựng.
+**Status**: F-01 xong 2026-10-18; F-02, F-03, F-04, F-05, F-06 mã xong 2026-10-19, còn nợ đi thử bằng trình duyệt; 7 tính năng MVP còn lại chưa dựng.
 
 ### Còn nợ
 - F-02: người dùng đi thử 6 bước kế hoạch §7 bằng trình duyệt (chọn để sau) — `docs/implement-report/f-02-accounts-roles-permissions-implement-report.md`.
@@ -20,6 +20,8 @@
 - F-04: người dùng đi thử bằng trình duyệt (kế hoạch §7) và áp migration `20261019072717_courses` lên cơ sở dữ liệu phát triển (`pnpm prisma:migrate`) — `docs/implement-report/f-04-course-catalog-implement-report.md`.
 
 - F-05: người dùng đi thử 6 bước kế hoạch §7 bằng trình duyệt (A–B tiên quyết kèm ngưỡng, vòng A → B → C → A, song hành hai chiều, ngừng mở lớp kèm học phần thay thế, nhóm tương đương và gộp nhóm) và áp migration `20261019075207_course_relations` lên cơ sở dữ liệu phát triển (`pnpm prisma:migrate`) — `docs/implement-report/f-05-course-relations-equivalence-implement-report.md`.
+
+- F-06: người dùng đi thử 6 bước kế hoạch §7 bằng trình duyệt (danh sách 1024034 với "Nháp", thêm chương trình lệch tín chỉ thấy chênh lệch rồi sửa, phân công Giám đốc rồi đăng nhập bằng người đó, kết thúc phân công hôm qua, nhân bản, ngừng sử dụng), áp migration `20261019082727_programs` lên cơ sở dữ liệu phát triển (`pnpm prisma:migrate` rồi `pnpm prisma:seed`), và thay giá trị giữ chỗ của 1024034 bằng số liệu từ tệp Excel khung của Khoa — `docs/implement-report/f-06-programs-directors-implement-report.md`.
 
 ### Agreed Approach
 - MVP = F-01..F-08, F-10, F-11, F-13, F-14, F-15 (13 tính năng, 298 điểm); F-09, F-12, F-16, F-26, B5, B6 làm sau.
@@ -36,6 +38,6 @@
 
 ## Up Next
 
-1. **Dựng F-06..F-08, F-10, F-11, F-13, F-14, F-15** — theo thứ tự trong README.
+1. **Dựng F-07, F-08, F-10, F-11, F-13, F-14, F-15** — theo thứ tự trong README.
 2. **Template** — sửa bốn lỗi của `E:\claude-code-templates` đã ghi ở báo cáo khởi tạo (hook chỉ dùng jq, sai đường dẫn migration, agent dùng npm/Biome, trùng tên agent giữa hai stack); cần người dùng đồng ý.
 3. **Volta** — `volta install pnpm@10.23.0` để pnpm chạy trên Node 22; cần người dùng đồng ý.

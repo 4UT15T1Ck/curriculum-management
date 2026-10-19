@@ -69,6 +69,8 @@ Migration `20261019072717_courses` (F-04) sinh bằng `prisma migrate dev --name
 
 Migration `20261019075207_course_relations` (F-05) sinh bằng `prisma migrate dev --create-only --name course_relations` trên PostgreSQL 18 thật (ICU `vi-VN`, container Docker), rồi nối tay hai ràng buộc `CHECK` ở cuối `migration.sql` và áp bằng `prisma migrate dev`; thêm `CourseRelation`, `EquivalentCourseGroup`, enum `CourseRelationType` và cột `Course.equivalenceGroupId`; chỉ thêm. Đã áp trên PostgreSQL của Testcontainers trong kiểm thử đầu-cuối (5 migration); chưa áp lên cơ sở dữ liệu phát triển của người dùng.
 
+Migration `20261019082727_programs` (F-06) sinh bằng `prisma migrate dev --create-only --name programs` trên PostgreSQL 18 thật (ICU `vi-VN`, container Docker), rồi nối tay hai chỉ mục duy nhất từng phần ở cuối `migration.sql` và áp bằng `prisma migrate dev`; chạy lại báo "Already in sync". Thêm `Program`, `ProgramVersion`, `ProgramDirectorAssignment` và ba enum `DegreeLevel`, `ProgramStatus`, `ProgramVersionStatus`; chỉ thêm. Đã áp trên PostgreSQL của Testcontainers trong kiểm thử đầu-cuối (6 migration); chưa áp lên cơ sở dữ liệu phát triển của người dùng.
+
 Migration `20261018151319_access_control` (F-02) sinh bằng `prisma migrate dev --create-only --name access_control`; đã áp trên cơ sở dữ liệu phát triển. Thêm `OrgUnit` tối thiểu, `Role`, `Permission`, `RolePermission`, `RoleAssignment` và `User.orgUnitId`.
 
 ### `User` — table `User`
@@ -162,6 +164,46 @@ Duy nhất `(sourceCourseId, targetCourseId, relationType)` (`CourseRelation_sou
 
 Thành viên là `Course.equivalenceGroupId` (không có bảng nối, M-4). Nhóm có ít nhất 2 học phần (service giữ); giải thể xóa nhóm sau khi xóa `equivalenceGroupId` của các thành viên (`SetNull` là lưới an toàn). Nhóm nằm ngoài ảnh chụp phiên bản nên R1 sửa trực tiếp bất cứ lúc nào (EC-16, E-11).
 
+### `Program` — table `Program` (F-06)
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `String` | `cuid(2)` |
+| `programCode` | `String` | Duy nhất (`Program_programCode_key`); cắt khoảng trắng, không sửa sau khi tạo; tối đa 20 ký tự |
+| `facultyId` | `String` | FK `OrgUnit` (`Restrict`), chỉ mục; mặc định Khoa CNTT khi tạo |
+| `degreeLevel` | `DegreeLevel` | `ENGINEER` Kỹ sư, `BACHELOR` Cử nhân (FR-24) |
+| `status` | `ProgramStatus` | Mặc định `ACTIVE`; không xóa chương trình, chỉ `INACTIVE` / `ACTIVE` (EC-50) |
+| `clonedFromId` | `String?` | FK `ProgramVersion` (`Restrict`): phiên bản được dùng làm nền khi nhân bản (FR-25) |
+| `createdAt` / `updatedAt` | `DateTime` | |
+
+Quan hệ: `faculty` (`ProgramFaculty`), `clonedFrom` (`ProgramClonedFrom`), `versions` (`ProgramVersions`), `directors`. `OrgUnit` thêm `programs`, `User` thêm `programDirectorships`, `grantedDirectorships`, `revokedDirectorships`. Đối tượng phân quyền của chương trình là `{ programIds: [id], orgUnitIds: [facultyId] }` (`programTarget`).
+
+### `ProgramVersion` — table `ProgramVersion` (F-06)
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `String` | `cuid(2)` |
+| `programId` | `String` | FK `Program` (`Restrict`) |
+| `versionNumber` | `String?` | Trống khi còn Nháp; F-15 điền khi ban hành |
+| `status` | `ProgramVersionStatus` | `DRAFT`, `PENDING`, `ACTIVE`, `HISTORICAL`; mặc định `DRAFT` |
+| `programName`, `majorCode`, `majorName` | `String` | Mô tả nằm ở phiên bản (M-3) để bản đã ban hành giữ mô tả riêng |
+| `semesterCount` | `Int` | 1..12 (`PROGRAM_LIMITS.SEMESTERS_MAX`, mặc định kế hoạch) |
+| `totalCredits`, `compulsoryCredits`, `electiveCredits` | `Decimal(5,2)` | Gửi và nhận dạng chuỗi; bắt buộc + tự chọn = tổng (BR-03, `assertCreditsAddUp`) |
+| `createdAt` / `updatedAt` | `DateTime` | |
+
+Duy nhất `(programId, versionNumber)` (nhiều `NULL` được qua, vì PostgreSQL coi `NULL` là khác nhau) và chỉ mục `(programId, status)`. **Hai chỉ mục duy nhất từng phần viết tay trong `migration.sql`** (Prisma không mô hình hóa và không diff chúng nên giữ qua các migration sau — đừng "dọn" khỏi SQL): `ProgramVersion_one_draft` (`("programId") WHERE "status" = 'DRAFT'`) và `ProgramVersion_one_active` (`WHERE "status" = 'ACTIVE'`) — mỗi chương trình có nhiều nhất một bản Nháp và một bản Đang hiệu lực (BR-22); F-13, F-15 dựa vào. Cột ban hành (`decisionNumber`, `signedDate`, `effectiveSemester`, `publishedBy`, `publishedAt`, `previousVersion`, `correctionOf`, `correctionReason`, `sourceRequest`, `creditMismatchReason`) do F-15 thêm. Quan hệ ngược `clones` (các chương trình nhân bản từ phiên bản này).
+
+### `ProgramDirectorAssignment` — table `ProgramDirectorAssignment` (F-06)
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `String` | `cuid(2)` |
+| `programId` | `String` | FK `Program` (`Restrict`), chỉ mục |
+| `directorId` | `String` | FK `User` (`Restrict`), chỉ mục |
+| `validFrom` / `validTo` | `Date` / `Date?` | `@db.Date`; `validTo` trống = không thời hạn (tên SRS `startDate`, `endDate` đổi để dùng chung `shared/time/validity.ts`) |
+| `assignedById` | `String?` | FK `User` |
+| `revokedAt` / `revokedById` | `DateTime?` / `String?` | Thu hồi dòng nhập nhầm; dòng thu hồi vẫn nằm trong lịch sử |
+| `createdAt` | `DateTime` | Không có `updatedAt` (theo kế hoạch) |
+
+Dòng "còn hiệu lực" do `activeDirectorWhere(today)` (`src/shared/programs/active-director.ts`) định nghĩa: chưa thu hồi, trong khoảng ngày, **và** chương trình `ACTIVE`; bộ đọc phạm vi R3, tóm tắt chương trình và (sau này) tra người duyệt cấp 2 của F-14 cùng dùng. Không có ràng buộc cơ sở dữ liệu cho việc chồng thời hạn của cùng một người — `ProgramDirectorsService.assign` giữ (`overlapsPeriod`), hai Giám đốc khác nhau cùng thời gian là hợp lệ (US-020 AC3). Không xóa, không kéo dài tại chỗ.
+
 ### `Role` — table `Role`
 | Column | Type | Notes |
 |---|---|---|
@@ -239,6 +281,9 @@ Hình dạng do `connect-pg-simple` quy định (`createTableIfMissing: false`, 
 | `CourseType` | `THEORY`, `PRACTICE`, `LAB`, `PROJECT`, `CAPSTONE`, `INTERNSHIP`, `CONDITIONAL` |
 | `CourseStatus` | `ACTIVE`, `DISCONTINUED`, `CANCELLED` |
 | `CourseRelationType` | `PRIOR`, `PREREQUISITE`, `COREQUISITE`, `REPLACEMENT` |
+| `DegreeLevel` | `ENGINEER`, `BACHELOR` |
+| `ProgramStatus` | `ACTIVE`, `INACTIVE` |
+| `ProgramVersionStatus` | `DRAFT`, `PENDING`, `ACTIVE`, `HISTORICAL` |
 
 Các enum sau Giá trị liệt kê lưu ở dạng `SCREAMING_SNAKE` như từ điển dữ liệu ghi (ví dụ `DRAFT`, `PENDING`, `ACTIVE`, `HISTORICAL`).
 
@@ -249,3 +294,5 @@ Các enum sau Giá trị liệt kê lưu ở dạng `SCREAMING_SNAKE` như từ 
 `prisma/seed.ts`, chạy bằng `pnpm prisma:seed` (`prisma db seed` → `tsx prisma/seed.ts`, khai ở `prisma.config.ts`). Upsert một tài khoản R1: tên đăng nhập `SEED_ADMIN_USERNAME` (mặc định `admin`), mã `ADMIN`, mật khẩu `SEED_ADMIN_PASSWORD` (bắt buộc, theo chính sách mật khẩu), `mustChangePassword = true`; tài khoản đã có thì không đổi.
 
 Quyền và vai trò (F-02, `prisma/seed-data/*`): đơn vị Trường → Khoa CNTT + Phòng Đào tạo, 6 vai trò, 41 quyền (từ điển dữ liệu mục 9, thêm `permission.manage`), ma trận ban đầu 123 ô, gán R1 hệ thống cho tài khoản quản trị. Ô `RolePermission` chỉ được tạo cho quyền seed chèn lần đầu, nên chạy lại seed không hoàn tác thay đổi R1 làm trên MH-15 — ô đã xóa vẫn mất. Đã chạy hai lần trên cơ sở dữ liệu phát triển: `OrgUnit` 3, `Role` 6, `Permission` 41, `RolePermission` 123, `RoleAssignment` 1.
+
+Chương trình mẫu (F-06, `prisma/seed-data/programs.ts`, gọi từ `seed.ts` sau `seedAccessControl`): chương trình `1024034` (Kỹ sư, Khoa CNTT) kèm một phiên bản Nháp; upsert theo `programCode`, chỉ tạo bản Nháp khi chương trình chưa có phiên bản nào nên chạy lại không đổi (kiểm bằng đầu-cuối và chạy `prisma db seed` hai lần: `Program` 1, `ProgramVersion` 1). **Tên, mã ngành và tổng tín chỉ là giá trị giữ chỗ** (Kỹ thuật máy tính, 7480106, 10 học kỳ, 150 = 140 + 10) cho đến khi đọc tệp Excel khung của Khoa (Q-11, F00-24).

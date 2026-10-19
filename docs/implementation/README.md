@@ -144,7 +144,8 @@ Thứ tự phụ thuộc đáng chú ý: F-02 cần `OrgUnit` của F-03 (CV-011
 - [F-03 Đơn vị và nhóm chuyên môn](f-03-org-units-subject-groups-implementation-plan.md) — mã xong 2026-10-19; còn nợ đi thử bằng trình duyệt
 - [F-04 Danh mục học phần](f-04-course-catalog-implementation-plan.md) — mã xong 2026-10-19; còn nợ đi thử bằng trình duyệt
 - [F-05 Quan hệ học phần, nhóm tương đương](f-05-course-relations-equivalence-implementation-plan.md) — mã xong 2026-10-19; còn nợ đi thử bằng trình duyệt
-- Tiếp theo F-06
+- [F-06 Thông tin chương trình, Giám đốc CTĐT](f-06-programs-directors-implementation-plan.md) — mã xong 2026-10-19; còn nợ đi thử bằng trình duyệt
+- Tiếp theo F-07
 
 ### Completed
 - …

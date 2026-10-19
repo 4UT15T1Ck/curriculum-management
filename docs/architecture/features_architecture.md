@@ -173,3 +173,38 @@ Kế hoạch: `docs/implementation/f-05-course-relations-equivalence-implementat
 - `src/shared/courses/` — `CourseSelect` (một học phần) và `CourseMultiSelect` (nhiều): tìm từ xa theo mã hoặc tên trong `GET /courses?status=ACTIVE`, trễ 300 ms qua `shared/hooks/useDebouncedValue`, nhớ nhãn đã chọn; nhận `id` từ `Form.Item`.
 - MH-17 thêm `CourseRelationsSection` (bảng quan hệ đọc từ phía học phần hiện tại — nhãn theo loại **và** phía, `relationLabel`; ngưỡng điểm sửa tại chỗ `MinScoreCell`; xóa kèm xác nhận khi `editPath = DIRECT`, nút "Tạo đề xuất" bị khóa khi `VIA_REQUEST`), `AddRelationModal` (bảy lựa chọn `RELATION_CHOICES`, ô ngưỡng chỉ khi tiên quyết, thông điệp `REQUISITE_CYCLE` của máy chủ hiện nguyên văn trong `Alert`), `EquivalentCoursesCard` (mã nhóm liên kết tới MH-19 `?q=`, danh sách thành viên khác) và `DiscontinueCourseModal` (hiện học phần thay thế sẵn có hoặc đòi chọn một; gửi `{ replacementCourseId }`).
 - MH-19 `EquivalenceGroupsPage` (`/equivalence-groups`, cần `course.view`; menu "Học phần" › "Nhóm tương đương"): bảng nhóm, thẻ thành viên (liên kết MH-17, nút xóa kèm xác nhận), "Tạo nhóm" (≥ 2 học phần chặn ở biểu mẫu), "Thêm học phần" (khi 409 `COURSE_ALREADY_GROUPED` hiện nút "Gộp nhóm" mở `MergeGroupsModal` với hai nhóm chọn sẵn), "Gộp với nhóm…", "Sửa", "Giải thể" (xác nhận). Nút sửa hiện cho người có `courseRelation.edit` (`useCanEditSchoolWide`; `/api/auth/me` chưa có chế độ và phạm vi nên máy chủ từ chối R3..R5 bằng 403).
+
+---
+
+## 6. Chương trình đào tạo, Giám đốc CTĐT (F-06)
+
+Kế hoạch: `docs/implementation/f-06-programs-directors-implementation-plan.md`; báo cáo dựng: `docs/implement-report/f-06-programs-directors-implement-report.md`. Mã xong, chưa đi thử bằng trình duyệt.
+
+### Backend — `src/features/programs/`
+- `ProgramsController` gom cả route chương trình lẫn route Giám đốc; `ProgramsService` (chương trình, thông tin ở bản Nháp, nhân bản) và `ProgramDirectorsService` (phân công).
+- `GET /api/programs?q&degreeLevel&status&page&pageSize` (`program.view`): service đòi ô `program.view` không theo phạm vi (`scopeFor(...).all`) nên sinh viên (ô `P`) bị 403 `PERMISSION_DENIED` (US-018 AC3); `q` tìm mã hoặc tên ở **bất kỳ** phiên bản; `programName` và `currentVersion` lấy từ phiên bản hiện hành (bản `ACTIVE`, không có thì bản mới nhất — trước phát hành là Nháp); `directors` là người đang hiệu lực hôm nay.
+- `POST /api/programs` (`program.editInfo` + `assertSchoolWideDirect`, chỉ R1): ghi `Program` và một `ProgramVersion` `DRAFT` trong một lần; tổng khác bắt buộc + tự chọn → 400 `CREDITS_MISMATCH` với `message` nêu "chênh lệch N tín chỉ" và `details` trỏ `totalCredits` (KB-011); mã trùng → 409 `PROGRAM_CODE_TAKEN`; khoa mặc định là Khoa CNTT, phải là `FACULTY` đang hoạt động (400 `PROGRAM_FACULTY_INVALID`).
+- `GET /api/programs/:programId` (`program.view`, `assertCan` trên `programTarget`): `ProgramDetailDto` có `currentVersionInfo`, `draftVersion` (hoặc `null`), `versions`, `clonedFrom`, `editPath`, `canManage` (có `director.assign` trực tiếp), `canClone`.
+- `PATCH /api/programs/:programId` (`program.editInfo`): `assertDirectEdit` với `programEditState`; sửa **bản Nháp** (và `degreeLevel` trên chương trình) trong một giao dịch; không có Nháp hoặc đã có phiên bản rời Nháp → 409 `CHANGE_REQUEST_REQUIRED`; chỉ gửi một phần thì tổng tín chỉ kiểm với giá trị đã lưu; R3 chỉ sửa chương trình mình phụ trách (khác → 403 `OUT_OF_SCOPE`; hết hạn phân công → 403 `PERMISSION_DENIED` vì không còn R3). Không có route xóa chương trình.
+- `POST /:programId/deactivate`, `/reactivate` (`program.editInfo` + `assertSchoolWideDirect`): R1; cùng trạng thái → 409 `PROGRAM_STATUS_UNCHANGED`. Chương trình `INACTIVE` rời phạm vi R3 và không nhận phân công mới (409 `PROGRAM_INACTIVE`) nhưng vẫn đọc được.
+- `POST /:programId/clone` (`program.clone`, R1): một giao dịch tạo `Program` mới (cùng khoa và trình độ, `clonedFromId` = phiên bản nguồn) với bản Nháp chép mô tả, rồi `VersionContentCopier.copy`; nguồn mặc định là phiên bản hiện hành, `sourceVersionId` của chương trình khác → 400 `SOURCE_VERSION_INVALID`; bản sao không có Giám đốc và không dùng chung hàng với nguồn.
+- Giám đốc: `GET /:programId/directors` (`program.view`, kiểm `assertCan` ngay trong service) trả mọi dòng kể cả lịch sử, `validFrom` mới nhất trước, kèm `state`; `POST /:programId/directors` (`director.assign`): người phải là tài khoản `ACTIVE` (400 `DIRECTOR_INVALID`), khoảng ngày hợp lệ, **cùng một người** không chồng thời hạn trên cùng chương trình (409 `DIRECTOR_PERIOD_OVERLAP`) còn hai người khác nhau thì được; `POST /…/:assignmentId/end` chỉ rút ngắn (400 `END_DATE_NOT_EARLIER`, 400 `VALIDITY_INVALID`); `POST /…/revoke` cho dòng nhập nhầm; dòng đã thu hồi → 404 `DIRECTOR_ASSIGNMENT_NOT_FOUND`.
+- `ProgramsSharedModule` (`src/shared/programs/`) xuất `VersionContentCopier`; `ScopeSourceReader` trả `{ programIds }` cho `PROGRAM_DIRECTOR`. R3 xuất hiện trong `/api/auth/me` (`derived: true`) từ yêu cầu kế tiếp sau khi có dòng phân công hiệu lực.
+
+### Frontend
+- Tuyến `ROUTES.programs`, `programNew`, `programDetail`, `programEdit`; menu "Chương trình đào tạo" (`program.view`, ẩn với người chỉ có R6 qua `hideForRoles`).
+- `api/programs.ts`, `hooks/usePrograms.ts` (mọi ghi làm mới toàn bộ `['programs']`), `constants/programLabels.ts`, `schema/programRules.ts` (`PROGRAM_RULES`, `CREDITS_EPSILON`).
+
+#### `ProgramListPage` — MH-21 (`/programs`)
+- Bảng mã (liên kết MH-22), tên, trình độ, phiên bản hiện hành (`versionLabel`: số phiên bản hoặc "Nháp"), Giám đốc CTĐT, trạng thái; tìm có trễ 300 ms qua `useDebouncedValue`, lọc trình độ, lọc trạng thái (mặc định "Đang sử dụng", có "Tất cả" = không gửi `status`); phân trang phía máy chủ. "Thêm chương trình" hiện theo `useCanEditSchoolWide(programEditInfo)` (cũng hiện với R3, máy chủ trả 403).
+
+#### `ProgramOverviewPage` — MH-22 (`/programs/:programId`)
+- `ProgramInfoCard` (mô tả của bản Nháp nếu có, không thì bản hiện hành; "Nhân bản từ" liên kết chương trình nguồn), `ProgramDirectorsSection` (bảng cả lịch sử, dòng đang hiệu lực lên trước; chỉ khi `canManage`: "Phân công" qua `AssignDirectorModal` = `UserSelect` + hai `DatePicker`, "Kết thúc" qua `EndDirectorModal` chỉ cho dòng `ACTIVE`/`SCHEDULED`, "Thu hồi" kèm xác nhận "Chỉ dùng khi phân công nhập nhầm"), `ProgramSectionLinks` (ba thẻ khung, nhóm tự chọn, kiểm tra nhất quán — vô hiệu kèm chú thích đến khi F-07, F-08 thêm tuyến).
+- `ProgramEditButton` theo `editPath` (`DIRECT` → "Sửa thông tin"; `VIA_REQUEST` → "Tạo đề xuất" bị khóa kèm `CHANGE_REQUEST_PENDING_TOOLTIP`; `null` → ẩn), `CloneProgramButton` khi `canClone`, `ProgramStatusActions` ("Ngừng sử dụng"/"Dùng lại", hộp xác nhận `App.useApp().modal`) khi `canManage`.
+
+#### `ProgramFormPage` — MH-23 (`/programs/new`, `/programs/:programId/edit`)
+- Trang với AntD `rules`; tín chỉ là ô chữ gửi nguyên chuỗi, số học kỳ là `InputNumber` 1..12; `CreditsGapHint` hiện "Chênh lệch N tín chỉ." / "Khớp tổng tín chỉ." khi gõ nhưng vẫn cho gửi — máy chủ quyết định (`Number()` chỉ để hiển thị). Sửa: điền từ bản Nháp, mã bị khóa; `editPath` khác `DIRECT` → cảnh báo và chuyển về tổng quan. Lỗi nghiệp vụ có `details.field` đặt dưới ô qua `applyFieldErrors`.
+
+#### `CloneProgramModal` — MH-24
+- Chọn phiên bản nguồn (mặc định hiện hành), mã và tên mới; thành công chuyển tới tổng quan bản sao; `PROGRAM_CODE_TAKEN` hiện dưới ô mã. Ghi chú phạm vi nhân bản (`CLONE_SCOPE_NOTE`) nói bản sao chép "thông tin chương trình và khung" — phần khung đúng sau F-07.
+

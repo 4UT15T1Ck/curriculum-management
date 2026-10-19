@@ -59,6 +59,7 @@ src/
 │   ├── courses/           danh mục học phần, trạng thái HP-01..HP-04 (F-04); ngừng mở lớp kèm học phần thay thế (F-05)
 │   ├── course-relations/  quan hệ học trước / tiên quyết / song hành / thay thế, chống chu trình (F-05)
 │   ├── equivalence-groups/ nhóm học phần tương đương: tạo, thêm, bớt, gộp, giải thể (F-05)
+│   ├── programs/          chương trình đào tạo: danh sách, tổng quan, thông tin ở bản Nháp, ngừng/dùng lại, nhân bản; phân công Giám đốc CTĐT có thời hạn (F-06)
 │   └── health/            trạng thái hệ thống
 ├── shared/
 │   ├── config/            env.validation.ts — lớp Env (class-validator); sai thì dừng khi khởi động
@@ -70,6 +71,7 @@ src/
 │   ├── authz/             @RequirePermission, @AnyAuthenticated, @CurrentAccess, PermissionGuard, ScopeService, AccessContext, PERMISSIONS, LOCKED_CELLS, edit-path.ts (editPathFor, resolveEditPath, assertDirectEdit, assertSchoolWideDirect)
 │   ├── pagination/        PageQueryDto + Page<T>
 │   ├── courses/           CourseUsageReader (`hasActiveReplacement` do F-05 điền; F-07, F-15, F-17 điền các hàm còn lại), CoursesSharedModule, courseTarget, courseEditState, RelatedCourseDto, requisite-graph.ts (findRequisiteCycle, khóa đồ thị)
+│   ├── programs/          active-director.ts (`activeDirectorWhere`), program-target.ts (`programTarget`, `programEditState`), VersionContentCopier + ProgramsSharedModule — chỗ cắm để F-07, F-11 thêm bảng thuộc phiên bản vào phép sao (F-06)
 │   ├── decimal/           CREDITS_PATTERN, GRADE_POINT_PATTERN, toWireDecimal — số thập phân gửi dạng chuỗi
 │   ├── org-units/         home-faculty.ts — HOME_FACULTY_CODE, định nghĩa "khoa khác"
 │   ├── time/              todayDate() — ngày hôm nay theo Asia/Ho_Chi_Minh; validity.ts — validityState, parsePeriod, overlapsPeriod dùng chung cho mọi bảng có khoảng hiệu lực
@@ -79,9 +81,9 @@ src/
 │   └── dtos/              ErrorResponseDto, RefDto (OrgUnit, User, Role, SubjectGroup, Course), transforms.ts (trimString, emptyToNull, trimUpperCase)
 └── generated/prisma/      Prisma Client sinh ra (không sửa tay, không đưa vào git)
 prisma/
-├── schema.prisma          User, Session, OrgUnit, SubjectGroup, SubjectGroupMember, Course, CourseRelation, EquivalentCourseGroup, Role, Permission, RolePermission, RoleAssignment
+├── schema.prisma          User, Session, OrgUnit, SubjectGroup, SubjectGroupMember, Course, CourseRelation, EquivalentCourseGroup, Program, ProgramVersion, ProgramDirectorAssignment, Role, Permission, RolePermission, RoleAssignment
 ├── migrations/            migration của Prisma
-├── seed-data/             đơn vị, vai trò, danh mục 41 quyền + ma trận ban đầu
+├── seed-data/             đơn vị, vai trò, danh mục 41 quyền + ma trận ban đầu, chương trình mẫu 1024034 (programs.ts)
 └── seed.ts                tài khoản R1 đầu tiên, quyền và vai trò (`pnpm prisma:seed`)
 test/                      đầu-cuối: Testcontainers dựng PostgreSQL + Redis thật; test-app.ts, migrations.ts áp migration
 ```
@@ -100,18 +102,20 @@ test/                      đầu-cuối: Testcontainers dựng PostgreSQL + Red
 | Phiên | Cookie HttpOnly `ctdt.sid`, hàng trong bảng `session` (PostgreSQL), `rolling`, hết hạn sau `SESSION_IDLE_MINUTES` không hoạt động; đăng nhập gọi `regenerate` |
 | CSRF | `CsrfGuard`: phương thức khác GET/HEAD/OPTIONS phải có `X-Requested-With: XMLHttpRequest`, thiếu → 403 `CSRF_HEADER_MISSING` |
 | Phân quyền | `PermissionGuard` từ chối mặc định: route không `@Public` phải có `@RequirePermission(...codes)` (đủ một trong các mã) hoặc `@AnyAuthenticated()`, thiếu cả hai → 403. Quyền nạp lại mỗi yêu cầu, không cache |
-| Phạm vi | `ScopeService.loadAccess()` dựng `AccessContext` một lần mỗi yêu cầu, gắn vào `request.access`; service lấy bằng `@CurrentAccess()` và kiểm phạm vi đồng bộ trên đó. Vai trò `scopeSource = NONE` lấy từ hàng `RoleAssignment` (`SYSTEM`/`UNIT`); vai trò khác suy ra qua `ScopeSourceReader`: F-03 đã điền `SUBJECT_GROUP_MEMBER` (R5) và `SUBJECT_GROUP_COORDINATOR` (R4) từ hàng đang hiệu lực trong nhóm `ACTIVE`; F-06, F-17 điền tiếp |
+| Phạm vi | `ScopeService.loadAccess()` dựng `AccessContext` một lần mỗi yêu cầu, gắn vào `request.access`; service lấy bằng `@CurrentAccess()` và kiểm phạm vi đồng bộ trên đó. Vai trò `scopeSource = NONE` lấy từ hàng `RoleAssignment` (`SYSTEM`/`UNIT`); vai trò khác suy ra qua `ScopeSourceReader`: F-03 đã điền `SUBJECT_GROUP_MEMBER` (R5) và `SUBJECT_GROUP_COORDINATOR` (R4) từ hàng đang hiệu lực trong nhóm `ACTIVE`; F-06 điền `PROGRAM_DIRECTOR` (R3) từ `ProgramDirectorAssignment` đang hiệu lực trong chương trình `ACTIVE` qua `activeDirectorWhere`, trả `programIds`; F-17 điền tiếp `OWN_ENROLLMENT` (R6) |
 | Đường sửa | `src/shared/authz/edit-path.ts` quyết định một đối tượng được sửa trực tiếp (`DIRECT`) hay chỉ qua đề xuất (`VIA_REQUEST`) từ chế độ ô quyền và trạng thái đối tượng `{ released, draftOpenToRequestHolders }` (H-4, FR-55): đã ban hành → luôn qua đề xuất; chưa ban hành → ô `DIRECT` sửa thẳng, ô `VIA_REQUEST` sửa thẳng khi dữ liệu mở cho họ (với học phần: của Khoa CNTT). Service ghi gọi `assertDirectEdit`, ném 409 `CHANGE_REQUEST_REQUIRED`. F-06, F-07, F-10, F-11, F-12 dùng lại; F-13 nhận cùng thân yêu cầu làm mục thay đổi |
 | Sự thật của tính năng sau | `CourseUsageReader` (`src/shared/courses/`) trả "không có" cho `inReleasedVersion`, `hasStudyResults`, `programsUsing` đến khi F-15, F-17, F-07 điền; `hasActiveReplacement` đã thật từ F-05 (nhận thêm `tx` để thấy hàng vừa ghi trong cùng giao dịch); tính năng không import nhau |
 | Đồ thị tiên quyết | Mọi nơi ghi cạnh `PRIOR`/`PREREQUISITE` (quan hệ học phần F-05, `CurriculumRequisite` F-07, nhập Excel F-09) phải mở giao dịch, gọi `lockRequisiteGraph(tx)` (khóa `pg_advisory_xact_lock(REQUISITE_GRAPH_LOCK_KEY = 5001)`), rồi `findRequisiteCycle(cạnh, cạnhMới)` trên hợp các cạnh cần xét (`CYCLE_CHECKED_TYPES`); dùng đúng hằng khóa, không tự chọn khóa khác. Khóa dùng `$executeRaw` vì `pg_advisory_xact_lock` trả `void`, bộ điều hợp trình điều khiển không đọc được qua `$queryRaw` |
 | Dữ liệu toàn trường | `assertSchoolWideDirect(access, code)`: dữ liệu không thuộc đơn vị hay nhóm nào (nhóm tương đương) chỉ sửa được khi có ô `DIRECT` + `ALL` (R1); ô `Đ` hoặc ô theo phạm vi → 403 `PERMISSION_DENIED` |
+| Chương trình và phiên bản | `programTarget(program)` = `{ programIds: [id], orgUnitIds: [facultyId] }` (phạm vi R3 theo mã chương trình, phạm vi theo đơn vị của gán tay phủ cả khoa); `programEditState`: "đã ban hành" = có phiên bản khác `DRAFT`, `draftOpenToRequestHolders = true`. Thông tin chương trình sửa trên **bản Nháp**; không có Nháp thì 409 `CHANGE_REQUEST_REQUIRED`. Trạng thái chương trình và phân công Giám đốc là việc R1 (`assertSchoolWideDirect`, `director.assign`), luôn trực tiếp, không phải nội dung phiên bản |
+| Sao chép nội dung phiên bản | Mọi nơi sao một phiên bản (nhân bản chương trình F-06; bản Nháp của đề xuất F-13; đính chính F-15) gọi `VersionContentCopier.copy(tx, fromVersionId, toVersionId)` (`src/shared/programs/`) trong giao dịch của người gọi. Bảng thuộc phiên bản thêm bước vào hàm này: F-07 (khung, nhóm tự chọn, điều kiện), F-11 (PLO, ma trận); hiện hàm rỗng nên bản nhân bản mới chỉ có thông tin chương trình |
 | Mã quyền | Hằng `PERMISSIONS` (`shared/authz/permission-codes.ts`); không viết cứng mã vai trò trong mã |
 | Người dùng hiện tại | `@CurrentUser()`; không đọc `req.session` trong controller |
 | Kiểm thử | Đơn vị `*.spec.ts` cạnh tệp; đầu-cuối `test/*.e2e-spec.ts` dùng `configureApp` chung với `main.ts` |
 
 ### Chưa dựng
 
-Bộ đọc phạm vi suy ra cho Giám đốc CTĐT và sinh viên — F-06, F-17 (nhóm chuyên môn đã có từ F-03). Nhật ký kiểm toán hoãn (F01-07, `docs/planning/deferred-scope.md` §2).
+Bộ đọc phạm vi suy ra cho sinh viên (`OWN_ENROLLMENT`, F-17); nó phải trả cả `programIds` của các chương trình sinh viên theo học để `program.view` của R6 dùng được (nhóm chuyên môn có từ F-03, Giám đốc CTĐT từ F-06). Nhật ký kiểm toán hoãn (F01-07, `docs/planning/deferred-scope.md` §2).
 
 ---
 
@@ -127,18 +131,19 @@ src/
 │   ├── hooks/             useQuery / useMutation
 │   ├── pages/<Name>Page.tsx   một tệp cho mỗi màn hình, test cạnh tệp
 │   └── schema/            `rules` cho AntD Form
-│   (auth, health, home, users, permissions, org-units, subject-groups, courses, equivalence-groups)
+│   (auth, health, home, users, permissions, org-units, subject-groups, courses, equivalence-groups, programs)
 ├── shared/
 │   ├── api/               client.ts (getJson, sendJson, ApiError, header CSRF), queryClient.ts, errorCodes.ts, schema.d.ts (sinh từ OpenAPI, có trong git)
 │   ├── auth/              me.ts, useMe, useLogout, RequireAuth, permissions.ts, useCan, RequirePermission
 │   ├── org-units/         orgUnits.ts, useOrgUnits, OrgUnitSelect — dùng chung cho mọi ô chọn đơn vị
 │   ├── subject-groups/    subjectGroups.ts, useSubjectGroups — danh sách nhóm dùng chung (cây đơn vị, trang nhóm, bộ lọc và biểu mẫu học phần)
-│   ├── forms/             applyFieldErrors.ts — đặt lỗi nghiệp vụ của máy chủ dưới ô theo `details.field`; errorMessage
+│   ├── constants/         editPath.ts — chú thích nút "Tạo đề xuất" bị khóa (`CHANGE_REQUEST_PENDING_TOOLTIP`), dùng chung cho mọi tính năng có `editPath`
+│   ├── forms/             applyFieldErrors.ts — đặt lỗi nghiệp vụ của máy chủ dưới ô theo `details.field`; errorMessage; credits.ts — `CREDITS_PATTERN`, `CREDITS_MESSAGE` cho mọi biểu mẫu nhập tín chỉ
 │   ├── users/             userOptions.ts, UserSelect — ô tìm tài khoản đang hoạt động
 │   ├── courses/           courseSearch.ts, CourseSelect, CourseMultiSelect — ô tìm học phần đang sử dụng (F-05; F-07 dùng lại)
 │   ├── hooks/             useDebouncedValue — trễ giá trị cho ô tìm kiếm từ xa
 │   ├── validity/          nhãn, màu và định dạng ngày của trạng thái hiệu lực
-│   └── layout/            AppLayout.tsx (Header, Sider, Content), menuItems.tsx (mục menu kèm quyền cần; mục có `children` thành nhóm, ví dụ "Học phần" › Danh mục học phần, Nhóm tương đương)
+│   └── layout/            AppLayout.tsx (Header, Sider, Content), menuItems.tsx (mục menu kèm quyền cần; mục có `children` thành nhóm, ví dụ "Học phần" › Danh mục học phần, Nhóm tương đương; mục có `hideForRoles` ẩn khi mọi vai trò người gọi nằm trong danh sách — "Chương trình đào tạo" ẩn với người chỉ có R6, chỉ để hiển thị)
 └── test/setup.ts          jest-dom, bản giả ResizeObserver cho Vitest
 ```
 

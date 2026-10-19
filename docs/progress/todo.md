@@ -34,7 +34,7 @@ Một dòng cho mỗi tính năng; việc chi tiết (CV-xxx) ở `docs/planning
 
 | # | Item | Status | Notes |
 |---|---|---|---|
-| F-06 | Thông tin chương trình, Giám đốc CTĐT | ❌ | `Program`, `ProgramVersion` ở Nháp, nhân bản |
+| F-06 | Thông tin chương trình, Giám đốc CTĐT | 🔄 | Mã xong 2026-10-19, kiểm thử xanh (backend đơn vị 269, đầu-cuối 158; frontend 119); `Program`/`ProgramVersion` ở Nháp, Giám đốc CTĐT có thời hạn và lịch sử, phạm vi R3 thật, nhân bản qua `VersionContentCopier`; còn nợ đi thử bằng trình duyệt (kế hoạch §7), áp migration `programs` lên cơ sở dữ liệu phát triển và thay giá trị giữ chỗ của 1024034 — `docs/implement-report/f-06-programs-directors-implement-report.md` |
 | F-07 | Khung chương trình, nhóm tự chọn | ❌ | `CurriculumItem`, `ElectiveGroup` |
 | F-08 | Kiểm tra nhất quán | ❌ | Quy tắc trên khung Nháp |
 | F-09 | Nhập, xuất Excel | ❌ | Sau MVP. ExcelJS trong worker; chạy thử → xác nhận |

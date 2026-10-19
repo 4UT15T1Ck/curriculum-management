@@ -114,3 +114,15 @@ Format:
 - Giao diện: mục "Quan hệ học phần" và thẻ "Học phần tương đương" trên MH-17, hộp thoại ngừng mở lớp chọn học phần thay thế, MH-19 `/equivalence-groups`, menu "Học phần" thành nhóm; `CourseSelect`, `CourseMultiSelect`, `useDebouncedValue` dùng chung.
 - Kiểm tra: backend tsc 0, oxlint 0, đơn vị 223/223 (28 tệp), đầu-cuối 130/130 (10 tệp, Testcontainers); frontend tsc 0, oxlint 0, đơn vị 93/93 (24 tệp), `vite build` ổn; Prettier sạch ở cả hai.
 - Còn nợ: đi thử bằng trình duyệt (kế hoạch §7) và áp migration lên cơ sở dữ liệu phát triển. Điểm lệch kế hoạch ở báo cáo dựng.
+
+## [F-06] Thông tin chương trình, Giám đốc CTĐT — dựng mã
+**Date**: 2026-10-19
+**Files changed**: `source/backend/prisma/{schema.prisma,seed.ts,seed-data/programs.ts,migrations/20261019082727_programs}`, `source/backend/src/shared/{programs,authz/scope-source.reader*,dtos/ref.dto.ts}/*`, `source/backend/src/features/programs/*`, `source/backend/src/app.module.ts`, `source/backend/test/*`, `source/frontend/src/shared/{api,auth,constants,forms,layout}/*`, `source/frontend/src/features/{programs,courses}/*`, `source/frontend/src/{router.tsx,routes.ts}`, `docs/architecture/*`, `docs/implementation/{README.md,f-06-programs-directors-implementation-plan.md}`, `docs/implement-report/f-06-programs-directors-implement-report.md`, `docs/progress/*`
+- Bảng `Program`, `ProgramVersion` (mô tả ở phiên bản, tín chỉ `Decimal(5,2)`), `ProgramDirectorAssignment`, ba enum — migration `20261019082727_programs` sinh bằng `prisma migrate dev` trên PostgreSQL 18 thật, nối tay hai chỉ mục duy nhất từng phần (một Nháp, một Đang hiệu lực mỗi chương trình); chạy lại báo "Already in sync".
+- Danh sách, tổng quan, thêm (kèm bản Nháp trong một lần ghi), sửa thông tin ở bản Nháp, ngừng/dùng lại (không xóa), nhân bản; tổng tín chỉ lệch bị chặn kèm "chênh lệch N tín chỉ" (BR-03, KB-011); sinh viên bị từ chối danh sách.
+- Giám đốc CTĐT có thời hạn: phân công, kết thúc (chỉ rút ngắn), thu hồi, lịch sử; nhiều người cùng lúc, cùng một người không chồng thời hạn. `ScopeSourceReader` điền `PROGRAM_DIRECTOR` qua `activeDirectorWhere`: R3 chỉ sửa chương trình mình phụ trách và mất quyền ngay khi hết hạn.
+- `VersionContentCopier` (shared) là chỗ cắm cho F-07, F-11, F-13, F-15; `programTarget`, `programEditState` dùng chung. Dời tooltip đề xuất và mẫu tín chỉ sang `shared/`.
+- Màn hình MH-21..MH-24 (danh sách, tổng quan kèm Giám đốc, biểu mẫu kèm gợi ý chênh lệch, hộp nhân bản); menu "Chương trình đào tạo" ẩn với người chỉ có R6. Seed chương trình 1024034 với số liệu giữ chỗ.
+- Kiểm tra: backend tsc 0, oxlint 0, đơn vị 269/269 (31 tệp), đầu-cuối 158/158 (11 tệp, Testcontainers); frontend tsc 0, oxlint 0, đơn vị 119/119 (28 tệp), `vite build` ổn; Prettier sạch ở cả hai.
+- Còn nợ: đi thử bằng trình duyệt (kế hoạch §7), áp migration lên cơ sở dữ liệu phát triển, thay số liệu giữ chỗ của 1024034. Điểm lệch kế hoạch ở báo cáo dựng.
+
