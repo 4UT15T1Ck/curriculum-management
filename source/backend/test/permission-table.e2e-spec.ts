@@ -91,6 +91,12 @@ describe('permission table', () => {
 
   async function countWrites(path: string): Promise<number> {
     if (path.startsWith('/api/org-units')) return prisma.orgUnit.count();
+    if (path.includes('/syllabus') || path.startsWith('/api/syllabi')) {
+      return prisma.syllabus.count();
+    }
+    if (path.startsWith('/api/weekly-contents')) {
+      return prisma.weeklyContent.count();
+    }
     if (path.startsWith('/api/courses')) return prisma.course.count();
     if (path.startsWith('/api/course-relations')) {
       return prisma.courseRelation.count();

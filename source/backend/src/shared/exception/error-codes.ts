@@ -76,6 +76,11 @@ export const ERRORS_BY_STATUS: Partial<Record<HttpStatus, ErrorDefinition>> = {
     code: 'CONFLICT',
     message: 'Dữ liệu đã bị thay đổi, vui lòng tải lại.',
   },
+  [HttpStatus.PAYLOAD_TOO_LARGE]: {
+    status: HttpStatus.PAYLOAD_TOO_LARGE,
+    code: 'PAYLOAD_TOO_LARGE',
+    message: 'Tệp hoặc nội dung gửi lên quá lớn.',
+  },
 };
 
 export const UNMAPPED_CLIENT_ERROR_CODE = 'REQUEST_FAILED';

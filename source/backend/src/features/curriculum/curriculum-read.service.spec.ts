@@ -91,6 +91,7 @@ function course(code: string, credits: string, ownerGroupId: string | null) {
     credits: new Prisma.Decimal(credits),
     status: CourseStatus.ACTIVE,
     ownerGroupId,
+    syllabi: [] as { id: string }[],
   };
 }
 
@@ -207,6 +208,19 @@ describe('CurriculumReadService.read', () => {
       declared: { compulsory: '100', elective: '50', total: '150' },
       mismatch: true,
     });
+  });
+
+  it('flags a row whose course has any syllabus revision (EC-44)', async () => {
+    curriculumItem.findMany.mockResolvedValue([
+      row('C1', 1, 1, {
+        course: { ...course('C1', '3', 'G1'), syllabi: [{ id: 's1' }] },
+      }),
+      row('C2', 1, 2),
+    ]);
+
+    const result = await service.read('v1', R1);
+
+    expect(result.items.map((item) => item.hasSyllabus)).toEqual([true, false]);
   });
 
   it('numbers rows 1.. in the order the database returns them (semester, then order)', async () => {

@@ -65,6 +65,8 @@ export class CurriculumItemDto {
   @ApiProperty() plannedSemester!: number;
   @ApiProperty() sortOrder!: number;
   @ApiProperty({ type: RelatedCourseDto }) course!: RelatedCourseDto;
+  @ApiProperty({ description: 'The course has a syllabus revision (EC-44).' })
+  hasSyllabus!: boolean;
   @ApiProperty({ nullable: true, type: String }) blockSymbol!: string | null;
   @ApiProperty({ nullable: true, type: String }) blockName!: string | null;
   @ApiProperty() isElective!: boolean;
@@ -146,7 +148,14 @@ export class CurriculumDto {
 }
 
 export const ITEM_INCLUDE = {
-  course: { select: { ...RELATED_COURSE_SELECT, ownerGroupId: true } },
+  // take: 1 makes "has a syllabus" an existence check; any revision counts (F-10, EC-44).
+  course: {
+    select: {
+      ...RELATED_COURSE_SELECT,
+      ownerGroupId: true,
+      syllabi: { select: { id: true }, take: 1 },
+    },
+  },
   electiveGroup: { select: { id: true, groupCode: true } },
   requisites: {
     include: { sourceCourse: { select: RELATED_COURSE_SELECT } },
@@ -185,6 +194,7 @@ export function toCurriculumItemDto(
     plannedSemester: row.plannedSemester,
     sortOrder: row.sortOrder,
     course: toRelatedCourseDto(row.course),
+    hasSyllabus: row.course.syllabi.length > 0,
     blockSymbol: row.blockSymbol,
     blockName: row.blockSymbol
       ? (context.blockNames.get(row.blockSymbol) ?? null)

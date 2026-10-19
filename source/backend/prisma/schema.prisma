@@ -145,6 +145,7 @@ model User {
   grantedDirectorships      ProgramDirectorAssignment[] @relation("ProgramDirectorAssignedBy")
   revokedDirectorships      ProgramDirectorAssignment[] @relation("ProgramDirectorRevokedBy")
   creditMismatchAcceptances ProgramVersion[]            @relation("CreditMismatchAcceptedBy")
+  syllabusAttachments       SyllabusAttachment[]        @relation("SyllabusAttachmentUploadedBy")
   createdAt                 DateTime                    @default(now())
   updatedAt                 DateTime                    @updatedAt
 
@@ -184,6 +185,7 @@ model Course {
   relationsAsTarget    CourseRelation[]       @relation("RelationTarget")
   curriculumItems      CurriculumItem[]       @relation("CurriculumItemCourse")
   curriculumRequisites CurriculumRequisite[]  @relation("CurriculumRequisiteSource")
+  syllabi              Syllabus[]
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
 
@@ -457,4 +459,71 @@ model CurriculumRequisite {
 
   @@unique([itemId, sourceCourseId, relationType])
   @@index([sourceCourseId])
+}
+
+enum SyllabusStatus {
+  DRAFT
+  PUBLISHED
+  HISTORICAL
+}
+
+enum AttachmentFileType {
+  PDF
+  DOCX
+  XLSX
+  IMAGE
+}
+
+// One syllabus per course, kept as numbered revisions. Section texts are sanitized HTML (null = empty).
+// The partial unique indexes (one Draft, one Published per course) and the CHECKs are added by hand in the migration.
+model Syllabus {
+  id                 String               @id @default(cuid(2))
+  courseId           String
+  course             Course               @relation(fields: [courseId], references: [id], onDelete: Restrict)
+  revisionNumber     Int
+  status             SyllabusStatus       @default(DRAFT)
+  courseDescription  String?
+  englishDescription String?
+  objectives         String?
+  teachingMethods    String?
+  assessmentMethods  String?
+  references         String?
+  previousVersionId  String?              @unique
+  previousVersion    Syllabus?            @relation("SyllabusLineage", fields: [previousVersionId], references: [id], onDelete: Restrict)
+  nextVersion        Syllabus?            @relation("SyllabusLineage")
+  publishedAt        DateTime?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  weeklyContents     WeeklyContent[]
+  attachments        SyllabusAttachment[]
+
+  @@unique([courseId, revisionNumber])
+}
+
+model WeeklyContent {
+  id                 String   @id @default(cuid(2))
+  syllabusId         String
+  syllabus           Syllabus @relation(fields: [syllabusId], references: [id], onDelete: Cascade)
+  weekLabel          String
+  sortOrder          Int
+  content            String
+  teachingActivities String?
+
+  @@index([syllabusId, sortOrder])
+}
+
+// The file lives on disk under FILES_ROOT; filePath is relative with '/' separators.
+model SyllabusAttachment {
+  id           String             @id @default(cuid(2))
+  syllabusId   String
+  syllabus     Syllabus           @relation(fields: [syllabusId], references: [id], onDelete: Restrict)
+  fileName     String
+  fileType     AttachmentFileType
+  filePath     String             @unique
+  sizeBytes    Int
+  uploadedById String
+  uploadedBy   User               @relation("SyllabusAttachmentUploadedBy", fields: [uploadedById], references: [id], onDelete: Restrict)
+  recordedAt   DateTime           @default(now())
+
+  @@index([syllabusId, recordedAt])
 }

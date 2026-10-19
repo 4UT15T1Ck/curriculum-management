@@ -5,6 +5,7 @@ import {
   type Prisma,
 } from '../../generated/prisma/client.js';
 import { EDIT_PATHS, type EditPath } from '../../shared/authz/edit-path.js';
+import { CourseUsageDto } from '../../shared/courses/course-usage.dto.js';
 import { RelatedCourseDto } from '../../shared/courses/related-course.js';
 import { toWireDecimal } from '../../shared/decimal/decimal.js';
 import {
@@ -34,14 +35,6 @@ export class CoursePageDto {
   @ApiProperty() total!: number;
   @ApiProperty() page!: number;
   @ApiProperty() pageSize!: number;
-}
-
-export class CourseUsageDto {
-  @ApiProperty() programId!: string;
-  @ApiProperty() programCode!: string;
-  @ApiProperty() programName!: string;
-  @ApiProperty({ nullable: true, type: String }) versionLabel!: string | null;
-  @ApiProperty() plannedSemester!: number;
 }
 
 export class CourseEquivalenceDto {
