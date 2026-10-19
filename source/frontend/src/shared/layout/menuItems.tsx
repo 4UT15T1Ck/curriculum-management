@@ -26,6 +26,11 @@ export const APP_MENU: readonly AppMenuItem[] = [
     permission: PERMISSIONS.subjectGroupView,
   },
   {
+    path: ROUTES.courses,
+    label: 'Học phần',
+    permission: PERMISSIONS.courseView,
+  },
+  {
     path: ROUTES.permissionMatrix,
     label: 'Ma trận quyền',
     permission: PERMISSIONS.permissionView,

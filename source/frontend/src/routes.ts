@@ -9,4 +9,8 @@ export const ROUTES = {
   orgUnits: '/org-units',
   subjectGroups: '/subject-groups',
   subjectGroupDetail: '/subject-groups/:groupId',
+  courses: '/courses',
+  courseNew: '/courses/new',
+  courseDetail: '/courses/:courseId',
+  courseEdit: '/courses/:courseId/edit',
 } as const;

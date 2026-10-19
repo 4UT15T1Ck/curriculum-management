@@ -452,6 +452,86 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/courses': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['CoursesController_list'];
+    put?: never;
+    post: operations['CoursesController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/courses/{courseId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['CoursesController_detail'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations['CoursesController_update'];
+    trace?: never;
+  };
+  '/api/courses/{courseId}/discontinue': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['CoursesController_discontinue'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/courses/{courseId}/reopen': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['CoursesController_reopen'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/courses/{courseId}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['CoursesController_cancel'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -783,7 +863,7 @@ export interface components {
       groupName?: string;
       facultyId?: string;
     };
-    SubjectGroupCourseRefDto: {
+    CourseRefDto: {
       id: string;
       courseCode: string;
       courseName: string;
@@ -791,7 +871,7 @@ export interface components {
     SubjectGroupDeactivationImpactDto: {
       activeMemberCount: number;
       activeCoordinators: components['schemas']['UserRefDto'][];
-      courses: components['schemas']['SubjectGroupCourseRefDto'][];
+      courses: components['schemas']['CourseRefDto'][];
     };
     AddSubjectGroupMemberDto: {
       lecturerId: string;
@@ -825,6 +905,81 @@ export interface components {
       revokedAt: string | null;
       revokedBy: components['schemas']['UserRefDto'] | null;
       subjectGroup: components['schemas']['SubjectGroupRefDto'];
+    };
+    /** @enum {string} */
+    CourseType:
+      | 'THEORY'
+      | 'PRACTICE'
+      | 'LAB'
+      | 'PROJECT'
+      | 'CAPSTONE'
+      | 'INTERNSHIP'
+      | 'CONDITIONAL';
+    /** @enum {string} */
+    CourseStatus: 'ACTIVE' | 'DISCONTINUED' | 'CANCELLED';
+    CourseSummaryDto: {
+      id: string;
+      courseCode: string;
+      courseName: string;
+      englishName: string | null;
+      /** @example 2.5 */
+      credits: string;
+      courseType: components['schemas']['CourseType'];
+      status: components['schemas']['CourseStatus'];
+      ownerFaculty: components['schemas']['OrgUnitRefDto'];
+      ownerGroup: components['schemas']['SubjectGroupRefDto'] | null;
+      isForeign: boolean;
+    };
+    CoursePageDto: {
+      items: components['schemas']['CourseSummaryDto'][];
+      total: number;
+      page: number;
+      pageSize: number;
+    };
+    CreateCourseDto: {
+      courseCode: string;
+      courseName: string;
+      englishName?: string | null;
+      /** @example 2.5 */
+      credits: string;
+      courseType: components['schemas']['CourseType'];
+      ownerFacultyId: string;
+      ownerGroupId?: string | null;
+    };
+    CourseUsageDto: {
+      programId: string;
+      programCode: string;
+      programName: string;
+      versionLabel: string | null;
+    };
+    /** @enum {string} */
+    EditPath: 'DIRECT' | 'VIA_REQUEST';
+    CourseDetailDto: {
+      id: string;
+      courseCode: string;
+      courseName: string;
+      englishName: string | null;
+      /** @example 2.5 */
+      credits: string;
+      courseType: components['schemas']['CourseType'];
+      status: components['schemas']['CourseStatus'];
+      ownerFaculty: components['schemas']['OrgUnitRefDto'];
+      ownerGroup: components['schemas']['SubjectGroupRefDto'] | null;
+      isForeign: boolean;
+      programsUsing: components['schemas']['CourseUsageDto'][];
+      editPath: components['schemas']['EditPath'] | null;
+      canChangeStatus: boolean;
+      createdAt: string;
+      updatedAt: string;
+    };
+    UpdateCourseDto: {
+      courseName?: string;
+      englishName?: string | null;
+      /** @example 2.5 */
+      credits?: string;
+      courseType?: components['schemas']['CourseType'];
+      ownerFacultyId?: string;
+      ownerGroupId?: string | null;
     };
   };
   responses: never;
@@ -1652,6 +1807,168 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['UserSubjectGroupMembershipDto'][];
+        };
+      };
+    };
+  };
+  CoursesController_list: {
+    parameters: {
+      query?: {
+        page?: number;
+        pageSize?: number;
+        q?: string;
+        ownerFacultyId?: string;
+        ownerGroupId?: string;
+        courseType?: components['schemas']['CourseType'];
+        status?: components['schemas']['CourseStatus'];
+        foreign?: boolean;
+        sort?: 'courseCode' | 'courseName' | 'credits' | 'updatedAt';
+        order?: 'asc' | 'desc';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CoursePageDto'];
+        };
+      };
+    };
+  };
+  CoursesController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateCourseDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CourseDetailDto'];
+        };
+      };
+    };
+  };
+  CoursesController_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        courseId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CourseDetailDto'];
+        };
+      };
+    };
+  };
+  CoursesController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        courseId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateCourseDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CourseDetailDto'];
+        };
+      };
+    };
+  };
+  CoursesController_discontinue: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        courseId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CourseDetailDto'];
+        };
+      };
+    };
+  };
+  CoursesController_reopen: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        courseId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CourseDetailDto'];
+        };
+      };
+    };
+  };
+  CoursesController_cancel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        courseId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CourseDetailDto'];
         };
       };
     };

@@ -37,6 +37,21 @@ const SubjectGroupDetailPage = lazy(() =>
     (module) => ({ default: module.SubjectGroupDetailPage }),
   ),
 );
+const CourseListPage = lazy(() =>
+  import('./features/courses/pages/CourseListPage').then((module) => ({
+    default: module.CourseListPage,
+  })),
+);
+const CourseDetailPage = lazy(() =>
+  import('./features/courses/pages/CourseDetailPage').then((module) => ({
+    default: module.CourseDetailPage,
+  })),
+);
+const CourseFormPage = lazy(() =>
+  import('./features/courses/pages/CourseFormPage').then((module) => ({
+    default: module.CourseFormPage,
+  })),
+);
 
 const HomePage = lazy(() =>
   import('./features/home/pages/HomePage').then((module) => ({
@@ -111,6 +126,38 @@ export const router = createBrowserRouter([
             element: (
               <RequirePermission code={PERMISSIONS.subjectGroupView}>
                 <SubjectGroupDetailPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.courses,
+            element: (
+              <RequirePermission code={PERMISSIONS.courseView}>
+                <CourseListPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.courseNew,
+            element: (
+              <RequirePermission code={PERMISSIONS.courseEdit}>
+                <CourseFormPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.courseDetail,
+            element: (
+              <RequirePermission code={PERMISSIONS.courseView}>
+                <CourseDetailPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.courseEdit,
+            element: (
+              <RequirePermission code={PERMISSIONS.courseEdit}>
+                <CourseFormPage />
               </RequirePermission>
             ),
           },
