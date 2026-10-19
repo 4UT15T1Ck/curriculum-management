@@ -6,6 +6,7 @@ import { ProgramDirectorsSection } from '../components/ProgramDirectorsSection';
 import { ProgramEditButton } from '../components/ProgramEditButton';
 import { ProgramInfoCard } from '../components/ProgramInfoCard';
 import { ProgramSectionLinks } from '../components/ProgramSectionLinks';
+import { ProgramVersionsSection } from '../components/ProgramVersionsSection';
 import { ProgramStatusActions } from '../components/ProgramStatusActions';
 import { ProgramStatusTag } from '../components/ProgramStatusTag';
 import { useProgram } from '../hooks/usePrograms';
@@ -36,6 +37,7 @@ export function ProgramOverviewPage() {
       </Flex>
       <ProgramInfoCard program={program} />
       <ProgramDirectorsSection program={program} />
+      <ProgramVersionsSection program={program} />
       <ProgramSectionLinks program={program} />
     </Flex>
   );

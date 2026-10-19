@@ -119,6 +119,8 @@ export function courseSyllabus(
     canEditClos: true,
     editPath: 'DIRECT',
     attachmentRules: RULES,
+    canAttachToPublished: false,
+    version: null,
     ...patch,
   };
 }

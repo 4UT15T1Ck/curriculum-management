@@ -1,11 +1,17 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { App, Button, Card, Popconfirm, Space, Typography } from 'antd';
 import { useState } from 'react';
+import { generatePath, Link } from 'react-router';
+import { ROUTES } from '../../../routes';
 import { CHANGE_REQUEST_QUERY_ROOT } from '../../../shared/change-requests/changeRequestQueryRoot';
 import { errorMessage } from '../../../shared/forms/applyFieldErrors';
 import { ApiError } from '../../../shared/api/client';
 import type { ChangeRequestDetail } from '../api/changeRequests';
-import { APPROVE_CONFIRM, DECISION_TITLES } from '../constants/approvalLabels';
+import {
+  APPROVE_CONFIRM,
+  DECISION_TITLES,
+  FINAL_APPROVAL_BUTTON,
+} from '../constants/approvalLabels';
 import {
   useApproveChangeRequest,
   useOverrideChangeRequest,
@@ -25,7 +31,8 @@ type OpenModal = 'RETURN' | 'REJECT' | 'OVERRIDE' | null;
 
 // MH-41: the buttons come only from `permissions`; the server decides, the page shows (US-062 AC4).
 export function ApprovalPanel({ request }: ApprovalPanelProps) {
-  const { canApprove, canReturn, canReject, canOverride } = request.permissions;
+  const { canApprove, canFinalApprove, canReturn, canReject, canOverride } =
+    request.permissions;
   const [modal, setModal] = useState<OpenModal>(null);
   const approve = useApproveChangeRequest(request.id);
   const returnRequest = useReturnChangeRequest(request.id);
@@ -34,7 +41,14 @@ export function ApprovalPanel({ request }: ApprovalPanelProps) {
   const { message } = App.useApp();
   const queryClient = useQueryClient();
 
-  if (!canApprove && !canReturn && !canReject && !canOverride) return null;
+  if (
+    !canApprove &&
+    !canFinalApprove &&
+    !canReturn &&
+    !canReject &&
+    !canOverride
+  )
+    return null;
 
   // A 409 means someone decided first; the failed call changed nothing, and the next read of the page hides what no longer applies.
   const fail = (error: unknown) => {
@@ -76,6 +90,13 @@ export function ApprovalPanel({ request }: ApprovalPanelProps) {
             </Button>
           </Popconfirm>
         )}
+        {canFinalApprove && (
+          <Link
+            to={generatePath(ROUTES.finalApproval, { requestId: request.id })}
+          >
+            <Button type="primary">{FINAL_APPROVAL_BUTTON}</Button>
+          </Link>
+        )}
         {canReturn && (
           <Button onClick={() => setModal('RETURN')}>Trả lại</Button>
         )}
@@ -88,7 +109,7 @@ export function ApprovalPanel({ request }: ApprovalPanelProps) {
           <Button onClick={() => setModal('OVERRIDE')}>Duyệt thay</Button>
         )}
       </Space>
-      {canReturn && !canApprove && (
+      {canReturn && !canApprove && !canFinalApprove && (
         <Typography.Paragraph type="secondary" style={{ margin: '8px 0 0' }}>
           Phê duyệt cuối của đề xuất dữ liệu được thực hiện ở màn hình ban hành.
         </Typography.Paragraph>

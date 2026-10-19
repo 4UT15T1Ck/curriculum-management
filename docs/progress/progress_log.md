@@ -185,3 +185,12 @@ Format:
 - Giao diện: bảng xử lý và hộp lý do ở MH-41, lịch sử và bình luận, MH-42, chuông và MH-04, cột "Số ngày chờ" ở MH-38.
 - Kiểm tra: backend đơn vị 707, đầu-cuối 330; frontend 376; tsc, oxlint, Prettier, build sạch. Migration đã áp lên `ctdt-dev-pg`.
 - Còn nợ: đi thử bằng trình duyệt. Điểm lệch kế hoạch ở báo cáo dựng.
+
+## [F-15] Ban hành, ảnh chụp phiên bản — dựng mã
+**Date**: 2026-10-19
+**Files changed**: `source/backend/prisma/{schema.prisma,seed.ts,seed-data,migrations/20261019131021_release_versions}`, `source/backend/src/features/{semesters,releases,change-requests,programs,curriculum,outcomes,syllabi,consistency}/*`, `source/backend/src/shared/{releases,courses,curriculum,syllabi,programs,change-requests,authz,config,queue}/*`, `source/backend/test/*`, `source/frontend/src/features/{releases,change-requests,programs,syllabi}/*`, `source/frontend/src/shared/*`, `docs/{implement-report,progress,implementation}/*`
+- Bảng `Semester`, `Cohort`, `CohortVersion`; ban hành khởi tạo và phê duyệt cuối, đánh số `major.minor`, ảnh chụp tên và tín chỉ, ghim đề cương; kích hoạt đầu học kỳ qua hàng đợi `release-activation`; đính chính phiên bản; `MISSING_SYLLABUS`.
+- Giao diện MH-10/43/45/46/47/49.
+- Kiểm tra: backend đơn vị 853, đầu-cuối 391; frontend 411; tsc, oxlint, Prettier, build sạch. Migration đã áp lên `ctdt-dev-pg`.
+- Còn nợ: đi thử bằng trình duyệt. Mã MVP đã đủ.
+

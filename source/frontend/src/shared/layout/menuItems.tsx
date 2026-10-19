@@ -54,6 +54,11 @@ export const APP_MENU: readonly AppMenuItem[] = [
     hideForRoles: [STUDENT_ROLE_CODE],
   },
   {
+    path: ROUTES.semesters,
+    label: 'Học kỳ và khóa tuyển sinh',
+    permission: PERMISSIONS.semesterManage,
+  },
+  {
     path: ROUTES.changeRequests,
     label: 'Đề xuất thay đổi',
     permission: PERMISSIONS.changeRequestView,

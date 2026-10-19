@@ -1,7 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { COURSE_QUERY_ROOT } from '../../../shared/courses/courseQueryKeys';
+import { CURRICULUM_QUERY_ROOT } from '../../../shared/curriculum/curriculumQueryRoot';
+import { OUTCOME_QUERY_ROOT } from '../../../shared/outcomes/outcomeQueryRoot';
 import {
   approveChangeRequest,
   createComment,
+  fetchFinalApproval,
+  finalApproveChangeRequest,
+  type FinalApproveInput,
   getApprovalHistory,
   getApprovalQueue,
   listComments,
@@ -27,6 +33,42 @@ export const useOverrideChangeRequest = (id: string) =>
   useRequestMutation((body: OverrideDecisionBody) =>
     overrideChangeRequest(id, body),
   );
+
+// The preview is what the office decides on: recomputed on every visit, never cached across them.
+export function useFinalApprovalPreview(id: string) {
+  return useQuery({
+    queryKey: CHANGE_REQUEST_QUERY_KEYS.finalApproval(id),
+    queryFn: () => fetchFinalApproval(id),
+    enabled: Boolean(id),
+    staleTime: 0,
+  });
+}
+
+// Approving releases versions and may publish a revision: everything that shows them is read again.
+export function useFinalApprove(id: string) {
+  const queryClient = useQueryClient();
+  const approve = useRequestMutation((body: FinalApproveInput) =>
+    finalApproveChangeRequest(id, body),
+  );
+  return {
+    ...approve,
+    mutateAsync: (body: FinalApproveInput) =>
+      approve.mutateAsync(body).then(async (detail) => {
+        await Promise.all(
+          [
+            ['programs'],
+            ['releases'],
+            ['syllabi'],
+            ['consistency'],
+            CURRICULUM_QUERY_ROOT,
+            OUTCOME_QUERY_ROOT,
+            COURSE_QUERY_ROOT,
+          ].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+        );
+        return detail;
+      }),
+  };
+}
 
 // Loaded when the history is opened: the current round is already on the page.
 export function useApprovalHistory(id: string, enabled: boolean) {

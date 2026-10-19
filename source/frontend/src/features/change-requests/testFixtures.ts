@@ -33,6 +33,7 @@ export const ACTIONS: ChangeRequestDetail['permissions'] = {
   canWithdraw: false,
   canUpload: true,
   canApprove: false,
+  canFinalApprove: false,
   canReturn: false,
   canReject: false,
   canOverride: false,
@@ -80,6 +81,7 @@ export function detail(
     steps: [],
     conflicts: [],
     permissions: ACTIONS,
+    release: null,
     ...patch,
   };
 }

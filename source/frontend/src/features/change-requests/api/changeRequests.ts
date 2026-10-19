@@ -24,6 +24,10 @@ export type ApprovalStepKind = Schemas['ApprovalStepKind'];
 export type OverrideAction = Schemas['OverrideAction'];
 export type OverrideDecisionBody = Schemas['OverrideDecisionDto'];
 export type ApprovalHistory = Schemas['ApprovalHistoryDto'];
+export type FinalApprovalPreview = Schemas['FinalApprovalPreviewDto'];
+export type FinalApprovalProgram = Schemas['FinalApprovalProgramDto'];
+export type FinalApproveInput = Schemas['FinalApproveDto'];
+export type RequestRelease = NonNullable<ChangeRequestDetail['release']>;
 export type ApprovalRound = Schemas['ApprovalRoundDto'];
 export type ChangeRequestComment = Schemas['CommentDto'];
 export type ApprovalQueueItem = Schemas['ApprovalQueueItemDto'];
@@ -125,6 +129,18 @@ export const approveChangeRequest = (id: string, remark?: string) =>
   sendJson<ChangeRequestDetail>('POST', `${requestPath(id)}/approve`, {
     remark,
   });
+// MH-43: the decision number and the semester turn a level-3 data request into released versions (F-15).
+export const fetchFinalApproval = (id: string) =>
+  getJson<FinalApprovalPreview>(`${requestPath(id)}/final-approval`);
+export const finalApproveChangeRequest = (
+  id: string,
+  body: FinalApproveInput,
+) =>
+  sendJson<ChangeRequestDetail>(
+    'POST',
+    `${requestPath(id)}/final-approve`,
+    body,
+  );
 export const returnChangeRequest = (id: string, remark: string) =>
   sendJson<ChangeRequestDetail>('POST', `${requestPath(id)}/return`, {
     remark,

@@ -1,6 +1,10 @@
 import { Flex, Space, Tag, Typography } from 'antd';
 import { RichTextView } from '../../../shared/components/rich-text/RichTextView';
-import type { Syllabus, SyllabusSectionField } from '../api/syllabi';
+import type {
+  AttachmentRules,
+  Syllabus,
+  SyllabusSectionField,
+} from '../api/syllabi';
 import {
   ATTACHMENTS_SECTION_LABEL,
   CLO_SECTION_LABEL,
@@ -13,12 +17,15 @@ import {
 import { formatDate, formatDateTime } from '../utils/formatDateTime';
 import { translated } from '../utils/syllabusLanguage';
 import { AttachmentList } from './AttachmentList';
+import { AttachmentUploader } from './AttachmentUploader';
 import { CloView } from './CloView';
 import { WeeklyContentView } from './WeeklyContentView';
 
 interface SyllabusSectionsProps {
   syllabus: Syllabus;
   language: SyllabusLanguage;
+  // Set when the caller may add a signed file to this published revision (no delete is ever offered).
+  attachTo?: { courseId: string; attachmentRules: AttachmentRules };
 }
 
 interface SectionProps {
@@ -43,6 +50,7 @@ function Section({ title, children, untranslated = false }: SectionProps) {
 export function SyllabusSections({
   syllabus,
   language,
+  attachTo,
 }: SyllabusSectionsProps) {
   const description = translated(
     language,
@@ -81,7 +89,16 @@ export function SyllabusSections({
       {plain('assessmentMethods')}
       {plain('references')}
       <Section title={ATTACHMENTS_SECTION_LABEL}>
-        <AttachmentList attachments={syllabus.attachments} />
+        <Flex vertical gap="small">
+          {attachTo && (
+            <AttachmentUploader
+              courseId={attachTo.courseId}
+              syllabusId={syllabus.id}
+              attachmentRules={attachTo.attachmentRules}
+            />
+          )}
+          <AttachmentList attachments={syllabus.attachments} />
+        </Flex>
       </Section>
     </Flex>
   );

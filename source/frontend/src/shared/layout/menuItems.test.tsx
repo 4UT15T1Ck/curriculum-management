@@ -63,4 +63,11 @@ describe('app menu', () => {
     expect(withView).toContain(ROUTES.approvalQueue);
     expect(withView).toContain(ROUTES.notifications);
   });
+
+  it('lists the semesters only for holders of semester.manage', () => {
+    const keys = (permissions: string[]) =>
+      toMenuItems(APP_MENU, permissions as never).map((item) => item.key);
+    expect(keys(['semester.manage'])).toContain(ROUTES.semesters);
+    expect(keys(['course.view'])).not.toContain(ROUTES.semesters);
+  });
 });

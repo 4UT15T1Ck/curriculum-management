@@ -1,4 +1,5 @@
 import {
+  Alert,
   Empty,
   Flex,
   Result,
@@ -17,6 +18,7 @@ import { PERMISSIONS } from '../../../shared/auth/permissions';
 import { useCan } from '../../../shared/auth/useCan';
 import { REQUEST_ID_PARAM } from '../../../shared/change-requests/requestParams';
 import { RequestDraftBanner } from '../../../shared/change-requests/RequestDraftBanner';
+import { VERSION_ID_PARAM } from '../../../shared/releases/versionParams';
 import type { Syllabus } from '../api/syllabi';
 import { SyllabusActions } from '../components/SyllabusActions';
 import { SyllabusSections } from '../components/SyllabusSections';
@@ -37,7 +39,13 @@ export function SyllabusPage() {
   const [searchParams] = useSearchParams();
   // A request's working copy is shown as the Draft when the link carries the request id (F-13).
   const requestId = searchParams.get(REQUEST_ID_PARAM) ?? undefined;
-  const { data, isPending, error } = useCourseSyllabus(courseId, requestId);
+  // A link from a released version carries its id: the page then shows the revision that version pins (US-079).
+  const versionId = searchParams.get(VERSION_ID_PARAM) ?? undefined;
+  const { data, isPending, error } = useCourseSyllabus(
+    courseId,
+    requestId,
+    versionId,
+  );
   const canViewCourse = useCan(PERMISSIONS.courseView);
   const [language, setLanguage] = useState<SyllabusLanguage>('vi');
   if (isPending) return <Skeleton active />;
@@ -84,6 +92,23 @@ export function SyllabusPage() {
         </Space>
       </Flex>
       <RequestDraftBanner request={data.draft?.sourceRequest ?? null} />
+      {data.version && (
+        <Alert
+          type="info"
+          showIcon
+          message={`Đề cương theo phiên bản ${data.version.versionNumber ?? '—'} của chương trình ${data.version.programCode}`}
+          description={
+            <Link
+              to={generatePath(ROUTES.versionDetail, {
+                programId: data.version.programId,
+                versionId: data.version.id,
+              })}
+            >
+              Về phiên bản
+            </Link>
+          }
+        />
+      )}
       {revisions.length === 0 ? (
         <Empty description={NO_SYLLABUS} />
       ) : (
@@ -95,7 +120,18 @@ export function SyllabusPage() {
                 ? REQUEST_COPY_TAB_LABEL
                 : `${SYLLABUS_STATUS_LABELS[revision.status]} — bản ${revision.revisionNumber}`,
             children: (
-              <SyllabusSections syllabus={revision} language={language} />
+              <SyllabusSections
+                syllabus={revision}
+                language={language}
+                attachTo={
+                  data.canAttachToPublished && revision.status !== 'DRAFT'
+                    ? {
+                        courseId: data.course.id,
+                        attachmentRules: data.attachmentRules,
+                      }
+                    : undefined
+                }
+              />
             ),
           }))}
         />

@@ -1524,6 +1524,38 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/change-requests/{id}/final-approval': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ApprovalController_finalApproval'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/change-requests/{id}/final-approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ApprovalController_finalApprove'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/change-requests/{id}/return': {
     parameters: {
       query?: never;
@@ -1684,6 +1716,182 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/semesters': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['SemestersController_listSemesters'];
+    put?: never;
+    post: operations['SemestersController_createSemester'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/semesters/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations['SemestersController_updateSemester'];
+    trace?: never;
+  };
+  '/api/cohorts': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['SemestersController_listCohorts'];
+    put?: never;
+    post: operations['SemestersController_createCohort'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/cohorts/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations['SemestersController_updateCohort'];
+    trace?: never;
+  };
+  '/api/programs/{programId}/versions/{versionId}/release-check': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ReleasesController_check'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/programs/{programId}/versions/{versionId}/release': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ReleasesController_release'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/programs/{programId}/versions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['VersionHistoryController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/programs/{programId}/versions/{versionId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['VersionHistoryController_detail'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/programs/{programId}/versions/{versionId}/corrections': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['CorrectionsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/programs/{programId}/versions/{versionId}/corrections/{correctionId}/issue': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['CorrectionsController_issue'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/programs/{programId}/versions/{versionId}/corrections/{correctionId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['CorrectionsController_discard'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1747,8 +1955,10 @@ export interface components {
       | 'changeRequest.comment'
       | 'changeRequest.statistics'
       | 'version.publish'
+      | 'version.correct'
       | 'version.viewHistory'
       | 'version.compare'
+      | 'semester.manage'
       | 'data.importExcel'
       | 'report.exportAccreditation'
       | 'report.benchmark'
@@ -2485,7 +2695,8 @@ export interface components {
       | 'GROUP_MINIMUM_UNREACHABLE'
       | 'REQUISITE_CYCLE'
       | 'CREDIT_MISMATCH'
-      | 'CREDIT_MISMATCH_ACCEPTED';
+      | 'CREDIT_MISMATCH_ACCEPTED'
+      | 'MISSING_SYLLABUS';
     /** @enum {string} */
     WarningSeverity: 'ERROR' | 'HIGH' | 'INFO';
     CurriculumWarningDto: {
@@ -2885,6 +3096,12 @@ export interface components {
       maxBytes: number;
       fileTypes: components['schemas']['AttachmentFileType'][];
     };
+    SyllabusVersionRefDto: {
+      id: string;
+      programId: string;
+      programCode: string;
+      versionNumber: string | null;
+    };
     CourseSyllabusDto: {
       course: components['schemas']['SyllabusCourseDto'];
       programsUsing: components['schemas']['CourseUsageDto'][];
@@ -2895,6 +3112,10 @@ export interface components {
       canEditClos: boolean;
       editPath: components['schemas']['EditPath'] | null;
       attachmentRules: components['schemas']['AttachmentRulesDto'];
+      /** @description The caller may add a signed file to the published revision (files are only ever added once a revision is published) */
+      canAttachToPublished: boolean;
+      /** @description Set when the answer is the revision pinned by this version */
+      version: components['schemas']['SyllabusVersionRefDto'] | null;
     };
     UpdateSyllabusDto: {
       courseDescription?: string | null;
@@ -3097,10 +3318,35 @@ export interface components {
       canWithdraw: boolean;
       canUpload: boolean;
       canApprove: boolean;
+      /** @description Đề xuất dữ liệu đang chờ Phòng Đào tạo và người xem được phép phê duyệt cuối (MH-43). */
+      canFinalApprove: boolean;
       canReturn: boolean;
       canReject: boolean;
       canOverride: boolean;
       canComment: boolean;
+    };
+    SemesterDto: {
+      id: string;
+      semesterCode: string;
+      academicYear: string;
+      termInYear: number;
+      /** Format: date */
+      startDate: string | null;
+    };
+    ReleasedVersionDto: {
+      id: string;
+      programId: string;
+      programCode: string;
+      versionNumber: string | null;
+      status: components['schemas']['ProgramVersionStatus'];
+    };
+    RequestReleaseDto: {
+      decisionNumber: string;
+      /** Format: date */
+      signedDate: string;
+      effectiveSemester: components['schemas']['SemesterDto'] | null;
+      pastSemesterAllowed: boolean;
+      versions: components['schemas']['ReleasedVersionDto'][];
     };
     ChangeRequestDetailDto: {
       id: string;
@@ -3127,6 +3373,7 @@ export interface components {
       steps: components['schemas']['ApprovalStepDto'][];
       conflicts: components['schemas']['ConflictDto'][];
       permissions: components['schemas']['RequestActionsDto'];
+      release: components['schemas']['RequestReleaseDto'] | null;
     };
     UpdateChangeRequestDto: {
       title?: string;
@@ -3210,6 +3457,56 @@ export interface components {
     ApproveDecisionDto: {
       remark?: Record<string, never>;
     };
+    /** @enum {string} */
+    FinalApprovalKind: 'PROGRAM_VERSION' | 'SYLLABUS' | 'AUTHORED';
+    /** @enum {string} */
+    SyllabusIssueCode: 'MISSING_SYLLABUS' | 'SYLLABUS_INCOMPLETE';
+    SyllabusReleaseIssueDto: {
+      courseId: string;
+      courseCode: string;
+      code: components['schemas']['SyllabusIssueCode'];
+      /** @description Điều kiện chưa đạt, theo mã (rỗng khi chưa có đề cương). */
+      details: string[];
+    };
+    FinalApprovalProgramDto: {
+      programId: string;
+      programCode: string;
+      baseVersionId: string;
+      baseVersionNumber: string | null;
+      nextVersionNumber: string;
+      consistencyIssues: components['schemas']['CurriculumWarningDto'][];
+      syllabusIssues: components['schemas']['SyllabusReleaseIssueDto'][];
+      /** @description Liên kết CLO–PLO sẽ mất vì bản đề cương mới không còn mã CLO đó. */
+      droppedCloLinks: number;
+    };
+    FinalApprovalPreviewDto: {
+      requestId: string;
+      requestCode: string;
+      kind: components['schemas']['FinalApprovalKind'];
+      /** @description Dữ liệu gốc đã đổi; phải làm lại bản nháp. */
+      stale: boolean;
+      affectedPrograms: components['schemas']['FinalApprovalProgramDto'][];
+      /** @description Điều kiện chưa đạt của chính bản đề cương được đề xuất. */
+      copyIssues: string[];
+      /** @description Nhãn các thay đổi tác giả soạn. */
+      authoredLabels: string[];
+      /** @description Gán khóa tuyển sinh được khi tạo đúng một phiên bản. */
+      canAssignCohorts: boolean;
+      /** @description Người tạo đề xuất là Phòng Đào tạo nên được nạp học kỳ đã qua. */
+      canAllowPastSemester: boolean;
+    };
+    FinalApproveDto: {
+      /** @example QĐ-123/ĐHBK */
+      decisionNumber: string;
+      /** Format: date */
+      signedDate: string;
+      effectiveSemesterId: string;
+      remark?: string | null;
+      /** @description Cho phép ban hành vào học kỳ đã bắt đầu; chỉ hiệu lực với đề xuất do Phòng Đào tạo tạo. */
+      allowPastSemester?: boolean;
+      /** @description Chỉ khi đề xuất tạo đúng một phiên bản. */
+      cohortIds?: string[];
+    };
     DecisionRemarkDto: {
       remark: string;
     };
@@ -3261,7 +3558,8 @@ export interface components {
       | 'REQUEST_REJECTED'
       | 'REQUEST_APPROVED'
       | 'REQUEST_OVERRIDDEN'
-      | 'REQUEST_COMMENTED';
+      | 'REQUEST_COMMENTED'
+      | 'REQUEST_EFFECTIVE';
     /** @enum {string} */
     NotificationReadStatus: 'UNREAD' | 'READ';
     NotificationDto: {
@@ -3281,6 +3579,142 @@ export interface components {
     };
     UnreadCountDto: {
       count: number;
+    };
+    CreateSemesterDto: {
+      /** @example 2026-2027-1 */
+      semesterCode: string;
+      /** @example 2026-2027 */
+      academicYear: string;
+      termInYear: number;
+      /** Format: date */
+      startDate?: string | null;
+    };
+    UpdateSemesterDto: {
+      /** @example 2026-2027-1 */
+      semesterCode?: string;
+      /** @example 2026-2027 */
+      academicYear?: string;
+      termInYear?: number;
+      /** Format: date */
+      startDate?: string | null;
+    };
+    CreateCohortDto: {
+      /** @example K2026 */
+      cohortCode: string;
+      /** @example 2026 */
+      intakeYear: number;
+    };
+    UpdateCohortDto: {
+      /** @example K2026 */
+      cohortCode?: string;
+      /** @example 2026 */
+      intakeYear?: number;
+    };
+    ReleaseCheckDto: {
+      versionId: string;
+      canRelease: boolean;
+      consistencyIssues: components['schemas']['CurriculumWarningDto'][];
+      syllabusIssues: components['schemas']['SyllabusReleaseIssueDto'][];
+    };
+    ReleaseVersionDto: {
+      /** @example QĐ-123/ĐHBK */
+      decisionNumber: string;
+      /** Format: date */
+      signedDate: string;
+      effectiveSemesterId: string;
+      /**
+       * @default 1.0
+       * @example 1.0
+       */
+      versionNumber: string;
+      cohortIds: string[];
+    };
+    CohortDto: {
+      id: string;
+      cohortCode: string;
+      intakeYear: number;
+    };
+    VersionOriginRequestDto: {
+      id: string;
+      requestCode: string;
+    };
+    VersionLinkDto: {
+      id: string;
+      versionNumber: string | null;
+    };
+    SyllabusPinDto: {
+      id: string;
+      revisionNumber: number;
+      status: components['schemas']['SyllabusStatus'];
+    };
+    VersionRowDto: {
+      itemId: string;
+      plannedSemester: number;
+      courseId: string;
+      courseCode: string;
+      courseName: string;
+      /** @example 3 */
+      credits: string;
+      syllabus: components['schemas']['SyllabusPinDto'] | null;
+    };
+    VersionDetailDto: {
+      id: string;
+      versionNumber: string | null;
+      status: components['schemas']['ProgramVersionStatus'];
+      decisionNumber: string | null;
+      /** Format: date */
+      signedDate: string | null;
+      publishedAt: string | null;
+      effectiveSemester: components['schemas']['SemesterDto'] | null;
+      cohorts: components['schemas']['CohortDto'][];
+      originRequest: components['schemas']['VersionOriginRequestDto'] | null;
+      /** @description Phiên bản đính chính đã ban hành thay cho phiên bản này. */
+      correctedBy: components['schemas']['VersionLinkDto'] | null;
+      programId: string;
+      programCode: string;
+      programName: string;
+      majorCode: string;
+      majorName: string;
+      semesterCount: number;
+      /** @example 150 */
+      totalCredits: string;
+      /** @example 120 */
+      compulsoryCredits: string;
+      /** @example 30 */
+      electiveCredits: string;
+      publishedBy: components['schemas']['UserRefDto'] | null;
+      previousVersion: components['schemas']['VersionLinkDto'] | null;
+      correctionOf: components['schemas']['VersionLinkDto'] | null;
+      correctionReason: string | null;
+      /** @description Bản nháp đính chính chưa ban hành. */
+      isCorrectionDraft: boolean;
+      /** @description Bản nháp đính chính đang mở của phiên bản này (chỉ người có quyền đính chính thấy). */
+      openCorrection: components['schemas']['VersionLinkDto'] | null;
+      /** @description Người xem được phép bắt đầu đính chính phiên bản này. */
+      canCorrect: boolean;
+      rows: components['schemas']['VersionRowDto'][];
+    };
+    VersionRefDto: {
+      id: string;
+      versionNumber: string | null;
+      status: components['schemas']['ProgramVersionStatus'];
+      decisionNumber: string | null;
+      /** Format: date */
+      signedDate: string | null;
+      publishedAt: string | null;
+      effectiveSemester: components['schemas']['SemesterDto'] | null;
+      cohorts: components['schemas']['CohortDto'][];
+      originRequest: components['schemas']['VersionOriginRequestDto'] | null;
+      /** @description Phiên bản đính chính đã ban hành thay cho phiên bản này. */
+      correctedBy: components['schemas']['VersionLinkDto'] | null;
+    };
+    VersionListDto: {
+      versions: components['schemas']['VersionRefDto'][];
+    };
+    IssueCorrectionDto: {
+      reason: string;
+      /** @default true */
+      moveCohorts: boolean;
     };
   };
   responses: never;
@@ -5404,6 +5838,8 @@ export interface operations {
       query?: {
         /** @description A change request's id: show its working copy as the Draft */
         requestId?: string;
+        /** @description A program version whose curriculum holds the course: show the revision that version pins as the published one */
+        versionId?: string;
       };
       header?: never;
       path: {
@@ -6098,6 +6534,52 @@ export interface operations {
       };
     };
   };
+  ApprovalController_finalApproval: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FinalApprovalPreviewDto'];
+        };
+      };
+    };
+  };
+  ApprovalController_finalApprove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['FinalApproveDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChangeRequestDetailDto'];
+        };
+      };
+    };
+  };
   ApprovalController_returnToDraft: {
     parameters: {
       query?: never;
@@ -6341,6 +6823,289 @@ export interface operations {
         content: {
           'application/json': components['schemas']['NotificationDto'];
         };
+      };
+    };
+  };
+  SemestersController_listSemesters: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SemestersController_createSemester: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateSemesterDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SemestersController_updateSemester: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateSemesterDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SemestersController_listCohorts: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SemestersController_createCohort: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateCohortDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SemestersController_updateCohort: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateCohortDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ReleasesController_check: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        programId: string;
+        versionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ReleaseCheckDto'];
+        };
+      };
+    };
+  };
+  ReleasesController_release: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        programId: string;
+        versionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReleaseVersionDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['VersionDetailDto'];
+        };
+      };
+    };
+  };
+  VersionHistoryController_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        programId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['VersionListDto'];
+        };
+      };
+    };
+  };
+  VersionHistoryController_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        programId: string;
+        versionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['VersionDetailDto'];
+        };
+      };
+    };
+  };
+  CorrectionsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        programId: string;
+        versionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['VersionDetailDto'];
+        };
+      };
+    };
+  };
+  CorrectionsController_issue: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        programId: string;
+        versionId: string;
+        correctionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['IssueCorrectionDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['VersionDetailDto'];
+        };
+      };
+    };
+  };
+  CorrectionsController_discard: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        programId: string;
+        versionId: string;
+        correctionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

@@ -29,6 +29,13 @@ export const ROUTES = {
   itemCloPlo: '/programs/:programId/versions/:versionId/items/:itemId/clo-plo',
   outcomeCoverage: '/programs/:programId/versions/:versionId/outcome-coverage',
   programVersionInfo: '/programs/:programId/versions/:versionId/info',
+  versionHistory: '/programs/:programId/versions',
+  versionDetail: '/programs/:programId/versions/:versionId',
+  versionRelease: '/programs/:programId/versions/:versionId/release',
+  versionCorrection:
+    '/programs/:programId/versions/:versionId/corrections/:correctionId',
+  finalApproval: '/change-requests/:requestId/final-approval',
+  semesters: '/semesters',
   changeRequests: '/change-requests',
   changeRequestNew: '/change-requests/new',
   changeRequestOrganizationalNew: '/change-requests/new-organizational',

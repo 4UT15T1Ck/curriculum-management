@@ -51,6 +51,8 @@ export const CHANGE_REQUEST_QUERY_KEYS = {
   programs: (q: string) =>
     [...CHANGE_REQUEST_QUERY_ROOT, 'programs', q] as const,
   subjectGroups: [...CHANGE_REQUEST_QUERY_ROOT, 'subject-groups'] as const,
+  finalApproval: (id: string) =>
+    [...CHANGE_REQUEST_QUERY_ROOT, 'final-approval', id] as const,
   history: (id: string) =>
     [...CHANGE_REQUEST_QUERY_ROOT, 'history', id] as const,
   comments: (id: string) =>

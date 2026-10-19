@@ -164,6 +164,37 @@ const VersionInfoEditPage = lazy(() =>
   })),
 );
 
+const SemestersPage = lazy(() =>
+  import('./features/releases/pages/SemestersPage').then((module) => ({
+    default: module.SemestersPage,
+  })),
+);
+const InitialReleasePage = lazy(() =>
+  import('./features/releases/pages/InitialReleasePage').then((module) => ({
+    default: module.InitialReleasePage,
+  })),
+);
+const VersionHistoryPage = lazy(() =>
+  import('./features/releases/pages/VersionHistoryPage').then((module) => ({
+    default: module.VersionHistoryPage,
+  })),
+);
+const VersionDetailPage = lazy(() =>
+  import('./features/releases/pages/VersionDetailPage').then((module) => ({
+    default: module.VersionDetailPage,
+  })),
+);
+const CorrectionPage = lazy(() =>
+  import('./features/releases/pages/CorrectionPage').then((module) => ({
+    default: module.CorrectionPage,
+  })),
+);
+const FinalApprovalPage = lazy(() =>
+  import('./features/change-requests/pages/FinalApprovalPage').then(
+    (module) => ({ default: module.FinalApprovalPage }),
+  ),
+);
+
 const HomePage = lazy(() =>
   import('./features/home/pages/HomePage').then((module) => ({
     default: module.HomePage,
@@ -285,6 +316,54 @@ export const router = createBrowserRouter([
             element: (
               <RequirePermission code={PERMISSIONS.syllabusEdit}>
                 <SyllabusEditorPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.semesters,
+            element: (
+              <RequirePermission code={PERMISSIONS.semesterManage}>
+                <SemestersPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.versionHistory,
+            element: (
+              <RequirePermission code={PERMISSIONS.programView}>
+                <VersionHistoryPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.versionDetail,
+            element: (
+              <RequirePermission code={PERMISSIONS.programView}>
+                <VersionDetailPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.versionRelease,
+            element: (
+              <RequirePermission code={PERMISSIONS.versionPublish}>
+                <InitialReleasePage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.versionCorrection,
+            element: (
+              <RequirePermission code={PERMISSIONS.versionCorrect}>
+                <CorrectionPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.finalApproval,
+            element: (
+              <RequirePermission code={PERMISSIONS.changeRequestView}>
+                <FinalApprovalPage />
               </RequirePermission>
             ),
           },

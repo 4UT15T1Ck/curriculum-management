@@ -28,14 +28,19 @@ export const SYLLABUS_QUERY_KEYS = {
   all: ['syllabi'] as const,
   // Every cached view of one course's syllabus, the request copies included: what a write invalidates.
   courseRoot: (courseId: string) => ['syllabi', courseId] as const,
-  course: (courseId: string, requestId?: string) =>
-    ['syllabi', courseId, requestId ?? null] as const,
+  course: (courseId: string, requestId?: string, versionId?: string) =>
+    ['syllabi', courseId, requestId ?? null, versionId ?? null] as const,
 };
 
-export function useCourseSyllabus(courseId: string, requestId?: string) {
+// With a version id the answer is the revision that released version pins (F-15), not the course's current one.
+export function useCourseSyllabus(
+  courseId: string,
+  requestId?: string,
+  versionId?: string,
+) {
   return useQuery({
-    queryKey: SYLLABUS_QUERY_KEYS.course(courseId, requestId),
-    queryFn: () => fetchCourseSyllabus(courseId, requestId),
+    queryKey: SYLLABUS_QUERY_KEYS.course(courseId, requestId, versionId),
+    queryFn: () => fetchCourseSyllabus(courseId, requestId, versionId),
     enabled: Boolean(courseId),
   });
 }

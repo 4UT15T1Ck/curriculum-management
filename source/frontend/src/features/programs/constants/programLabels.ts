@@ -1,5 +1,6 @@
 import {
   DRAFT_VERSION_LABEL,
+  VERSION_STATUS_LABELS as SHARED_VERSION_STATUS_LABELS,
   versionLabel,
 } from '../../../shared/constants/versionLabels';
 import type {
@@ -20,12 +21,9 @@ export const PROGRAM_STATUS_COLORS: Record<ProgramStatus, string> = {
   ACTIVE: 'green',
   INACTIVE: 'default',
 };
-export const VERSION_STATUS_LABELS: Record<ProgramVersionStatus, string> = {
-  DRAFT: 'Nháp',
-  PENDING: 'Chờ hiệu lực',
-  ACTIVE: 'Đang hiệu lực',
-  HISTORICAL: 'Lịch sử',
-};
+// Shared with the release screens (F-15) so every screen words the four states the same way.
+export const VERSION_STATUS_LABELS: Record<ProgramVersionStatus, string> =
+  SHARED_VERSION_STATUS_LABELS;
 // Moved to shared/ so the curriculum and course screens print the same label; re-exported for the programs screens.
 export { DRAFT_VERSION_LABEL, versionLabel };
 

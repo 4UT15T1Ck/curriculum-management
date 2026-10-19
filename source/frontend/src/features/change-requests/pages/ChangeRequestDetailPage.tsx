@@ -21,6 +21,7 @@ import { ApprovalPanel } from '../components/ApprovalPanel';
 import { CommentsCard } from '../components/CommentsCard';
 import { ConflictAlert } from '../components/ConflictAlert';
 import { DocumentsCard } from '../components/DocumentsCard';
+import { ReleaseCard } from '../components/ReleaseCard';
 import { RequestDiff } from '../components/RequestDiff';
 import { StepProgress } from '../components/StepProgress';
 import {
@@ -146,6 +147,7 @@ export function ChangeRequestDetailPage() {
           <StepProgress steps={request.steps} />
         </Card>
       )}
+      {request.release && <ReleaseCard release={request.release} />}
       <ApprovalPanel request={request} />
       <ApprovalHistory
         requestId={requestId}

@@ -53,7 +53,7 @@ Một dòng cho mỗi tính năng; việc chi tiết (CV-xxx) ở `docs/planning
 |---|---|---|---|
 | F-13 | Đề xuất thay đổi | 🔄 | Mã xong 2026-10-19 (bản nháp làm việc, so sánh, định tuyến ba cấp, gửi duyệt); còn nợ: đi thử bằng trình duyệt NT-B4-01/03/09 với R1–R5 và áp migration `20261019110535_change_requests` (`pnpm prisma:migrate` rồi `pnpm prisma:seed`) — `docs/implement-report/f-13-change-requests-implement-report.md` |
 | F-14 | Duyệt ba cấp, thông báo | 🔄 | Mã xong 2026-10-19, kiểm thử xanh (backend đơn vị 707, đầu-cuối 330; frontend 376); Đồng ý / Trả lại / Từ chối / Duyệt thay, hàng chờ, thông báo trong ứng dụng, bình luận, lịch sử; còn nợ: đi thử bằng trình duyệt NT-B4-04 (migration đã áp lên `ctdt-dev-pg`) — `docs/implement-report/f-14-three-level-approval-notifications-implement-report.md` |
-| F-15 | Ban hành, ảnh chụp phiên bản | ❌ | Ban hành khởi tạo (H-1), kích hoạt đầu học kỳ |
+| F-15 | Ban hành, ảnh chụp phiên bản | 🔄 | Mã xong 2026-10-19, kiểm thử xanh (backend đơn vị 853, đầu-cuối 391; frontend 411); ban hành khởi tạo, phê duyệt cuối, kích hoạt đầu học kỳ, đính chính; còn nợ: đi thử bằng trình duyệt NT-B4-01/05/06/10/12 (migration đã áp lên `ctdt-dev-pg`) — `docs/implement-report/f-15-release-version-snapshots-implement-report.md` |
 | F-16 | So sánh phiên bản, gán khóa | ❌ | Sau MVP |
 | F-26 | Sao lưu, diễn tập phục hồi | ❌ | Sau MVP. `pg_dump` hằng ngày + thư mục tệp |
 

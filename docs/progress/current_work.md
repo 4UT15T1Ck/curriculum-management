@@ -4,13 +4,13 @@
 
 - **Last updated**: 2026-10-19
 - **Active area**: dựng bản MVP (`docs/planning/epics.md` §0)
-- **Start here**: dựng F-15 (ban hành, ảnh chụp phiên bản; xem `docs/implementation/` và README). F-14 đã xong mã: `ApprovalRecorder` / `RequestNotifier` dùng chung cho phê duyệt cuối, đề xuất dữ liệu ở cấp 3 đang trả `FINAL_APPROVAL_REQUIRED` chờ MH-43 của F-15; F-15 thêm `REQUEST_EFFECTIVE` và `canFinalApprove`. Chi tiết hook ở báo cáo dựng F-14.
+- **Start here**: mã MVP đã đủ (F-01..F-08, F-10, F-11, F-13, F-14, F-15). Bước tiếp theo: đồng bộ tài liệu + đối chiếu chức năng toàn bộ.
 
 ---
 
 ## Active Item: Dựng bản MVP
 
-**Status**: F-01 xong 2026-10-18; F-02..F-08, F-10, F-11, F-13 và F-14 mã xong 2026-10-19, còn nợ đi thử bằng trình duyệt; F-15 còn lại chưa dựng.
+**Status**: F-01 xong 2026-10-18; F-02..F-08, F-10, F-11, F-13, F-14 và F-15 mã xong 2026-10-19, còn nợ đi thử bằng trình duyệt; mã MVP đã đủ.
 
 ### Còn nợ
 - F-02: người dùng đi thử 6 bước kế hoạch §7 bằng trình duyệt (chọn để sau) — `docs/implement-report/f-02-accounts-roles-permissions-implement-report.md`.
@@ -48,3 +48,4 @@
 1. **Dựng F-15** — theo thứ tự trong README.
 2. **Template** — sửa bốn lỗi của `E:\claude-code-templates` đã ghi ở báo cáo khởi tạo (hook chỉ dùng jq, sai đường dẫn migration, agent dùng npm/Biome, trùng tên agent giữa hai stack); cần người dùng đồng ý.
 3. **Volta** — `volta install pnpm@10.23.0` để pnpm chạy trên Node 22; cần người dùng đồng ý.
+- F-15: người dùng chạy `pnpm prisma:seed` (học kỳ, khóa giữ chỗ), đi thử NT-B4-01/05/06/10/12 bằng trình duyệt với R1 và R3; migration `20261019131021_release_versions` đã áp lên `ctdt-dev-pg` — `docs/implement-report/f-15-release-version-snapshots-implement-report.md`.

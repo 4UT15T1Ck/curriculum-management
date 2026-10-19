@@ -27,6 +27,10 @@ export const PERMISSIONS = {
   changeRequestCreateOrganizational: 'changeRequest.createOrganizational',
   changeRequestOverride: 'changeRequest.override',
   changeRequestComment: 'changeRequest.comment',
+  versionPublish: 'version.publish',
+  versionCorrect: 'version.correct',
+  versionViewHistory: 'version.viewHistory',
+  semesterManage: 'semester.manage',
 } as const satisfies Record<string, PermissionCode>;
 
 export function hasPermission(
