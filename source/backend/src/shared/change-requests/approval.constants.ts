@@ -36,3 +36,16 @@ export const SKIP_REASONS = {
   NO_PROGRAM: 'Học phần chưa thuộc chương trình đào tạo nào',
   NO_DIRECTOR: 'Chương trình chưa có Giám đốc CTĐT',
 } as const;
+
+export const REMARK_MIN = 20;
+export const REMARK_MAX = 2000;
+export const COMMENT_MAX = 2000;
+
+export const APPROVAL_STEP_KIND = {
+  NORMAL: 'NORMAL',
+  SKIPPED: 'SKIPPED',
+  OVERRIDE: 'OVERRIDE',
+} as const;
+export type ApprovalStepKind =
+  (typeof APPROVAL_STEP_KIND)[keyof typeof APPROVAL_STEP_KIND];
+export const APPROVAL_STEP_KINDS = Object.values(APPROVAL_STEP_KIND);

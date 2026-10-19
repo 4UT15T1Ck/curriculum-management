@@ -1,9 +1,6 @@
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import request from 'supertest';
-import {
-  ChangeRequestStatus,
-  ProgramVersionStatus,
-} from '../../src/generated/prisma/client.js';
+import { ProgramVersionStatus } from '../../src/generated/prisma/client.js';
 import { PrismaService } from '../../src/shared/prisma/prisma.service.js';
 import { createCourse } from './courses.js';
 import { addCurriculumItem, releaseVersionForTest } from './curriculum.js';
@@ -50,6 +47,11 @@ export interface RequestStep {
   action: string;
   isSkipped: boolean;
   skipReason: string | null;
+  remark: string | null;
+  recordedAt: string | null;
+  isOverride: boolean;
+  kind: string;
+  performedBy: { id: string; fullName: string } | null;
 }
 
 export interface RequestDetail {
@@ -80,28 +82,32 @@ export function submitRequest(agent: Agent, id: string) {
   return agent.post(`/api/change-requests/${id}/submit`).set(CSRF);
 }
 
-// Stands in for F-14's Return until it exists: back to Draft, round unchanged. F-14 replaces every call with the real route.
-export function returnForTest(app: NestExpressApplication, requestId: string) {
-  return app.get(PrismaService).changeRequest.update({
-    where: { id: requestId },
-    data: { status: ChangeRequestStatus.DRAFT },
-  });
+export const VALID_REMARK = 'Cần bổ sung minh chứng cho thay đổi này.';
+
+// The decision routes (F-14), called as whoever the agent is logged in as.
+export function decide(
+  agent: Agent,
+  requestId: string,
+  action: 'approve' | 'return' | 'reject',
+  remark: string = VALID_REMARK,
+) {
+  return agent
+    .post(`/api/change-requests/${requestId}/${action}`)
+    .set(CSRF)
+    .send(action === 'approve' ? {} : { remark });
 }
 
-// Stands in for F-14's approve on one non-skipped row.
-export async function approveFirstRowForTest(
-  app: NestExpressApplication,
+export async function returnAs(
+  agent: Agent,
   requestId: string,
-) {
-  const prisma = app.get(PrismaService);
-  const row = await prisma.approvalStep.findFirstOrThrow({
-    where: { changeRequestId: requestId, isSkipped: false },
-    orderBy: { approvalLevel: 'asc' },
-  });
-  return prisma.approvalStep.update({
-    where: { id: row.id },
-    data: { action: 'APPROVE', recordedAt: new Date() },
-  });
+  remark = VALID_REMARK,
+): Promise<void> {
+  await decide(agent, requestId, 'return', remark).expect(200);
+}
+
+export async function approveAs(agent: Agent, requestId: string) {
+  const response = await decide(agent, requestId, 'approve').expect(200);
+  return response.body as RequestDetail;
 }
 
 // A course with a published syllabus, written by the admin (R1) and published the way F-15 will.

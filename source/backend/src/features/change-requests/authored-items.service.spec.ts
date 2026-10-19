@@ -51,6 +51,8 @@ const ORG_ACCESS = (groupIds: string[]) => {
 
 const request = (patch: Partial<RequestCore>): RequestCore => ({
   id: 'cr1',
+  requestCode: 'DX-2026-0001',
+  title: 'Đề xuất',
   requestType: ChangeRequestType.COURSE_RELATION,
   targetType: ChangeTargetType.COURSE,
   courseId: 'c1',

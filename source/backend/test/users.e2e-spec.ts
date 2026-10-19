@@ -129,6 +129,10 @@ describe('user account management', () => {
       '/api/auth/me',
       '/api/auth/change-password',
       '/api/org-units',
+      '/api/notifications',
+      '/api/notifications/unread-count',
+      '/api/notifications/read-all',
+      '/api/notifications/:id/read',
     ]);
     for (const [path, operations] of Object.entries(paths)) {
       const normalizedPath = path.replace(

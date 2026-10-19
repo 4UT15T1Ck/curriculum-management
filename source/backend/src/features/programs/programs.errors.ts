@@ -1,12 +1,12 @@
 import { HttpStatus } from '@nestjs/common';
+import {
+  DIRECTOR_CONSTRAINT,
+  DIRECTOR_ERRORS,
+} from '../../shared/programs/director.errors.js';
 import type { ErrorDefinition } from '../../shared/exception/error-definition.js';
 
 export const PROGRAM_ERRORS = {
-  PROGRAM_NOT_FOUND: {
-    status: HttpStatus.NOT_FOUND,
-    code: 'PROGRAM_NOT_FOUND',
-    message: 'Không tìm thấy chương trình đào tạo.',
-  },
+  ...DIRECTOR_ERRORS,
   PROGRAM_CODE_TAKEN: {
     status: HttpStatus.CONFLICT,
     code: 'PROGRAM_CODE_TAKEN',
@@ -21,11 +21,6 @@ export const PROGRAM_ERRORS = {
     status: HttpStatus.BAD_REQUEST,
     code: 'CREDITS_MISMATCH',
     message: 'Tín chỉ bắt buộc cộng tín chỉ tự chọn phải bằng tổng tín chỉ',
-  },
-  PROGRAM_INACTIVE: {
-    status: HttpStatus.CONFLICT,
-    code: 'PROGRAM_INACTIVE',
-    message: 'Chương trình đã ngừng sử dụng.',
   },
   STATUS_UNCHANGED: {
     status: HttpStatus.CONFLICT,
@@ -52,34 +47,12 @@ export const PROGRAM_ERRORS = {
     code: 'SOURCE_VERSION_INVALID',
     message: 'Phiên bản nguồn không thuộc chương trình được nhân bản.',
   },
-  DIRECTOR_INVALID: {
-    status: HttpStatus.BAD_REQUEST,
-    code: 'DIRECTOR_INVALID',
-    message: 'Giám đốc CTĐT phải là một tài khoản đang hoạt động.',
-  },
-  DIRECTOR_PERIOD_OVERLAP: {
-    status: HttpStatus.CONFLICT,
-    code: 'DIRECTOR_PERIOD_OVERLAP',
-    message:
-      'Người này đã được phân công cho chương trình trong khoảng thời gian chồng lên.',
-  },
-  DIRECTOR_ASSIGNMENT_NOT_FOUND: {
-    status: HttpStatus.NOT_FOUND,
-    code: 'DIRECTOR_ASSIGNMENT_NOT_FOUND',
-    message: 'Không tìm thấy phân công Giám đốc CTĐT.',
-  },
-  END_DATE_NOT_EARLIER: {
-    status: HttpStatus.BAD_REQUEST,
-    code: 'END_DATE_NOT_EARLIER',
-    message:
-      'Ngày kết thúc mới phải sớm hơn ngày kết thúc hiện tại; muốn kéo dài thì thêm phân công mới.',
-  },
 } as const satisfies Record<string, ErrorDefinition>;
 
 // Constraint keys in `details`, the same style as class-validator keys (FieldErrorDto).
 export const PROGRAM_CONSTRAINT = {
   ACTIVE_FACULTY: 'activeFaculty',
-  ACTIVE_USER: 'activeUser',
+  ACTIVE_USER: DIRECTOR_CONSTRAINT.ACTIVE_USER,
   CREDITS_SUM: 'creditsSum',
   SEMESTERS_COVER_CURRICULUM: 'semestersCoverCurriculum',
 } as const;

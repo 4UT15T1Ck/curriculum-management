@@ -41,3 +41,19 @@ export async function otherAcademicOfficeHolderExists(
   });
   return row !== null;
 }
+
+// Everyone who may act on a level-3 request today, the creator excluded.
+export async function academicOfficeHolderIds(
+  db: Db,
+  exceptUserId: string,
+  today: Date,
+): Promise<string[]> {
+  const rows = await db.roleAssignment.findMany({
+    where: {
+      userId: { not: exceptUserId },
+      ...activeAcademicOfficeWhere(today),
+    },
+    select: { userId: true },
+  });
+  return [...new Set(rows.map((row) => row.userId))];
+}

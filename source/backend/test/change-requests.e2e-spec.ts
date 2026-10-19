@@ -12,14 +12,14 @@ import { PrismaService } from '../src/shared/prisma/prisma.service.js';
 import { todayDate, toIsoDay } from '../src/shared/time/today.js';
 import { createAccount, loginAgent } from './fixtures/accounts.js';
 import {
-  approveFirstRowForTest,
+  approveAs,
   openRequest,
   postRequest,
   publishedCourse,
   readRequest,
   releaseAnotherVersionForTest,
   releasedProgram,
-  returnForTest,
+  returnAs,
   type RequestStep,
   submitRequest,
 } from './fixtures/change-requests.js';
@@ -581,7 +581,7 @@ describe('change requests: authoring, routing and withdrawal', () => {
   });
 
   describe('withdrawing, deleting and resubmitting', () => {
-    it('withdraws a pending request and freezes its copy (US-059 AC1, AC4)', async () => {
+    it('withdraws a pending request, drops its copy and leaves it view-only (US-059 AC1, AC4)', async () => {
       const course = await publishedCourse(app, admin, code('CRS'), ga);
       const created = await openRequest(memberA, syllabusBody(course.id));
       await editCopy(memberA, created.workspace!.copyId);
@@ -593,12 +593,16 @@ describe('change requests: authoring, routing and withdrawal', () => {
           .expect(200)
       ).body;
       expect(withdrawn.status).toBe('WITHDRAWN');
-      const frozen = await memberA
+      // F-14: a closed request has no use for its copy; the stored items keep the diff readable.
+      expect(
+        await prisma.syllabus.count({ where: { sourceRequestId: created.id } }),
+      ).toBe(0);
+      await memberA
         .patch(`/api/syllabi/${created.workspace!.copyId}`)
         .set(CSRF)
         .send({ objectives: '<p>Sau khi rút</p>' })
-        .expect(409);
-      expect(frozen.body.code).toBe('REQUEST_NOT_DRAFT');
+        .expect(404);
+      await memberA.get(`/api/change-requests/${created.id}/diff`).expect(200);
       const again = await memberA
         .post(`/api/change-requests/${created.id}/withdraw`)
         .set(CSRF)
@@ -611,7 +615,7 @@ describe('change requests: authoring, routing and withdrawal', () => {
       const created = await openRequest(memberA, syllabusBody(course.id));
       await editCopy(memberA, created.workspace!.copyId);
       await submitRequest(memberA, created.id).expect(200);
-      await approveFirstRowForTest(app, created.id);
+      await approveAs(coordA, created.id);
       const refused = await memberA
         .post(`/api/change-requests/${created.id}/withdraw`)
         .set(CSRF)
@@ -676,7 +680,7 @@ describe('change requests: authoring, routing and withdrawal', () => {
       const kept = await openRequest(memberA, syllabusBody(course.id));
       await editCopy(memberA, kept.workspace!.copyId);
       await submitRequest(memberA, kept.id).expect(200);
-      await returnForTest(app, kept.id);
+      await returnAs(coordA, kept.id);
       const refused = await memberA
         .delete(`/api/change-requests/${kept.id}`)
         .set(CSRF)

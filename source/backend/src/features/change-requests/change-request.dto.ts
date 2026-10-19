@@ -4,16 +4,18 @@ import {
   PartialType,
   PickType,
 } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEnum,
   IsIn,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
   Length,
   MaxLength,
+  Min,
   ValidateIf,
 } from 'class-validator';
 import {
@@ -63,6 +65,17 @@ export class ChangeRequestQueryDto extends PageQueryDto {
   @IsOptional()
   @IsBoolean()
   mine?: boolean;
+
+  @ApiPropertyOptional({
+    minimum: 1,
+    description:
+      'Only requests waiting at their current level for this many days or more',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  minDaysWaiting?: number;
 }
 
 export class ConflictQueryDto {

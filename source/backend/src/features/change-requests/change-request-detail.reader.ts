@@ -6,7 +6,12 @@ import {
 } from '../../generated/prisma/client.js';
 import type { AccessContext } from '../../shared/authz/access-context.js';
 import { PERMISSIONS } from '../../shared/authz/permission-codes.js';
-import { PENDING_STATUSES } from '../../shared/change-requests/approval.constants.js';
+import { ApprovalRecorder } from '../../shared/change-requests/approval-recorder.js';
+import { levelOfStatus } from '../../shared/change-requests/approval-rules.js';
+import {
+  APPROVAL_LEVEL,
+  PENDING_STATUSES,
+} from '../../shared/change-requests/approval.constants.js';
 import { AUTHORED_ENTITY } from '../../shared/change-requests/authored-item.types.js';
 import {
   WORKSPACE_KIND,
@@ -15,6 +20,7 @@ import {
 import { StaleChecker } from '../../shared/change-requests/stale-checker.js';
 import { AppException } from '../../shared/exception/app.exception.js';
 import { PrismaService } from '../../shared/prisma/prisma.service.js';
+import { todayDate } from '../../shared/time/today.js';
 import { CHANGE_REQUEST_ERRORS } from './change-request-feature.errors.js';
 import {
   DOCUMENT_INCLUDE,
@@ -46,6 +52,7 @@ export class ChangeRequestDetailReader {
     private readonly prisma: PrismaService,
     private readonly stale: StaleChecker,
     private readonly conflicts: ConflictFinder,
+    private readonly recorder: ApprovalRecorder,
   ) {}
 
   async read(
@@ -104,7 +111,7 @@ export class ChangeRequestDetailReader {
       ),
       steps: steps.map(toStepDto),
       conflicts: await this.conflicts.find(targetKey(toKey(row)), access, id),
-      permissions: this.actions(row, access, steps),
+      permissions: await this.actions(row, access, steps),
     });
   }
 
@@ -150,11 +157,11 @@ export class ChangeRequestDetailReader {
     return null;
   }
 
-  private actions(
+  private async actions(
     row: RequestSummaryRow,
     access: AccessContext,
     steps: readonly { action: ApprovalAction; isSkipped: boolean }[],
-  ): RequestActionsDto {
+  ): Promise<RequestActionsDto> {
     const isCreator = row.createdById === access.userId;
     const isDraft = row.status === ChangeRequestStatus.DRAFT;
     const canCreate = access.has(
@@ -167,6 +174,12 @@ export class ChangeRequestDetailReader {
     );
     const pending = PENDING_STATUSES.includes(row.status);
     const canEdit = isCreator && isDraft && canCreate;
+    const level = levelOfStatus(row.status);
+    const decides = await this.canDecide(row, access.userId);
+    // A data request at level 3 is approved on F-15's final-approval form, not here.
+    const approvesHere =
+      level !== APPROVAL_LEVEL.ACADEMIC_OFFICE ||
+      row.requestType === ChangeRequestType.ORGANIZATION;
     return {
       canEdit,
       canDelete: canEdit && row.submissionRound === 0,
@@ -176,7 +189,30 @@ export class ChangeRequestDetailReader {
         (pending || (isDraft && row.submissionRound > 0)) &&
         !approved,
       canUpload: isCreator && UPLOAD_STATUSES.includes(row.status),
+      canApprove: decides && approvesHere,
+      canReturn: decides,
+      canReject: decides,
+      canOverride:
+        access.has(PERMISSIONS.CHANGE_REQUEST_OVERRIDE) &&
+        (level === APPROVAL_LEVEL.COORDINATOR ||
+          level === APPROVAL_LEVEL.DIRECTOR) &&
+        !isCreator,
+      canComment: access.has(PERMISSIONS.CHANGE_REQUEST_COMMENT),
     };
+  }
+
+  private async canDecide(
+    row: RequestSummaryRow,
+    userId: string,
+  ): Promise<boolean> {
+    if (!PENDING_STATUSES.includes(row.status)) return false;
+    const rows = await this.recorder.actionableRows(
+      this.prisma,
+      row,
+      userId,
+      todayDate(),
+    );
+    return rows.length > 0;
   }
 }
 

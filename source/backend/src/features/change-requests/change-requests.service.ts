@@ -20,6 +20,7 @@ import { COMMON_ERRORS } from '../../shared/exception/error-codes.js';
 import { FileStorageService } from '../../shared/files/file-storage.service.js';
 import { toPage, toSkipTake, type Page } from '../../shared/pagination/page.js';
 import { PrismaService } from '../../shared/prisma/prisma.service.js';
+import { waitingBefore } from '../../shared/time/days-since.js';
 import { todayDate } from '../../shared/time/today.js';
 import { ChangeRequestDetailReader } from './change-request-detail.reader.js';
 import { CHANGE_REQUEST_ERRORS } from './change-request-feature.errors.js';
@@ -77,6 +78,12 @@ export class ChangeRequestsService {
           ...(query.origin && { origin: query.origin }),
           ...(query.createdById && { createdById: query.createdById }),
           ...(query.mine && { createdById: access.userId }),
+          // Only PENDING_* rows have levelEnteredAt, so the filter implies them. "N days or more" includes day N.
+          ...(query.minDaysWaiting && {
+            levelEnteredAt: {
+              lt: waitingBefore(query.minDaysWaiting),
+            },
+          }),
         },
       ],
     };

@@ -7,13 +7,20 @@ import { CurriculumSharedModule } from '../../shared/curriculum/curriculum-share
 import { BYTES_PER_MB } from '../../shared/files/attachment-types.js';
 import { FilesModule } from '../../shared/files/files.module.js';
 import { ProgramsSharedModule } from '../../shared/programs/programs-shared.module.js';
+import { ApprovalHistoryReader } from './approval-history.reader.js';
+import { ApprovalQueueController } from './approval-queue.controller.js';
+import { ApprovalQueueReader } from './approval-queue.reader.js';
+import { ApprovalController } from './approval.controller.js';
+import { ApprovalService } from './approval.service.js';
 import { AuthoredItemsService } from './authored-items.service.js';
 import { ChangeRequestDetailReader } from './change-request-detail.reader.js';
 import { ChangeRequestDocumentsController } from './change-request-documents.controller.js';
 import { ChangeRequestDocumentsService } from './change-request-documents.service.js';
 import { ChangeRequestsController } from './change-requests.controller.js';
 import { ChangeRequestsService } from './change-requests.service.js';
+import { CommentsService } from './comments.service.js';
 import { ConflictFinder } from './conflict-finder.js';
+import { OrganizationalApplier } from './organizational-applier.js';
 import { RequestItemsService } from './request-items.service.js';
 import { RequestTargetResolver } from './request-target.resolver.js';
 import { RoutingPlanner } from './routing-planner.js';
@@ -38,8 +45,18 @@ import { WorkingCopyService } from './working-copy.service.js';
       }),
     }),
   ],
-  controllers: [ChangeRequestsController, ChangeRequestDocumentsController],
+  controllers: [
+    ChangeRequestsController,
+    ChangeRequestDocumentsController,
+    ApprovalController,
+    ApprovalQueueController,
+  ],
   providers: [
+    ApprovalHistoryReader,
+    ApprovalQueueReader,
+    ApprovalService,
+    CommentsService,
+    OrganizationalApplier,
     ChangeRequestsService,
     ChangeRequestDetailReader,
     AuthoredItemsService,

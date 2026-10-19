@@ -3,11 +3,13 @@ import {
   ChangeTargetType,
   type Prisma,
 } from '../../generated/prisma/client.js';
+import { stepKind } from '../../shared/change-requests/approval-rules.js';
 import {
   APPROVAL_LEVEL_NAMES,
   type ApprovalLevel,
 } from '../../shared/change-requests/approval.constants.js';
 import { USER_REF_SELECT } from '../../shared/dtos/ref.dto.js';
+import { daysSince } from '../../shared/time/days-since.js';
 import type {
   ApprovalStepDto,
   AuthoredItemDto,
@@ -29,6 +31,7 @@ export const REQUEST_SUMMARY_SELECT = {
   origin: true,
   basisDocumentNumber: true,
   submissionRound: true,
+  levelEnteredAt: true,
   createdById: true,
   courseId: true,
   programId: true,
@@ -91,6 +94,8 @@ export function toSummaryDto(row: RequestSummaryRow): ChangeRequestSummaryDto {
     status: row.status,
     origin: row.origin,
     submissionRound: row.submissionRound,
+    levelEnteredAt: row.levelEnteredAt?.toISOString() ?? null,
+    daysWaiting: row.levelEnteredAt ? daysSince(row.levelEnteredAt) : null,
     createdBy: row.createdBy,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
@@ -140,6 +145,7 @@ export function toDocumentDto(
 
 export const STEP_INCLUDE = {
   approver: { select: USER_REF_SELECT },
+  performedBy: { select: USER_REF_SELECT },
   forSubjectGroup: {
     select: { id: true, groupCode: true, groupName: true },
   },
@@ -162,6 +168,9 @@ export function toStepDto(row: StepRow): ApprovalStepDto {
     skipReason: row.skipReason,
     remark: row.remark,
     recordedAt: row.recordedAt?.toISOString() ?? null,
+    performedBy: row.performedBy,
+    isOverride: row.isOverride,
+    kind: stepKind(row),
   };
 }
 

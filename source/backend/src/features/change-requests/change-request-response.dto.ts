@@ -8,6 +8,10 @@ import {
   RequestOrigin,
   ApprovalAction,
 } from '../../generated/prisma/client.js';
+import {
+  APPROVAL_STEP_KINDS,
+  type ApprovalStepKind,
+} from '../../shared/change-requests/approval.constants.js';
 import { UserRefDto } from '../../shared/dtos/ref.dto.js';
 
 export const WORKSPACE_KINDS = ['PROGRAM_VERSION', 'SYLLABUS'] as const;
@@ -38,6 +42,14 @@ export class ChangeRequestSummaryDto {
   @ApiProperty({ enum: RequestOrigin, enumName: 'RequestOrigin' })
   origin!: RequestOrigin;
   @ApiProperty({ description: '0 = never submitted' }) submissionRound!: number;
+  @ApiProperty({
+    nullable: true,
+    type: String,
+    description:
+      'When the request entered its current level; null outside PENDING_*',
+  })
+  levelEnteredAt!: string | null;
+  @ApiProperty({ nullable: true, type: Number }) daysWaiting!: number | null;
   @ApiProperty({ type: UserRefDto }) createdBy!: UserRefDto;
   @ApiProperty() createdAt!: string;
   @ApiProperty() updatedAt!: string;
@@ -118,6 +130,15 @@ export class ApprovalStepDto {
   @ApiProperty({ nullable: true, type: String }) skipReason!: string | null;
   @ApiProperty({ nullable: true, type: String }) remark!: string | null;
   @ApiProperty({ nullable: true, type: String }) recordedAt!: string | null;
+  @ApiProperty({
+    type: UserRefDto,
+    nullable: true,
+    description: 'Who acted; differs from approver on an override',
+  })
+  performedBy!: UserRefDto | null;
+  @ApiProperty() isOverride!: boolean;
+  @ApiProperty({ enum: APPROVAL_STEP_KINDS, enumName: 'ApprovalStepKind' })
+  kind!: ApprovalStepKind;
 }
 
 export class ConflictDto {
@@ -135,6 +156,11 @@ export class RequestActionsDto {
   @ApiProperty() canSubmit!: boolean;
   @ApiProperty() canWithdraw!: boolean;
   @ApiProperty() canUpload!: boolean;
+  @ApiProperty() canApprove!: boolean;
+  @ApiProperty() canReturn!: boolean;
+  @ApiProperty() canReject!: boolean;
+  @ApiProperty() canOverride!: boolean;
+  @ApiProperty() canComment!: boolean;
 }
 
 export class ChangeRequestDetailDto extends ChangeRequestSummaryDto {

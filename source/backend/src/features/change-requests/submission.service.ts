@@ -12,6 +12,8 @@ import {
   PENDING_STATUSES,
   type ApprovalLevel,
 } from '../../shared/change-requests/approval.constants.js';
+import { levelOfStatus } from '../../shared/change-requests/approval-rules.js';
+import { RequestNotifier } from '../../shared/change-requests/request-notifier.js';
 import { REQUEST_DRAFT_ERRORS } from '../../shared/change-requests/change-request.errors.js';
 import { toJsonInput } from '../../shared/change-requests/diff/snapshot-entry.js';
 import {
@@ -42,6 +44,7 @@ import {
   type SubmitPreviewDto,
 } from './submit-preview.dto.js';
 import { findVisibleRequest, type RequestCore } from './request-visibility.js';
+import { WorkingCopyService } from './working-copy.service.js';
 import { CONSISTENCY_ERRORS } from '../../shared/curriculum/consistency-errors.js';
 
 type Db = PrismaService | Prisma.TransactionClient;
@@ -58,6 +61,8 @@ export class SubmissionService {
     private readonly checker: ConsistencyChecker,
     private readonly routing: RoutingPlanner,
     private readonly details: ChangeRequestDetailReader,
+    private readonly notifier: RequestNotifier,
+    private readonly copies: WorkingCopyService,
   ) {}
 
   // A dry run of submit: the same checks and the same routing, reported instead of thrown (US-057 AC7).
@@ -173,10 +178,17 @@ export class SubmissionService {
           recordedAt: step.isSkipped ? now : null,
         })),
       });
+      const status = firstPendingStatus(plan.steps);
       await tx.changeRequest.update({
         where: { id },
-        data: { status: firstPendingStatus(plan.steps) },
+        data: { status, levelEnteredAt: now },
       });
+      await this.notifier.arrived(
+        tx,
+        { ...request, submissionRound: round },
+        levelOfStatus(status)!,
+        access.userId,
+      );
     });
     this.logger.log(
       `Change request ${id} submitted (round ${round}) by ${access.userId}`,
@@ -200,24 +212,28 @@ export class SubmissionService {
     if (!withdrawable) {
       throw new AppException(SUBMISSION_ERRORS.WITHDRAW_NOT_ALLOWED);
     }
-    const { count } = await this.prisma.changeRequest.updateMany({
-      where: {
-        id,
-        status: request.status,
-        submissionRound: request.submissionRound,
-        steps: {
-          none: {
-            submissionRound: request.submissionRound,
-            action: ApprovalAction.APPROVE,
-            isSkipped: false,
+    await this.prisma.$transaction(async (tx) => {
+      const { count } = await tx.changeRequest.updateMany({
+        where: {
+          id,
+          status: request.status,
+          submissionRound: request.submissionRound,
+          steps: {
+            none: {
+              submissionRound: request.submissionRound,
+              action: ApprovalAction.APPROVE,
+              isSkipped: false,
+            },
           },
         },
-      },
-      data: { status: ChangeRequestStatus.WITHDRAWN },
+        data: { status: ChangeRequestStatus.WITHDRAWN, levelEnteredAt: null },
+      });
+      if (count === 0) {
+        throw new AppException(SUBMISSION_ERRORS.WITHDRAW_NOT_ALLOWED);
+      }
+      // A withdrawn request is final (BR-29): its working copy goes with it. The stored items keep the diff readable.
+      await this.copies.discard(tx, id);
     });
-    if (count === 0) {
-      throw new AppException(SUBMISSION_ERRORS.WITHDRAW_NOT_ALLOWED);
-    }
     this.logger.log(`Change request ${id} withdrawn by ${access.userId}`);
     return this.details.read(id, access);
   }

@@ -10,6 +10,7 @@ import { AccessContext } from '../../shared/authz/access-context.js';
 import { AppException } from '../../shared/exception/app.exception.js';
 import { CONSISTENCY_ERRORS } from '../../shared/curriculum/consistency-errors.js';
 import type { ConsistencyChecker } from '../../shared/curriculum/consistency-checker.js';
+import type { RequestNotifier } from '../../shared/change-requests/request-notifier.js';
 import type { StaleChecker } from '../../shared/change-requests/stale-checker.js';
 import type { PrismaService } from '../../shared/prisma/prisma.service.js';
 import type { ChangeRequestDetailReader } from './change-request-detail.reader.js';
@@ -17,6 +18,7 @@ import type { ChangeRequestsService } from './change-requests.service.js';
 import type { RequestItemsService } from './request-items.service.js';
 import type { PlannedStep, RoutingPlanner } from './routing-planner.js';
 import { SubmissionService } from './submission.service.js';
+import type { WorkingCopyService } from './working-copy.service.js';
 
 const ACCESS = new AccessContext('u1', []);
 
@@ -72,7 +74,7 @@ describe('SubmissionService', () => {
   };
   const prisma = {
     $transaction: vi.fn((run: (client: unknown) => unknown) => run(tx)),
-    changeRequest: { findFirst: vi.fn(), updateMany: vi.fn() },
+    changeRequest: { findFirst: vi.fn() },
     programVersion: { findUnique: vi.fn() },
     course: { findUniqueOrThrow: vi.fn() },
   };
@@ -82,6 +84,8 @@ describe('SubmissionService', () => {
   const checker = { assertPasses: vi.fn(), check: vi.fn() };
   const routing = { plan: vi.fn() };
   const details = { read: vi.fn().mockResolvedValue({ id: 'cr1' }) };
+  const notifier = { arrived: vi.fn() };
+  const copies = { discard: vi.fn() };
   let service: SubmissionService;
 
   beforeEach(() => {
@@ -103,7 +107,6 @@ describe('SubmissionService', () => {
       status: ChangeRequestStatus.PENDING_COORDINATOR,
       submissionRound: 1,
     });
-    prisma.changeRequest.updateMany.mockResolvedValue({ count: 1 });
     service = new SubmissionService(
       prisma as unknown as PrismaService,
       requests as unknown as ChangeRequestsService,
@@ -112,6 +115,8 @@ describe('SubmissionService', () => {
       checker as unknown as ConsistencyChecker,
       routing as unknown as RoutingPlanner,
       details as unknown as ChangeRequestDetailReader,
+      notifier as unknown as RequestNotifier,
+      copies as unknown as WorkingCopyService,
     );
   });
 
@@ -138,8 +143,17 @@ describe('SubmissionService', () => {
       });
       expect(tx.changeRequest.update).toHaveBeenCalledWith({
         where: { id: 'cr1' },
-        data: { status: ChangeRequestStatus.PENDING_COORDINATOR },
+        data: {
+          status: ChangeRequestStatus.PENDING_COORDINATOR,
+          levelEnteredAt: expect.any(Date),
+        },
       });
+      expect(notifier.arrived).toHaveBeenCalledWith(
+        tx,
+        expect.objectContaining({ id: 'cr1', submissionRound: 1 }),
+        1,
+        'u1',
+      );
       const rows = tx.approvalStep.createMany.mock.calls[0][0].data;
       expect(rows).toHaveLength(3);
       expect(
@@ -169,7 +183,14 @@ describe('SubmissionService', () => {
       expect(rows[2].recordedAt).toBeNull();
       expect(tx.changeRequest.update.mock.calls[0][0].data).toEqual({
         status: ChangeRequestStatus.PENDING_ACADEMIC_OFFICE,
+        levelEnteredAt: expect.any(Date),
       });
+      expect(notifier.arrived).toHaveBeenCalledWith(
+        tx,
+        expect.anything(),
+        3,
+        'u1',
+      );
     });
 
     it('numbers a resubmission one higher', async () => {
@@ -233,6 +254,7 @@ describe('SubmissionService', () => {
       });
       expect(tx.approvalStep.createMany).not.toHaveBeenCalled();
       expect(tx.changeRequest.update).not.toHaveBeenCalled();
+      expect(notifier.arrived).not.toHaveBeenCalled();
     });
   });
 
@@ -277,7 +299,7 @@ describe('SubmissionService', () => {
   describe('withdraw', () => {
     it('withdraws while no non-skipped row of this round approved', async () => {
       await service.withdraw('cr1', ACCESS);
-      expect(prisma.changeRequest.updateMany).toHaveBeenCalledWith({
+      expect(tx.changeRequest.updateMany).toHaveBeenCalledWith({
         where: {
           id: 'cr1',
           status: ChangeRequestStatus.PENDING_COORDINATOR,
@@ -290,12 +312,13 @@ describe('SubmissionService', () => {
             },
           },
         },
-        data: { status: ChangeRequestStatus.WITHDRAWN },
+        data: { status: ChangeRequestStatus.WITHDRAWN, levelEnteredAt: null },
       });
+      expect(copies.discard).toHaveBeenCalledWith(tx, 'cr1');
     });
 
     it('refuses when the guarded update finds an approval, a finished request or a Draft never submitted', async () => {
-      prisma.changeRequest.updateMany.mockResolvedValue({ count: 0 });
+      tx.changeRequest.updateMany.mockResolvedValue({ count: 0 });
       await expect(service.withdraw('cr1', ACCESS)).rejects.toMatchObject({
         code: 'WITHDRAW_NOT_ALLOWED',
       });

@@ -61,6 +61,8 @@ export function visibleWhere(
 // What the services that act on a request (documents, items, submit, withdraw) need to know about it.
 export const REQUEST_CORE_SELECT = {
   id: true,
+  requestCode: true,
+  title: true,
   requestType: true,
   targetType: true,
   courseId: true,

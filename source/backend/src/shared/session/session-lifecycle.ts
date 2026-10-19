@@ -11,6 +11,7 @@ export async function startSession(
     ),
   );
   request.session.userId = userId;
+  request.session.lastActivityAt = Date.now();
   await new Promise<void>((resolve, reject) =>
     request.session.save((error: unknown) =>
       error ? reject(error) : resolve(),

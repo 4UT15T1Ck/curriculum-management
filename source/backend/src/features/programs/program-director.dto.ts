@@ -1,26 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import type { Prisma } from '../../generated/prisma/client.js';
-import { UserRefDto, USER_REF_SELECT } from '../../shared/dtos/ref.dto.js';
+import { UserRefDto } from '../../shared/dtos/ref.dto.js';
+import {
+  DIRECTOR_SELECT,
+  type DirectorRow,
+} from '../../shared/programs/director.writer.js';
 import { toIsoDay } from '../../shared/time/today.js';
 import {
   VALIDITY_STATES,
   validityState,
   type ValidityState,
 } from '../../shared/time/validity.js';
-
-export const DIRECTOR_SELECT = {
-  id: true,
-  validFrom: true,
-  validTo: true,
-  revokedAt: true,
-  director: { select: USER_REF_SELECT },
-  assignedBy: { select: USER_REF_SELECT },
-  revokedBy: { select: USER_REF_SELECT },
-} as const satisfies Prisma.ProgramDirectorAssignmentSelect;
-
-export type DirectorRow = Prisma.ProgramDirectorAssignmentGetPayload<{
-  select: typeof DIRECTOR_SELECT;
-}>;
 
 export class ProgramDirectorDto {
   @ApiProperty() id!: string;
@@ -52,3 +41,5 @@ export function toProgramDirectorDto(
     revokedBy: row.revokedBy,
   };
 }
+
+export { DIRECTOR_SELECT };

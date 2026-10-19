@@ -142,6 +142,20 @@ enum ApprovalAction {
   REJECT
 }
 
+enum NotificationType {
+  REQUEST_AWAITING_YOU
+  REQUEST_RETURNED
+  REQUEST_REJECTED
+  REQUEST_APPROVED
+  REQUEST_OVERRIDDEN
+  REQUEST_COMMENTED
+}
+
+enum NotificationReadStatus {
+  UNREAD
+  READ
+}
+
 enum ChangeDocumentType {
   SUBMISSION
   MINUTES
@@ -197,6 +211,8 @@ model User {
   approvalSteps             ApprovalStep[]              @relation("ApprovalStepApprover")
   performedApprovalSteps    ApprovalStep[]              @relation("ApprovalStepPerformer")
   changeRequestDocuments    ChangeRequestDocument[]     @relation("ChangeRequestDocumentUploader")
+  comments                  Comment[]                   @relation("CommentAuthor")
+  notifications             Notification[]              @relation("NotificationRecipient")
   createdAt                 DateTime                    @default(now())
   updatedAt                 DateTime                    @updatedAt
 
@@ -702,9 +718,13 @@ model ChangeRequest {
   submissionRound         Int                     @default(0)
   // Whether the creator held the academic-office role on the day of creation (F-15 reads it for past-semester releases).
   createdByAcademicOffice Boolean                 @default(false)
+  // When the request entered its current PENDING_* level; null outside PENDING_* (days waiting, backlog filter).
+  levelEnteredAt          DateTime?
   items                   ChangeItem[]
   steps                   ApprovalStep[]
   documents               ChangeRequestDocument[]
+  comments                Comment[]
+  notifications           Notification[]
   programCopy             ProgramVersion?         @relation("ProgramVersionRequestCopy")
   syllabusCopy            Syllabus?               @relation("SyllabusRequestCopy")
   createdAt               DateTime                @default(now())
@@ -771,6 +791,36 @@ model ApprovalStep {
 
   @@index([changeRequestId, submissionRound, approvalLevel])
   @@index([approverId, action])
+}
+
+// No updatedAt on purpose: comments are never edited or deleted (US-067 AC3).
+model Comment {
+  id              String        @id @default(cuid(2))
+  changeRequestId String
+  changeRequest   ChangeRequest @relation(fields: [changeRequestId], references: [id], onDelete: Cascade)
+  authorId        String
+  author          User          @relation("CommentAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  content         String
+  createdAt       DateTime      @default(now())
+
+  @@index([changeRequestId, createdAt])
+}
+
+// In-app only; content is the Vietnamese sentence rendered when the event happened.
+model Notification {
+  id               String                 @id @default(cuid(2))
+  recipientId      String
+  recipient        User                   @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  notificationType NotificationType
+  content          String
+  changeRequestId  String?
+  changeRequest    ChangeRequest?         @relation(fields: [changeRequestId], references: [id], onDelete: Cascade)
+  readStatus       NotificationReadStatus @default(UNREAD)
+  readAt           DateTime?
+  createdAt        DateTime               @default(now())
+
+  @@index([recipientId, readStatus, createdAt])
+  @@index([changeRequestId])
 }
 
 // Scanned supporting documents; the file lives on disk under FILES_ROOT (relative path, '/' separators).
