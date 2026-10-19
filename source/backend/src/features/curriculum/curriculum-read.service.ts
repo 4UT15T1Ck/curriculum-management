@@ -1,6 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { ProgramVersionStatus } from '../../generated/prisma/client.js';
-import type { AccessContext } from '../../shared/authz/access-context.js';
+import {
+  ChangeRequestStatus,
+  ProgramVersionStatus,
+} from '../../generated/prisma/client.js';
+import type {
+  AccessContext,
+  ScopeTarget,
+} from '../../shared/authz/access-context.js';
+import { canEditCopy } from '../../shared/change-requests/request-draft.js';
 import { EDIT_PATH, editPathFor } from '../../shared/authz/edit-path.js';
 import { PERMISSIONS } from '../../shared/authz/permission-codes.js';
 import { toCreditBreakdownDto } from '../../shared/curriculum/credit-breakdown.dto.js';
@@ -74,26 +81,30 @@ export class CurriculumReadService {
       rows.map((row) => [row.courseId, row.plannedSemester]),
     );
     const editable = version.status === ProgramVersionStatus.DRAFT;
-    const editPath = editPathFor(
-      access,
-      PERMISSIONS.CURRICULUM_EDIT,
-      programTarget(version.program),
-      state,
-    );
+    const copy = version.sourceRequest;
+    const editPath = copy
+      ? EDIT_PATH.DIRECT
+      : editPathFor(
+          access,
+          PERMISSIONS.CURRICULUM_EDIT,
+          programTarget(version.program),
+          state,
+        );
+    // A request's working copy is editable by its creator while the request is a Draft; otherwise the old rule.
+    const canEditRow = (target: ScopeTarget) =>
+      editable &&
+      (copy
+        ? canEditCopy(access, PERMISSIONS.CURRICULUM_EDIT, target, copy)
+        : editPathFor(access, PERMISSIONS.CURRICULUM_EDIT, target, state) ===
+          EDIT_PATH.DIRECT);
+    const canEditStructure = canEditRow(programTarget(version.program));
     // In memory over the caller's assignments, so a row each costs nothing.
     const items = rows.map((row, index) =>
       toCurriculumItemDto(row, {
         displayOrder: index + 1,
         semesterOfCourse,
         blockNames,
-        canEdit:
-          editable &&
-          editPathFor(
-            access,
-            PERMISSIONS.CURRICULUM_EDIT,
-            itemTarget(version, row.course),
-            state,
-          ) === EDIT_PATH.DIRECT,
+        canEdit: canEditRow(itemTarget(version, row.course)),
       }),
     );
     const totalsInput = rows.map((row) => ({
@@ -113,11 +124,15 @@ export class CurriculumReadService {
     return {
       version: toCurriculumVersionDto(version),
       editPath,
-      canEditStructure: editable && editPath === EDIT_PATH.DIRECT,
-      canAddItems:
-        editable &&
-        !state.released &&
-        (editPath === EDIT_PATH.DIRECT || holdsGroupScope(access)),
+      canEditStructure,
+      canAddItems: copy
+        ? editable &&
+          copy.createdById === access.userId &&
+          copy.status === ChangeRequestStatus.DRAFT &&
+          (canEditStructure || holdsGroupScope(access))
+        : editable &&
+          !state.released &&
+          (editPath === EDIT_PATH.DIRECT || holdsGroupScope(access)),
       items,
       semesters: semesterTotals(version.semesterCount, totalsInput),
       blocks: blockTotals(totalsInput, blockNames),
@@ -172,12 +187,19 @@ export class CurriculumReadService {
       blockNames: new Map(block ? [[block.blockCode, block.blockName]] : []),
       canEdit:
         row.version.status === ProgramVersionStatus.DRAFT &&
-        editPathFor(
-          access,
-          PERMISSIONS.CURRICULUM_EDIT,
-          itemTarget(row.version, row.course),
-          state,
-        ) === EDIT_PATH.DIRECT,
+        (row.version.sourceRequest
+          ? canEditCopy(
+              access,
+              PERMISSIONS.CURRICULUM_EDIT,
+              itemTarget(row.version, row.course),
+              row.version.sourceRequest,
+            )
+          : editPathFor(
+              access,
+              PERMISSIONS.CURRICULUM_EDIT,
+              itemTarget(row.version, row.course),
+              state,
+            ) === EDIT_PATH.DIRECT),
     });
   }
 

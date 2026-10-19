@@ -7,6 +7,7 @@ import {
   CYCLE_CHECKED_TYPES,
   type RequisiteEdge,
 } from '../courses/requisite-graph.js';
+import { REQUEST_DRAFT_SELECT } from '../change-requests/request-draft.js';
 import { toWireDecimal } from '../decimal/decimal.js';
 import { AppException } from '../exception/app.exception.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -45,6 +46,7 @@ const CHECK_VERSION_SELECT = {
   creditMismatchElectiveGap: true,
   creditMismatchAcceptedAt: true,
   creditMismatchAcceptedBy: { select: { id: true, fullName: true } },
+  ...REQUEST_DRAFT_SELECT,
 } as const satisfies Prisma.ProgramVersionSelect;
 export type CheckedVersion = Prisma.ProgramVersionGetPayload<{
   select: typeof CHECK_VERSION_SELECT;

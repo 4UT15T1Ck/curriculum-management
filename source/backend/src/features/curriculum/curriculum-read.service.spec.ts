@@ -31,6 +31,7 @@ const VERSION: VersionRow = {
   compulsoryCredits: new Prisma.Decimal('100'),
   electiveCredits: new Prisma.Decimal('50'),
   program: { id: 'p1', facultyId: 'home', programCode: '1024034' },
+  sourceRequest: null,
 };
 
 interface Cell {

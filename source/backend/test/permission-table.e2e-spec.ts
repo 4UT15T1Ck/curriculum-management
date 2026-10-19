@@ -91,6 +91,9 @@ describe('permission table', () => {
 
   async function countWrites(path: string): Promise<number> {
     if (path.startsWith('/api/org-units')) return prisma.orgUnit.count();
+    if (path.startsWith('/api/change-requests')) {
+      return prisma.changeRequest.count();
+    }
     if (path.startsWith('/api/clos') || path.includes('/clos')) {
       return prisma.cLO.count();
     }

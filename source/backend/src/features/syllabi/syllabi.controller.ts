@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   Res,
   UploadedFile,
   UseInterceptors,
@@ -42,7 +43,11 @@ import {
   SyllabusAttachmentDto,
   UploadAttachmentFormDto,
 } from './syllabus-attachment.dto.js';
-import { CourseSyllabusDto, SyllabusDto } from './syllabus.dto.js';
+import {
+  CourseSyllabusDto,
+  CourseSyllabusQueryDto,
+  SyllabusDto,
+} from './syllabus.dto.js';
 import { SyllabiService } from './syllabi.service.js';
 import { UpdateSyllabusDto } from './update-syllabus.dto.js';
 import {
@@ -69,9 +74,10 @@ export class SyllabiController {
   @ApiOkResponse({ type: CourseSyllabusDto })
   forCourse(
     @Param('courseId') courseId: string,
+    @Query() query: CourseSyllabusQueryDto,
     @CurrentAccess() access: AccessContext,
   ) {
-    return this.syllabi.forCourse(courseId, access);
+    return this.syllabi.forCourse(courseId, access, query.requestId);
   }
 
   @Post('courses/:courseId/syllabus')

@@ -3,6 +3,7 @@ import path from 'node:path';
 import type { Readable } from 'node:stream';
 import { Injectable, Logger } from '@nestjs/common';
 import type { AccessContext } from '../../shared/authz/access-context.js';
+import { REQUEST_DRAFT_ERRORS } from '../../shared/change-requests/change-request.errors.js';
 import { AppException } from '../../shared/exception/app.exception.js';
 import {
   detectAttachmentType,
@@ -49,6 +50,9 @@ export class SyllabusAttachmentsService {
         select: SYLLABUS_ACCESS_SELECT,
       }),
     );
+    if (revision.sourceRequest) {
+      throw new AppException(REQUEST_DRAFT_ERRORS.COPY_HAS_NO_ATTACHMENTS);
+    }
     if (!file) {
       throw new AppException(SYLLABUS_ERRORS.ATTACHMENT_FILE_REQUIRED);
     }
@@ -128,7 +132,10 @@ export class SyllabusAttachmentsService {
     if (!row) {
       throw new AppException(SYLLABUS_ERRORS.ATTACHMENT_NOT_FOUND);
     }
-    await assertDraftWrite(this.prisma, access, row.syllabus);
+    const revision = await assertDraftWrite(this.prisma, access, row.syllabus);
+    if (revision.sourceRequest) {
+      throw new AppException(REQUEST_DRAFT_ERRORS.COPY_HAS_NO_ATTACHMENTS);
+    }
     if (row.uploadedById !== access.userId) {
       throw new AppException(SYLLABUS_ERRORS.ATTACHMENT_NOT_UPLOADER);
     }

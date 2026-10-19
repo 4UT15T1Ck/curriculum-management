@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsString, MaxLength } from 'class-validator';
+import { SYLLABUS_SECTION_FIELDS } from '../../shared/syllabi/syllabus-sections.js';
 import { SYLLABUS_LIMITS } from './syllabus.errors.js';
 
 // Every field is optional: only the sections sent change (two people may edit different sections).
@@ -42,11 +43,8 @@ export class UpdateSyllabusDto {
   references?: string | null;
 }
 
-export const SYLLABUS_SECTION_FIELDS = [
-  'courseDescription',
-  'englishDescription',
-  'objectives',
-  'teachingMethods',
-  'assessmentMethods',
-  'references',
-] as const satisfies readonly (keyof UpdateSyllabusDto)[];
+export { SYLLABUS_SECTION_FIELDS };
+
+// The shared list must stay a subset of this DTO's fields.
+export const SECTION_FIELDS_CHECK: readonly (keyof UpdateSyllabusDto)[] =
+  SYLLABUS_SECTION_FIELDS;

@@ -47,6 +47,8 @@ export class CourseUsageReader {
         courseId,
         version: {
           status: { not: ProgramVersionStatus.HISTORICAL },
+          // A request's working copy is not a version in use.
+          sourceRequestId: null,
           program: { status: ProgramStatus.ACTIVE },
         },
       },

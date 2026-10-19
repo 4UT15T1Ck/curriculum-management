@@ -4,6 +4,8 @@ import {
   type Prisma,
 } from '../../generated/prisma/client.js';
 import { EDIT_PATHS, type EditPath } from '../../shared/authz/edit-path.js';
+import { toRequestRef } from '../../shared/change-requests/request-draft.js';
+import { RequestRefDto } from '../../shared/change-requests/request-ref.dto.js';
 import {
   RELATED_COURSE_SELECT,
   RelatedCourseDto,
@@ -32,6 +34,8 @@ export class CurriculumVersionDto {
   @ApiProperty({ enum: ProgramVersionStatus, enumName: 'ProgramVersionStatus' })
   status!: ProgramVersionStatus;
   @ApiProperty() semesterCount!: number;
+  @ApiProperty({ type: RequestRefDto, nullable: true })
+  sourceRequest!: RequestRefDto | null;
 }
 
 export class CurriculumRequisiteDto {
@@ -153,7 +157,11 @@ export const ITEM_INCLUDE = {
     select: {
       ...RELATED_COURSE_SELECT,
       ownerGroupId: true,
-      syllabi: { select: { id: true }, take: 1 },
+      syllabi: {
+        where: { sourceRequestId: null },
+        select: { id: true },
+        take: 1,
+      },
     },
   },
   electiveGroup: { select: { id: true, groupCode: true } },
@@ -234,6 +242,7 @@ export function toCurriculumVersionDto(
     versionNumber: version.versionNumber,
     status: version.status,
     semesterCount: version.semesterCount,
+    sourceRequest: toRequestRef(version.sourceRequest),
   };
 }
 

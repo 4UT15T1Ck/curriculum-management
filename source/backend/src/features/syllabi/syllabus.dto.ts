@@ -1,4 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional, IsString } from 'class-validator';
 import {
   CourseStatus,
   SyllabusStatus,
@@ -8,6 +9,11 @@ import { EDIT_PATHS, type EditPath } from '../../shared/authz/edit-path.js';
 import { CourseUsageDto } from '../../shared/courses/course-usage.dto.js';
 import { toWireDecimal } from '../../shared/decimal/decimal.js';
 import { USER_REF_SELECT } from '../../shared/dtos/ref.dto.js';
+import { RequestRefDto } from '../../shared/change-requests/request-ref.dto.js';
+import {
+  REQUEST_DRAFT_SELECT,
+  toRequestRef,
+} from '../../shared/change-requests/request-draft.js';
 import type { SyllabusCourseRow } from './syllabus-access.js';
 import {
   AttachmentRulesDto,
@@ -39,9 +45,16 @@ const NULLABLE_HTML = {
 
 export class SyllabusDto {
   @ApiProperty() id!: string;
-  @ApiProperty() revisionNumber!: number;
+  @ApiProperty({
+    nullable: true,
+    type: Number,
+    description: 'Null on the working copy of a change request',
+  })
+  revisionNumber!: number | null;
   @ApiProperty({ enum: SyllabusStatus, enumName: 'SyllabusStatus' })
   status!: SyllabusStatus;
+  @ApiProperty({ type: RequestRefDto, nullable: true })
+  sourceRequest!: RequestRefDto | null;
   @ApiProperty(NULLABLE_HTML) courseDescription!: string | null;
   @ApiProperty(NULLABLE_HTML) englishDescription!: string | null;
   @ApiProperty(NULLABLE_HTML) objectives!: string | null;
@@ -56,6 +69,15 @@ export class SyllabusDto {
   attachments!: SyllabusAttachmentDto[];
   @ApiProperty({ type: [CloDto] })
   clos!: CloDto[];
+}
+
+export class CourseSyllabusQueryDto {
+  @ApiPropertyOptional({
+    description: "A change request's id: show its working copy as the Draft",
+  })
+  @IsOptional()
+  @IsString()
+  requestId?: string;
 }
 
 export class CourseSyllabusDto {
@@ -77,6 +99,7 @@ export class CourseSyllabusDto {
 }
 
 export const SYLLABUS_INCLUDE = {
+  ...REQUEST_DRAFT_SELECT,
   weeklyContents: {
     include: WEEKLY_CONTENT_INCLUDE,
     orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
@@ -113,6 +136,7 @@ export function toSyllabusDto(
     id: row.id,
     revisionNumber: row.revisionNumber,
     status: row.status,
+    sourceRequest: toRequestRef(row.sourceRequest),
     courseDescription: row.courseDescription,
     englishDescription: row.englishDescription,
     objectives: row.objectives,

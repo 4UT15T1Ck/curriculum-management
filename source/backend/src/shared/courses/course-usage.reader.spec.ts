@@ -99,6 +99,7 @@ describe('CourseUsageReader.programsUsing', () => {
       courseId: 'course',
       version: {
         status: { not: ProgramVersionStatus.HISTORICAL },
+        sourceRequestId: null,
         program: { status: ProgramStatus.ACTIVE },
       },
     });

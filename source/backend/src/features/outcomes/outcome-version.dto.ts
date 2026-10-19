@@ -4,6 +4,8 @@ import {
   type Prisma,
 } from '../../generated/prisma/client.js';
 import { EDIT_PATHS, type EditPath } from '../../shared/authz/edit-path.js';
+import { toRequestRef } from '../../shared/change-requests/request-draft.js';
+import { RequestRefDto } from '../../shared/change-requests/request-ref.dto.js';
 import type { OutcomeVersionRow } from './outcome-access.js';
 
 export class OutcomeVersionDto {
@@ -14,6 +16,8 @@ export class OutcomeVersionDto {
   @ApiProperty({ nullable: true, type: String }) versionNumber!: string | null;
   @ApiProperty({ enum: ProgramVersionStatus, enumName: 'ProgramVersionStatus' })
   status!: ProgramVersionStatus;
+  @ApiProperty({ type: RequestRefDto, nullable: true })
+  sourceRequest!: RequestRefDto | null;
 }
 
 export class PloHeaderDto {
@@ -56,5 +60,6 @@ export function toOutcomeVersionDto(row: OutcomeVersionRow): OutcomeVersionDto {
     programName: row.programName,
     versionNumber: row.versionNumber,
     status: row.status,
+    sourceRequest: toRequestRef(row.sourceRequest),
   };
 }

@@ -24,6 +24,7 @@ import { ConsistencyModule } from './features/consistency/consistency.module.js'
 import { CurriculumModule } from './features/curriculum/curriculum.module.js';
 import { OutcomesModule } from './features/outcomes/outcomes.module.js';
 import { SyllabiModule } from './features/syllabi/syllabi.module.js';
+import { ChangeRequestsModule } from './features/change-requests/change-requests.module.js';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { SyllabiModule } from './features/syllabi/syllabi.module.js';
     ConsistencyModule,
     OutcomesModule,
     SyllabiModule,
+    ChangeRequestsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: CsrfGuard },

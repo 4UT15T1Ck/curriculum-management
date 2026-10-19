@@ -4,14 +4,15 @@ import {
   type Prisma,
 } from '../../generated/prisma/client.js';
 import type { AccessContext } from '../../shared/authz/access-context.js';
-import {
-  assertDirectEdit,
-  type EditState,
-} from '../../shared/authz/edit-path.js';
+import type { EditState } from '../../shared/authz/edit-path.js';
 import {
   PERMISSIONS,
   type PermissionCode,
 } from '../../shared/authz/permission-codes.js';
+import {
+  assertEditPath,
+  REQUEST_DRAFT_SELECT,
+} from '../../shared/change-requests/request-draft.js';
 import { courseTarget } from '../../shared/courses/course-target.js';
 import { AppException } from '../../shared/exception/app.exception.js';
 import { HOME_FACULTY_CODE } from '../../shared/org-units/home-faculty.js';
@@ -38,6 +39,7 @@ export const SYLLABUS_ACCESS_SELECT = {
   status: true,
   courseId: true,
   course: { select: SYLLABUS_COURSE_SELECT },
+  ...REQUEST_DRAFT_SELECT,
 } as const satisfies Prisma.SyllabusSelect;
 export type SyllabusAccessRow = Prisma.SyllabusGetPayload<{
   select: typeof SYLLABUS_ACCESS_SELECT;
@@ -95,6 +97,7 @@ export function assertRevisionVisible(
 }
 
 // Every write to a revision or its rows goes through here, in this order. CLO writes pass clo.edit.
+// A request's working copy is writable by its creator while the request is a Draft (F-13); published data is not.
 export async function assertDraftWrite(
   prisma: Pick<PrismaService, 'syllabus'>,
   access: AccessContext,
@@ -102,11 +105,12 @@ export async function assertDraftWrite(
   permission: PermissionCode = PERMISSIONS.SYLLABUS_EDIT,
 ): Promise<SyllabusAccessRow> {
   assertRevisionVisible(row, access);
-  assertDirectEdit(
+  await assertEditPath(
     access,
     permission,
     courseTarget(row.course),
-    await syllabusEditState(prisma, row.course),
+    row.sourceRequest,
+    () => syllabusEditState(prisma, row.course),
   );
   if (row.status !== SyllabusStatus.DRAFT) {
     throw new AppException(SYLLABUS_ERRORS.SYLLABUS_NOT_DRAFT);

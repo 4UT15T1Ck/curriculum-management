@@ -1,0 +1,189 @@
+import { Injectable } from '@nestjs/common';
+import {
+  ApprovalAction,
+  ChangeRequestStatus,
+  ChangeRequestType,
+} from '../../generated/prisma/client.js';
+import type { AccessContext } from '../../shared/authz/access-context.js';
+import { PERMISSIONS } from '../../shared/authz/permission-codes.js';
+import { PENDING_STATUSES } from '../../shared/change-requests/approval.constants.js';
+import { AUTHORED_ENTITY } from '../../shared/change-requests/authored-item.types.js';
+import {
+  WORKSPACE_KIND,
+  workspaceKindFor,
+} from '../../shared/change-requests/request-kinds.js';
+import { StaleChecker } from '../../shared/change-requests/stale-checker.js';
+import { AppException } from '../../shared/exception/app.exception.js';
+import { PrismaService } from '../../shared/prisma/prisma.service.js';
+import { CHANGE_REQUEST_ERRORS } from './change-request-feature.errors.js';
+import {
+  DOCUMENT_INCLUDE,
+  REQUEST_SUMMARY_SELECT,
+  STEP_INCLUDE,
+  toAuthoredItemDto,
+  toDocumentDto,
+  toStepDto,
+  toSummaryDto,
+  type RequestSummaryRow,
+} from './change-request.mapper.js';
+import type {
+  ChangeRequestDetailDto,
+  RequestActionsDto,
+  RequestWorkspaceDto,
+} from './change-request-response.dto.js';
+import { UPLOAD_STATUSES } from './change-request.constants.js';
+import { ConflictFinder } from './conflict-finder.js';
+import { targetKey } from './request-target.resolver.js';
+import { visibleWhere } from './request-visibility.js';
+
+const NO_NUMBER = 'chưa đánh số';
+const AUTHORED_ENTITIES: string[] = Object.values(AUTHORED_ENTITY);
+
+// Everything the edit page and the detail page show about one request, as the caller may see it.
+@Injectable()
+export class ChangeRequestDetailReader {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly stale: StaleChecker,
+    private readonly conflicts: ConflictFinder,
+  ) {}
+
+  async read(
+    id: string,
+    access: AccessContext,
+  ): Promise<ChangeRequestDetailDto> {
+    const row = await this.prisma.changeRequest.findFirst({
+      where: { id, ...visibleWhere(access) },
+      select: {
+        ...REQUEST_SUMMARY_SELECT,
+        documents: {
+          include: DOCUMENT_INCLUDE,
+          orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        },
+        steps: {
+          include: STEP_INCLUDE,
+          orderBy: [
+            { approvalLevel: 'asc' },
+            { createdAt: 'asc' },
+            { id: 'asc' },
+          ],
+        },
+        items: {
+          where: { entityType: { in: AUTHORED_ENTITIES } },
+          orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
+        },
+        programCopy: {
+          select: {
+            id: true,
+            baseVersion: { select: { versionNumber: true } },
+          },
+        },
+        syllabusCopy: {
+          select: {
+            id: true,
+            baseRevision: { select: { revisionNumber: true } },
+          },
+        },
+      },
+    });
+    if (!row) {
+      throw new AppException(CHANGE_REQUEST_ERRORS.REQUEST_NOT_FOUND);
+    }
+    const isCreator = row.createdById === access.userId;
+    const isDraft = row.status === ChangeRequestStatus.DRAFT;
+    const steps = row.steps.filter(
+      (step) => step.submissionRound === row.submissionRound,
+    );
+    return Object.assign(toSummaryDto(row), {
+      reason: row.reason,
+      basisDocumentNumber: row.basisDocumentNumber,
+      workspace: await this.workspace(row),
+      authoredItems: row.items.map(toAuthoredItemDto),
+      documents: row.documents.map((document) =>
+        toDocumentDto(document, isCreator && isDraft),
+      ),
+      steps: steps.map(toStepDto),
+      conflicts: await this.conflicts.find(targetKey(toKey(row)), access, id),
+      permissions: this.actions(row, access, steps),
+    });
+  }
+
+  private async workspace(
+    row: RequestSummaryRow & {
+      programCopy: {
+        id: string;
+        baseVersion: { versionNumber: string | null } | null;
+      } | null;
+      syllabusCopy: {
+        id: string;
+        baseRevision: { revisionNumber: number | null } | null;
+      } | null;
+    },
+  ): Promise<RequestWorkspaceDto | null> {
+    const kind = workspaceKindFor(row.requestType, row.targetType);
+    if (!kind) return null;
+    // Only a Draft can be rebased, so only a Draft reports staleness here; later checks belong to approval.
+    const isStale =
+      row.status === ChangeRequestStatus.DRAFT
+        ? await this.stale.isStale(this.prisma, row)
+        : false;
+    if (kind === WORKSPACE_KIND.PROGRAM_VERSION && row.programCopy) {
+      return {
+        kind,
+        copyId: row.programCopy.id,
+        programId: row.programId,
+        courseId: null,
+        baseLabel: `Phiên bản ${row.programCopy.baseVersion?.versionNumber ?? NO_NUMBER}`,
+        isStale,
+      };
+    }
+    if (kind === WORKSPACE_KIND.SYLLABUS && row.syllabusCopy) {
+      return {
+        kind,
+        copyId: row.syllabusCopy.id,
+        programId: null,
+        courseId: row.courseId,
+        baseLabel: `Đề cương bản ${row.syllabusCopy.baseRevision?.revisionNumber ?? NO_NUMBER}`,
+        isStale,
+      };
+    }
+    return null;
+  }
+
+  private actions(
+    row: RequestSummaryRow,
+    access: AccessContext,
+    steps: readonly { action: ApprovalAction; isSkipped: boolean }[],
+  ): RequestActionsDto {
+    const isCreator = row.createdById === access.userId;
+    const isDraft = row.status === ChangeRequestStatus.DRAFT;
+    const canCreate = access.has(
+      row.requestType === ChangeRequestType.ORGANIZATION
+        ? PERMISSIONS.CHANGE_REQUEST_CREATE_ORGANIZATIONAL
+        : PERMISSIONS.CHANGE_REQUEST_CREATE,
+    );
+    const approved = steps.some(
+      (step) => step.action === ApprovalAction.APPROVE && !step.isSkipped,
+    );
+    const pending = PENDING_STATUSES.includes(row.status);
+    const canEdit = isCreator && isDraft && canCreate;
+    return {
+      canEdit,
+      canDelete: canEdit && row.submissionRound === 0,
+      canSubmit: canEdit,
+      canWithdraw:
+        isCreator &&
+        (pending || (isDraft && row.submissionRound > 0)) &&
+        !approved,
+      canUpload: isCreator && UPLOAD_STATUSES.includes(row.status),
+    };
+  }
+}
+
+function toKey(row: RequestSummaryRow) {
+  return { targetType: row.targetType, id: targetId(row) };
+}
+
+function targetId(row: RequestSummaryRow): string {
+  return row.courseId ?? row.programId ?? row.subjectGroupId!;
+}

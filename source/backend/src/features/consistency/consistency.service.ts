@@ -3,6 +3,10 @@ import { ProgramVersionStatus } from '../../generated/prisma/client.js';
 import type { AccessContext } from '../../shared/authz/access-context.js';
 import { PERMISSIONS } from '../../shared/authz/permission-codes.js';
 import {
+  assertCopyWritable,
+  canEditCopy,
+} from '../../shared/change-requests/request-draft.js';
+import {
   ConsistencyChecker,
   type CheckedVersion,
 } from '../../shared/curriculum/consistency-checker.js';
@@ -17,13 +21,19 @@ import {
 import { CONSISTENCY_FEATURE_ERRORS } from './consistency.errors.js';
 
 function canAccept(version: CheckedVersion, access: AccessContext): boolean {
-  return (
-    version.status === ProgramVersionStatus.DRAFT &&
-    access.modeFor(
-      PERMISSIONS.PROGRAM_EDIT_INFO,
-      programTarget(version.program),
-    ) !== null
-  );
+  const target = programTarget(version.program);
+  if (version.status !== ProgramVersionStatus.DRAFT) {
+    return false;
+  }
+  // A request's working copy: only its creator, while the request is a Draft (F-13).
+  return version.sourceRequest
+    ? canEditCopy(
+        access,
+        PERMISSIONS.PROGRAM_EDIT_INFO,
+        target,
+        version.sourceRequest,
+      )
+    : access.modeFor(PERMISSIONS.PROGRAM_EDIT_INFO, target) !== null;
 }
 
 @Injectable()
@@ -57,12 +67,18 @@ export class ConsistencyService {
     access: AccessContext,
   ): Promise<ConsistencyReportDto> {
     const { version, credits } = await this.checker.check(versionId);
-    access.assertCan(
-      PERMISSIONS.PROGRAM_EDIT_INFO,
-      programTarget(version.program),
-    );
+    const target = programTarget(version.program);
+    access.assertCan(PERMISSIONS.PROGRAM_EDIT_INFO, target);
     if (version.status !== ProgramVersionStatus.DRAFT) {
       throw new AppException(CONSISTENCY_FEATURE_ERRORS.VERSION_NOT_EDITABLE);
+    }
+    if (version.sourceRequest) {
+      assertCopyWritable(
+        access,
+        PERMISSIONS.PROGRAM_EDIT_INFO,
+        target,
+        version.sourceRequest,
+      );
     }
     if (!credits.mismatch) {
       throw new AppException(CONSISTENCY_FEATURE_ERRORS.NO_CREDIT_MISMATCH);

@@ -21,10 +21,16 @@ export async function currentRevisionByCourse(
     where: {
       courseId: { in: [...courseIds] },
       status: { in: [SyllabusStatus.PUBLISHED, SyllabusStatus.DRAFT] },
+      // A request's working copy is not a revision of the course.
+      sourceRequestId: null,
     },
     select: { id: true, courseId: true, revisionNumber: true, status: true },
   });
-  for (const { courseId, ...revision } of rows) {
+  for (const { courseId, revisionNumber, ...rest } of rows) {
+    if (revisionNumber === null) {
+      continue;
+    }
+    const revision = { ...rest, revisionNumber };
     const held = byCourse.get(courseId);
     if (!held || revision.status === SyllabusStatus.PUBLISHED) {
       byCourse.set(courseId, revision);

@@ -95,6 +95,8 @@ export const programInclude = (today: Date) =>
   ({
     faculty: { select: ORG_UNIT_REF_SELECT },
     versions: {
+      // A request's working copy is not a version of the program.
+      where: { sourceRequestId: null },
       select: VERSION_INFO_SELECT,
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     },
@@ -141,7 +143,7 @@ function toVersionRef(version: VersionInfoRow): ProgramVersionRefDto {
   };
 }
 
-function toVersionInfo(version: VersionInfoRow): ProgramVersionInfoDto {
+export function toVersionInfo(version: VersionInfoRow): ProgramVersionInfoDto {
   return {
     id: version.id,
     versionNumber: version.versionNumber,

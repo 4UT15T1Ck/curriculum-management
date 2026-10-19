@@ -37,6 +37,16 @@ export const PROGRAM_ERRORS = {
     code: 'SEMESTERS_BELOW_CURRICULUM',
     message: 'Khung chương trình đã có học phần ở học kỳ',
   },
+  VERSION_NOT_FOUND: {
+    status: HttpStatus.NOT_FOUND,
+    code: 'PROGRAM_VERSION_NOT_FOUND',
+    message: 'Không tìm thấy phiên bản chương trình.',
+  },
+  VERSION_NOT_EDITABLE: {
+    status: HttpStatus.CONFLICT,
+    code: 'PROGRAM_VERSION_NOT_EDITABLE',
+    message: 'Chỉ sửa được thông tin của phiên bản đang ở trạng thái Nháp.',
+  },
   SOURCE_VERSION_INVALID: {
     status: HttpStatus.BAD_REQUEST,
     code: 'SOURCE_VERSION_INVALID',

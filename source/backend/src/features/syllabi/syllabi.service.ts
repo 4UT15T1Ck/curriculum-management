@@ -11,7 +11,11 @@ import {
   EDIT_PATH,
   editPathFor,
 } from '../../shared/authz/edit-path.js';
-import { PERMISSIONS } from '../../shared/authz/permission-codes.js';
+import {
+  PERMISSIONS,
+  type PermissionCode,
+} from '../../shared/authz/permission-codes.js';
+import { canEditCopy } from '../../shared/change-requests/request-draft.js';
 import type { Env } from '../../shared/config/env.validation.js';
 import { courseTarget } from '../../shared/courses/course-target.js';
 import { CourseUsageReader } from '../../shared/courses/course-usage.reader.js';
@@ -54,9 +58,11 @@ export class SyllabiService {
   ) {}
 
   // Always answers for a visible course: both revisions may be null ("chưa có đề cương", US-038 AC3).
+  // With requestId the answer shows that request's working copy as the Draft; the published revision is unchanged.
   async forCourse(
     courseId: string,
     access: AccessContext,
+    requestId?: string,
   ): Promise<CourseSyllabusDto> {
     const course = await this.prisma.course.findUnique({
       where: { id: courseId },
@@ -67,21 +73,35 @@ export class SyllabiService {
       where: {
         courseId,
         status: { in: [SyllabusStatus.PUBLISHED, SyllabusStatus.DRAFT] },
+        sourceRequestId: null,
       },
       include: SYLLABUS_INCLUDE,
     });
+    const copy = requestId
+      ? await this.findCopy(courseId, requestId, access)
+      : null;
+    const copyEditable = (permission: PermissionCode) =>
+      copy !== null &&
+      copy.sourceRequest !== null &&
+      canEditCopy(access, permission, courseTarget(course), copy.sourceRequest);
     const state = await syllabusEditState(this.prisma, course);
-    const editPath = editPathFor(
-      access,
-      PERMISSIONS.SYLLABUS_EDIT,
-      courseTarget(course),
-      state,
-    );
+    const editPath = copy
+      ? copyEditable(PERMISSIONS.SYLLABUS_EDIT)
+        ? EDIT_PATH.DIRECT
+        : EDIT_PATH.VIA_REQUEST
+      : editPathFor(
+          access,
+          PERMISSIONS.SYLLABUS_EDIT,
+          courseTarget(course),
+          state,
+        );
     const published =
       revisions.find((row) => row.status === SyllabusStatus.PUBLISHED) ?? null;
-    const draft = seesDrafts(access)
-      ? (revisions.find((row) => row.status === SyllabusStatus.DRAFT) ?? null)
-      : null;
+    const draft = copy
+      ? copy
+      : seesDrafts(access)
+        ? (revisions.find((row) => row.status === SyllabusStatus.DRAFT) ?? null)
+        : null;
     const hasAnyRevision = revisions.length > 0 || state.released;
     const canDeleteFrom = (uploadedById: string) =>
       uploadedById === access.userId && editPath === EDIT_PATH.DIRECT;
@@ -91,17 +111,19 @@ export class SyllabiService {
       published: published && toSyllabusDto(published, () => false),
       draft: draft && toSyllabusDto(draft, canDeleteFrom),
       canCreate:
+        copy === null &&
         !hasAnyRevision &&
         course.status !== CourseStatus.CANCELLED &&
         editPath === EDIT_PATH.DIRECT,
-      canEditClos:
-        draft !== null &&
-        editPathFor(
-          access,
-          PERMISSIONS.CLO_EDIT,
-          courseTarget(course),
-          state,
-        ) === EDIT_PATH.DIRECT,
+      canEditClos: copy
+        ? copyEditable(PERMISSIONS.CLO_EDIT)
+        : draft !== null &&
+          editPathFor(
+            access,
+            PERMISSIONS.CLO_EDIT,
+            courseTarget(course),
+            state,
+          ) === EDIT_PATH.DIRECT,
       editPath,
       attachmentRules: this.attachmentRules(),
     };
@@ -126,7 +148,11 @@ export class SyllabiService {
     if (course.status === CourseStatus.CANCELLED) {
       throw new AppException(SYLLABUS_ERRORS.COURSE_CANCELLED);
     }
-    if ((await this.prisma.syllabus.count({ where: { courseId } })) > 0) {
+    if (
+      (await this.prisma.syllabus.count({
+        where: { courseId, sourceRequestId: null },
+      })) > 0
+    ) {
       throw new AppException(SYLLABUS_ERRORS.SYLLABUS_ALREADY_EXISTS);
     }
     try {
@@ -173,6 +199,24 @@ export class SyllabiService {
       updated,
       (uploadedById) => uploadedById === access.userId,
     );
+  }
+
+  // The copy of one request on this course, visible like any Draft (D18).
+  private async findCopy(
+    courseId: string,
+    requestId: string,
+    access: AccessContext,
+  ) {
+    const copy = seesDrafts(access)
+      ? await this.prisma.syllabus.findFirst({
+          where: { courseId, sourceRequestId: requestId },
+          include: SYLLABUS_INCLUDE,
+        })
+      : null;
+    if (!copy) {
+      throw new AppException(SYLLABUS_ERRORS.SYLLABUS_NOT_FOUND);
+    }
+    return copy;
   }
 
   attachmentRules(): AttachmentRulesDto {

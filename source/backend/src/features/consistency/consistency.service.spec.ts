@@ -91,6 +91,7 @@ function result(
       creditMismatchElectiveGap: null,
       creditMismatchAcceptedAt: null,
       creditMismatchAcceptedBy: null,
+      sourceRequest: null,
     },
     credits: {
       declared: breakdown('100', '50', '150'),
