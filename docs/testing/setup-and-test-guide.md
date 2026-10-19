@@ -20,17 +20,7 @@ Một chỗ để bắt đầu: dựng hệ thống trên máy, chạy kiểm th
 
 1. `pnpm install` (tự chạy `prisma generate`).
 2. `pnpm services:up` — dựng PostgreSQL 18 (ICU `vi-VN`) và Redis 8. Nếu cổng 6379 đã bị chiếm, đặt `REDIS_PORT` khác trước khi chạy.
-3. Tạo `.env` cạnh `package.json`:
-
-   ```env
-   DATABASE_URL=postgresql://ctdt:ctdt@localhost:5432/ctdt
-   REDIS_HOST=localhost
-   REDIS_PORT=6379
-   SESSION_SECRET=<chuỗi ngẫu nhiên ≥ 32 ký tự>
-   FILES_ROOT=files
-   ```
-
-   Các biến tùy chọn (`PORT`, `SESSION_IDLE_MINUTES`, `ATTACHMENT_MAX_MB`, `BULLMQ_PREFIX`): `docs/technical/technical_reference.md`.
+3. Tạo `.env` cạnh `package.json` (mẫu đầy đủ ở §1.3). Tối thiểu cần `DATABASE_URL`, `SESSION_SECRET` và `SEED_ADMIN_PASSWORD`.
 4. `pnpm prisma:migrate` — áp 13 migration (`auth_session` … `release_versions`).
 5. `SEED_ADMIN_PASSWORD=<≥ 8 ký tự, có chữ và số> pnpm prisma:seed` — chạy lại nhiều lần không sinh trùng.
 6. `pnpm dev` → API `http://localhost:3000/api`, tài liệu API `http://localhost:3000/api/docs`.
@@ -44,7 +34,48 @@ Một chỗ để bắt đầu: dựng hệ thống trên máy, chạy kiểm th
 
 Khi API đổi: chạy backend rồi `pnpm api:types` để sinh lại `src/shared/api/schema.d.ts`.
 
-### 1.3. Seed tạo sẵn gì
+### 1.3. Mẫu `.env`
+
+**Backend** — `source/backend/.env`. `docker compose` (`pnpm services:up`) và `prisma` (migrate, seed) đọc cùng tệp này, nên các giá trị `POSTGRES_*` phải khớp `DATABASE_URL`.
+
+```env
+# --- Bắt buộc ---
+DATABASE_URL=postgresql://ctdt:ctdt@localhost:5432/ctdt
+# ≥ 32 ký tự. Sinh: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+SESSION_SECRET=
+
+# --- Chỉ cho seed (pnpm prisma:seed) ---
+# Mật khẩu tài khoản R1 đầu tiên: ≥ 8 ký tự, có chữ và số
+SEED_ADMIN_PASSWORD=
+# SEED_ADMIN_USERNAME=admin
+
+# --- Tùy chọn (giá trị mặc định) ---
+NODE_ENV=development
+PORT=3000
+REDIS_HOST=localhost
+# Đổi nếu 6379 đã bị chiếm; compose cũng mở Redis ở cổng này
+REDIS_PORT=6379
+# Phiên hết hạn sau số phút không thao tác (NFR-08)
+SESSION_IDLE_MINUTES=60
+# Thư mục tệp đính kèm đề cương và đề xuất; ở máy chủ thật đặt trên ổ bền, có sao lưu
+FILES_ROOT=files
+# Dung lượng tối đa một tệp đính kèm (MB)
+ATTACHMENT_MAX_MB=20
+# Tiền tố khóa Redis của hàng đợi BullMQ; chỉ đặt khi nhiều ứng dụng dùng chung một Redis
+# BULLMQ_PREFIX=ctdt
+
+# --- docker compose (pnpm services:up) ---
+POSTGRES_USER=ctdt
+POSTGRES_PASSWORD=ctdt
+POSTGRES_DB=ctdt
+POSTGRES_PORT=5432
+```
+
+Thiếu `DATABASE_URL` hoặc `SESSION_SECRET`, hay một biến sai kiểu, thì máy chủ dừng ngay lúc khởi động (`src/shared/config/env.validation.ts`).
+
+**Frontend** — không cần `.env`. Vite chuyển `/api` sang `http://localhost:3000`, giá trị này viết cứng trong `vite.config.ts`. Nếu backend chạy ở cổng khác thì sửa `BACKEND_URL` ở đó.
+
+### 1.4. Seed tạo sẵn gì
 
 | Dữ liệu | Ghi chú |
 |---|---|
