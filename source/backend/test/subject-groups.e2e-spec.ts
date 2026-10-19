@@ -1,6 +1,5 @@
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import type { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
-import type { StartedRedisContainer } from '@testcontainers/redis';
+import type { TestPostgres, TestRedis } from './containers.js';
 import request from 'supertest';
 import {
   CourseStatus,
@@ -23,7 +22,6 @@ import {
   daysFromToday,
 } from './fixtures/subject-groups.js';
 import { startPostgres, startRedis } from './containers.js';
-import { applyMigrations } from './migrations.js';
 import { setAppEnv } from './test-env.js';
 import { createTestApp } from './test-app.js';
 
@@ -31,8 +29,8 @@ const CSRF = { 'X-Requested-With': 'XMLHttpRequest' };
 const MATH_CODE = 'KHOA_TOAN';
 
 describe('subject groups and memberships', () => {
-  let postgres: StartedPostgreSqlContainer;
-  let redis: StartedRedisContainer;
+  let postgres: TestPostgres;
+  let redis: TestRedis;
   let app: NestExpressApplication;
   let prisma: PrismaService;
   let admin: ReturnType<typeof request.agent>;
@@ -44,7 +42,6 @@ describe('subject groups and memberships', () => {
       startRedis(),
     ]);
     setAppEnv(postgres, redis);
-    applyMigrations(postgres.getConnectionUri());
     app = await createTestApp();
     prisma = app.get(PrismaService);
     await seedAccessControl(prisma);

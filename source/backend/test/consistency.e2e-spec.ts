@@ -1,6 +1,5 @@
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import type { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
-import type { StartedRedisContainer } from '@testcontainers/redis';
+import type { TestPostgres, TestRedis } from './containers.js';
 import request from 'supertest';
 import { seedAccessControl } from '../prisma/seed-data/seed-access-control.js';
 import { ConsistencyChecker } from '../src/shared/curriculum/consistency-checker.js';
@@ -14,7 +13,6 @@ import {
 } from './fixtures/curriculum.js';
 import { createProgram } from './fixtures/programs.js';
 import { startPostgres, startRedis } from './containers.js';
-import { applyMigrations } from './migrations.js';
 import { createTestApp } from './test-app.js';
 import { setAppEnv } from './test-env.js';
 
@@ -31,8 +29,8 @@ interface Issue {
 }
 
 describe('consistency check', () => {
-  let postgres: StartedPostgreSqlContainer;
-  let redis: StartedRedisContainer;
+  let postgres: TestPostgres;
+  let redis: TestRedis;
   let app: NestExpressApplication;
   let prisma: PrismaService;
   let admin: Agent;
@@ -46,7 +44,6 @@ describe('consistency check', () => {
       startRedis(),
     ]);
     setAppEnv(postgres, redis);
-    applyMigrations(postgres.getConnectionUri());
     app = await createTestApp();
     prisma = app.get(PrismaService);
     await seedAccessControl(prisma);

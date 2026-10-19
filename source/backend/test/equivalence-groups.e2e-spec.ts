@@ -1,6 +1,5 @@
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import type { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
-import type { StartedRedisContainer } from '@testcontainers/redis';
+import type { TestPostgres, TestRedis } from './containers.js';
 import request from 'supertest';
 import { CourseStatus } from '../src/generated/prisma/client.js';
 import { seedAccessControl } from '../prisma/seed-data/seed-access-control.js';
@@ -8,7 +7,6 @@ import { PrismaService } from '../src/shared/prisma/prisma.service.js';
 import { createAccount, loginAgent } from './fixtures/accounts.js';
 import { createCourse, createForeignFaculty } from './fixtures/courses.js';
 import { startPostgres, startRedis } from './containers.js';
-import { applyMigrations } from './migrations.js';
 import { setAppEnv } from './test-env.js';
 import { createTestApp } from './test-app.js';
 
@@ -18,8 +16,8 @@ const MATH_CODE = 'KHOA_TOAN_EQ';
 type Agent = ReturnType<typeof request.agent>;
 
 describe('equivalence groups', () => {
-  let postgres: StartedPostgreSqlContainer;
-  let redis: StartedRedisContainer;
+  let postgres: TestPostgres;
+  let redis: TestRedis;
   let app: NestExpressApplication;
   let prisma: PrismaService;
   let admin: Agent;
@@ -32,7 +30,6 @@ describe('equivalence groups', () => {
       startRedis(),
     ]);
     setAppEnv(postgres, redis);
-    applyMigrations(postgres.getConnectionUri());
     app = await createTestApp();
     prisma = app.get(PrismaService);
     await seedAccessControl(prisma);

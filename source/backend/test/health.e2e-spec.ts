@@ -1,14 +1,16 @@
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import type { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
-import type { StartedRedisContainer } from '@testcontainers/redis';
+import type { TestPostgres, TestRedis } from './containers.js';
 import request from 'supertest';
-import { startPostgres, startRedis } from './containers.js';
+import {
+  startPostgresContainer as startPostgres,
+  startRedisContainer as startRedis,
+} from './containers.js';
 import { setAppEnv } from './test-env.js';
 import { createTestApp } from './test-app.js';
 
 describe('GET /api/health', () => {
-  let postgres: StartedPostgreSqlContainer;
-  let redis: StartedRedisContainer;
+  let postgres: TestPostgres;
+  let redis: TestRedis;
   let app: NestExpressApplication;
 
   beforeAll(async () => {

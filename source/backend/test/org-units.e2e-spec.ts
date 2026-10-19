@@ -1,6 +1,5 @@
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import type { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
-import type { StartedRedisContainer } from '@testcontainers/redis';
+import type { TestPostgres, TestRedis } from './containers.js';
 import request from 'supertest';
 import { OrgUnitStatus, OrgUnitType } from '../src/generated/prisma/client.js';
 import { ORG_UNIT_CODES } from '../prisma/seed-data/org-units.js';
@@ -9,7 +8,6 @@ import { PrismaService } from '../src/shared/prisma/prisma.service.js';
 import { createAccount, loginAgent } from './fixtures/accounts.js';
 import { createSubjectGroup } from './fixtures/subject-groups.js';
 import { startPostgres, startRedis } from './containers.js';
-import { applyMigrations } from './migrations.js';
 import { setAppEnv } from './test-env.js';
 import { createTestApp } from './test-app.js';
 
@@ -17,8 +15,8 @@ const CSRF = { 'X-Requested-With': 'XMLHttpRequest' };
 const MATH_CODE = 'KHOA_TOAN';
 
 describe('org unit management', () => {
-  let postgres: StartedPostgreSqlContainer;
-  let redis: StartedRedisContainer;
+  let postgres: TestPostgres;
+  let redis: TestRedis;
   let app: NestExpressApplication;
   let prisma: PrismaService;
   let admin: ReturnType<typeof request.agent>;
@@ -32,7 +30,6 @@ describe('org unit management', () => {
       startRedis(),
     ]);
     setAppEnv(postgres, redis);
-    applyMigrations(postgres.getConnectionUri());
     app = await createTestApp();
     prisma = app.get(PrismaService);
     await seedAccessControl(prisma);

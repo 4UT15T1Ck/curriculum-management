@@ -1,10 +1,10 @@
 import type { ConfigService } from '@nestjs/config';
-import type { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
+import type { TestPostgres } from './containers.js';
 import type { Env } from '../src/shared/config/env.validation.js';
 import { PrismaService } from '../src/shared/prisma/prisma.service.js';
 import { startPostgres } from './containers.js';
 
-function prismaFor(container: StartedPostgreSqlContainer): PrismaService {
+function prismaFor(container: TestPostgres): PrismaService {
   const config = {
     get: () => container.getConnectionUri(),
   } as unknown as ConfigService<Env, true>;

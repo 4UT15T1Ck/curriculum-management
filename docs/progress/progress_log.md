@@ -143,3 +143,10 @@ Format:
 - Giao diện MH-27, dòng tổng chương trình ở MH-25, nút và thẻ "Kiểm tra nhất quán", `?focus=` làm nổi dòng/nhóm.
 - Kiểm tra: backend đơn vị 391, đầu-cuối 207; frontend 190; tsc, oxlint, Prettier, build sạch.
 - Còn nợ: đi thử bằng trình duyệt, áp migration lên cơ sở dữ liệu phát triển.
+
+## [TEST] Kiểm thử đầu-cuối dùng chung một PostgreSQL và một Redis
+**Date**: 2026-10-19
+**Files changed**: `source/backend/test/{global-setup.ts,containers.ts,test-env.ts,*.e2e-spec.ts}`, `source/backend/vitest.config.e2e.ts`
+- `globalSetup` dựng một PostgreSQL (ICU `vi-VN`) và một Redis cho cả lượt chạy, migrate một lần vào cơ sở dữ liệu mẫu `ctdt_template`; mỗi tệp kiểm thử nhận một cơ sở dữ liệu riêng sao từ mẫu (`startPostgres`), xóa khi xong. Tệp mới không gọi `applyMigrations` nữa.
+- `health.e2e-spec.ts` vẫn dựng container riêng vì nó tắt Redis (`startPostgresContainer`, `startRedisContainer`).
+- 207/207 đạt; thời gian chạy 116 s → 66 s.
