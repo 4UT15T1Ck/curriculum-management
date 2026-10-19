@@ -676,6 +676,134 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/programs': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ProgramsController_list'];
+    put?: never;
+    post: operations['ProgramsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/programs/{programId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ProgramsController_detail'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations['ProgramsController_update'];
+    trace?: never;
+  };
+  '/api/programs/{programId}/deactivate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ProgramsController_deactivate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/programs/{programId}/reactivate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ProgramsController_reactivate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/programs/{programId}/clone': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ProgramsController_clone'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/programs/{programId}/directors': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ProgramsController_listDirectors'];
+    put?: never;
+    post: operations['ProgramsController_assign'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/programs/{programId}/directors/{assignmentId}/end': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ProgramsController_end'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/programs/{programId}/directors/{assignmentId}/revoke': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ProgramsController_revoke'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1193,6 +1321,131 @@ export interface components {
     MergeEquivalenceGroupsDto: {
       /** @description Nhóm sẽ bị xóa; học phần của nó chuyển sang nhóm được giữ. */
       otherGroupId: string;
+    };
+    /** @enum {string} */
+    DegreeLevel: 'ENGINEER' | 'BACHELOR';
+    /** @enum {string} */
+    ProgramStatus: 'ACTIVE' | 'INACTIVE';
+    /** @enum {string} */
+    ProgramVersionStatus: 'DRAFT' | 'PENDING' | 'ACTIVE' | 'HISTORICAL';
+    ProgramVersionRefDto: {
+      id: string;
+      versionNumber: string | null;
+      status: components['schemas']['ProgramVersionStatus'];
+    };
+    ProgramSummaryDto: {
+      id: string;
+      programCode: string;
+      degreeLevel: components['schemas']['DegreeLevel'];
+      status: components['schemas']['ProgramStatus'];
+      faculty: components['schemas']['OrgUnitRefDto'];
+      programName: string;
+      currentVersion: components['schemas']['ProgramVersionRefDto'];
+      directors: components['schemas']['UserRefDto'][];
+    };
+    ProgramPageDto: {
+      items: components['schemas']['ProgramSummaryDto'][];
+      total: number;
+      page: number;
+      pageSize: number;
+    };
+    CreateProgramDto: {
+      programCode: string;
+      /** @description Khoa quản lý; mặc định là Khoa CNTT. */
+      facultyId?: string;
+      degreeLevel: components['schemas']['DegreeLevel'];
+      programName: string;
+      majorCode: string;
+      majorName: string;
+      semesterCount: number;
+      /** @example 130 */
+      totalCredits: string;
+      /** @example 122 */
+      compulsoryCredits: string;
+      /** @example 8 */
+      electiveCredits: string;
+    };
+    ProgramVersionInfoDto: {
+      id: string;
+      versionNumber: string | null;
+      status: components['schemas']['ProgramVersionStatus'];
+      programName: string;
+      majorCode: string;
+      majorName: string;
+      semesterCount: number;
+      /** @example 150 */
+      totalCredits: string;
+      /** @example 140 */
+      compulsoryCredits: string;
+      /** @example 10 */
+      electiveCredits: string;
+      updatedAt: string;
+    };
+    ProgramClonedFromDto: {
+      programId: string;
+      programCode: string;
+      version: components['schemas']['ProgramVersionRefDto'];
+    };
+    ProgramDetailDto: {
+      id: string;
+      programCode: string;
+      degreeLevel: components['schemas']['DegreeLevel'];
+      status: components['schemas']['ProgramStatus'];
+      faculty: components['schemas']['OrgUnitRefDto'];
+      programName: string;
+      currentVersion: components['schemas']['ProgramVersionRefDto'];
+      directors: components['schemas']['UserRefDto'][];
+      currentVersionInfo: components['schemas']['ProgramVersionInfoDto'];
+      draftVersion: components['schemas']['ProgramVersionInfoDto'] | null;
+      versions: components['schemas']['ProgramVersionRefDto'][];
+      clonedFrom: components['schemas']['ProgramClonedFromDto'] | null;
+      editPath: components['schemas']['EditPath'] | null;
+      canManage: boolean;
+      canClone: boolean;
+      createdAt: string;
+      updatedAt: string;
+    };
+    UpdateProgramDto: {
+      degreeLevel?: components['schemas']['DegreeLevel'];
+      programName?: string;
+      majorCode?: string;
+      majorName?: string;
+      semesterCount?: number;
+      /** @example 130 */
+      totalCredits?: string;
+      /** @example 122 */
+      compulsoryCredits?: string;
+      /** @example 8 */
+      electiveCredits?: string;
+    };
+    CloneProgramDto: {
+      programCode: string;
+      programName: string;
+      /** @description Phiên bản nguồn; mặc định là phiên bản hiện hành. */
+      sourceVersionId?: string;
+    };
+    ProgramDirectorDto: {
+      id: string;
+      director: components['schemas']['UserRefDto'];
+      /** Format: date */
+      validFrom: string;
+      /** Format: date */
+      validTo: string | null;
+      state: components['schemas']['ValidityState'];
+      assignedBy: components['schemas']['UserRefDto'] | null;
+      revokedAt: string | null;
+      revokedBy: components['schemas']['UserRefDto'] | null;
+    };
+    AssignDirectorDto: {
+      directorId: string;
+      /** Format: date */
+      validFrom: string;
+      /** Format: date */
+      validTo?: string;
+    };
+    EndDirectorDto: {
+      /** Format: date */
+      validTo: string;
     };
   };
   responses: never;
@@ -2459,6 +2712,261 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  ProgramsController_list: {
+    parameters: {
+      query?: {
+        page?: number;
+        pageSize?: number;
+        q?: string;
+        degreeLevel?: components['schemas']['DegreeLevel'];
+        status?: components['schemas']['ProgramStatus'];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProgramPageDto'];
+        };
+      };
+    };
+  };
+  ProgramsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateProgramDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProgramDetailDto'];
+        };
+      };
+    };
+  };
+  ProgramsController_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        programId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProgramDetailDto'];
+        };
+      };
+    };
+  };
+  ProgramsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        programId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateProgramDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProgramDetailDto'];
+        };
+      };
+    };
+  };
+  ProgramsController_deactivate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        programId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProgramDetailDto'];
+        };
+      };
+    };
+  };
+  ProgramsController_reactivate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        programId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProgramDetailDto'];
+        };
+      };
+    };
+  };
+  ProgramsController_clone: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        programId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CloneProgramDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProgramDetailDto'];
+        };
+      };
+    };
+  };
+  ProgramsController_listDirectors: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        programId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProgramDirectorDto'][];
+        };
+      };
+    };
+  };
+  ProgramsController_assign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        programId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AssignDirectorDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProgramDirectorDto'];
+        };
+      };
+    };
+  };
+  ProgramsController_end: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        programId: string;
+        assignmentId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['EndDirectorDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProgramDirectorDto'];
+        };
+      };
+    };
+  };
+  ProgramsController_revoke: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        programId: string;
+        assignmentId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProgramDirectorDto'];
+        };
       };
     };
   };

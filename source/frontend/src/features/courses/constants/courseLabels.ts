@@ -20,8 +20,6 @@ export const COURSE_STATUS_COLORS: Record<CourseStatus, string> = {
   CANCELLED: 'default',
 };
 export const FOREIGN_COURSE_LABEL = 'Khoa khác';
-export const CHANGE_REQUEST_PENDING_TOOLTIP =
-  'Dữ liệu đã ban hành chỉ sửa qua đề xuất thay đổi; chức năng đề xuất có từ bậc B4.';
 export const COURSE_ACTION_LABELS: Record<CourseAction, string> = {
   discontinue: 'Ngừng mở lớp',
   reopen: 'Mở lại',

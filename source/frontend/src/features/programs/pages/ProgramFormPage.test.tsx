@@ -1,0 +1,240 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { App } from 'antd';
+import { createMemoryRouter, RouterProvider } from 'react-router';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { CREDITS_MESSAGE } from '../../../shared/forms/credits';
+import { ProgramFormPage } from './ProgramFormPage';
+
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status });
+const INFO = {
+  id: 'v1',
+  versionNumber: null,
+  status: 'DRAFT',
+  programName: 'Kỹ thuật máy tính',
+  majorCode: '7480106',
+  majorName: 'Kỹ thuật máy tính',
+  semesterCount: 10,
+  totalCredits: '150',
+  compulsoryCredits: '140',
+  electiveCredits: '10',
+  updatedAt: '2026-10-19T00:00:00.000Z',
+};
+const PROGRAM = {
+  id: 'p1',
+  programCode: '1024034',
+  degreeLevel: 'ENGINEER',
+  status: 'ACTIVE',
+  faculty: { id: 'f1', unitCode: 'KHOA_CNTT', unitName: 'Khoa CNTT' },
+  programName: 'Kỹ thuật máy tính',
+  currentVersion: { id: 'v1', versionNumber: null, status: 'DRAFT' },
+  directors: [],
+  currentVersionInfo: INFO,
+  draftVersion: INFO,
+  versions: [{ id: 'v1', versionNumber: null, status: 'DRAFT' }],
+  clonedFrom: null,
+  editPath: 'DIRECT',
+  canManage: true,
+  canClone: true,
+  createdAt: '2026-10-19T00:00:00.000Z',
+  updatedAt: '2026-10-19T00:00:00.000Z',
+};
+
+function renderForm(
+  path: string,
+  options: {
+    program?: Record<string, unknown>;
+    write?: () => Response;
+  } = {},
+) {
+  const fetchMock = vi.fn((_input: RequestInfo | URL, init?: RequestInit) => {
+    if (init?.method === 'POST' || init?.method === 'PATCH')
+      return Promise.resolve((options.write ?? (() => json(PROGRAM, 201)))());
+    return Promise.resolve(json(options.program ?? PROGRAM));
+  });
+  vi.stubGlobal('fetch', fetchMock);
+  const router = createMemoryRouter(
+    [
+      { path: '/programs', element: <p>Danh sách chương trình</p> },
+      { path: '/programs/new', element: <ProgramFormPage /> },
+      { path: '/programs/:programId/edit', element: <ProgramFormPage /> },
+      { path: '/programs/:programId', element: <p>Tổng quan chương trình</p> },
+    ],
+    { initialEntries: [path] },
+  );
+  render(
+    <QueryClientProvider
+      client={
+        new QueryClient({
+          defaultOptions: {
+            queries: { retry: false },
+            mutations: { retry: false },
+          },
+        })
+      }
+    >
+      <App>
+        <RouterProvider router={router} />
+      </App>
+    </QueryClientProvider>,
+  );
+  return fetchMock;
+}
+
+const writes = (fetchMock: ReturnType<typeof renderForm>) =>
+  fetchMock.mock.calls.filter(
+    ([, init]) => init?.method === 'POST' || init?.method === 'PATCH',
+  );
+
+function fill(label: string, value: string) {
+  fireEvent.change(screen.getByLabelText(label), { target: { value } });
+}
+
+async function fillValid(code: string) {
+  fireEvent.change(await screen.findByLabelText('Mã chương trình'), {
+    target: { value: code },
+  });
+  fireEvent.mouseDown(screen.getByLabelText('Trình độ'));
+  fireEvent.click(await screen.findByTitle('Kỹ sư'));
+  fill('Tên chương trình', 'Chương trình mới');
+  fill('Mã ngành', '7480106');
+  fill('Tên ngành', 'Kỹ thuật máy tính');
+  fill('Số học kỳ', '10');
+  fill('Tổng số tín chỉ', '150');
+  fill('Tín chỉ bắt buộc', '140');
+  fill('Tín chỉ tự chọn', '10');
+}
+
+afterEach(() => vi.unstubAllGlobals());
+
+describe('ProgramFormPage', () => {
+  it('names the missing required fields without sending a request', async () => {
+    const fetchMock = renderForm('/programs/new');
+    fireEvent.click(await screen.findByRole('button', { name: 'Lưu' }));
+    expect(
+      await screen.findByText('Nhập mã chương trình.'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Chọn trình độ.')).toBeInTheDocument();
+    expect(screen.getByText('Nhập tên chương trình.')).toBeInTheDocument();
+    expect(screen.getByText('Nhập tổng số tín chỉ.')).toBeInTheDocument();
+    expect(writes(fetchMock)).toHaveLength(0);
+  });
+
+  it('refuses a malformed credit number with the range', async () => {
+    const fetchMock = renderForm('/programs/new');
+    fireEvent.change(await screen.findByLabelText('Tổng số tín chỉ'), {
+      target: { value: '-1' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Lưu' }));
+    expect(await screen.findByText(CREDITS_MESSAGE)).toBeInTheDocument();
+    expect(writes(fetchMock)).toHaveLength(0);
+  });
+
+  it('shows the gap while typing and clears it once the sums agree (KB-011)', async () => {
+    const fetchMock = renderForm('/programs/new');
+    await fillValid('9999999');
+    fill('Tín chỉ bắt buộc', '120');
+    fill('Tín chỉ tự chọn', '25');
+    expect(
+      await screen.findByText('Chênh lệch 5 tín chỉ.'),
+    ).toBeInTheDocument();
+    fill('Tín chỉ tự chọn', '30');
+    expect(await screen.findByText('Khớp tổng tín chỉ.')).toBeInTheDocument();
+    expect(writes(fetchMock)).toHaveLength(0);
+  });
+
+  it('still posts a mismatch and shows the server refusal under the total', async () => {
+    const message =
+      'Tín chỉ bắt buộc cộng tín chỉ tự chọn phải bằng tổng tín chỉ (chênh lệch 5 tín chỉ).';
+    const fetchMock = renderForm('/programs/new', {
+      write: () =>
+        json(
+          {
+            code: 'CREDITS_MISMATCH',
+            message,
+            details: [{ field: 'totalCredits', constraints: ['creditsSum'] }],
+          },
+          400,
+        ),
+    });
+    await fillValid('9999999');
+    fill('Tín chỉ bắt buộc', '120');
+    fill('Tín chỉ tự chọn', '25');
+    fireEvent.click(screen.getByRole('button', { name: 'Lưu' }));
+    await waitFor(() => expect(writes(fetchMock)).toHaveLength(1));
+    expect(await screen.findByText(message)).toBeInTheDocument();
+  });
+
+  it('posts the trimmed code and string credits, then opens the overview', async () => {
+    const fetchMock = renderForm('/programs/new');
+    await fillValid('  9999999 ');
+    fireEvent.click(screen.getByRole('button', { name: 'Lưu' }));
+    await waitFor(() => expect(writes(fetchMock)).toHaveLength(1));
+    const [url, init] = writes(fetchMock)[0];
+    expect(String(url)).toBe('/api/programs');
+    expect(JSON.parse(String(init?.body))).toEqual({
+      programCode: '9999999',
+      degreeLevel: 'ENGINEER',
+      programName: 'Chương trình mới',
+      majorCode: '7480106',
+      majorName: 'Kỹ thuật máy tính',
+      semesterCount: 10,
+      totalCredits: '150',
+      compulsoryCredits: '140',
+      electiveCredits: '10',
+    });
+    expect(
+      await screen.findByText('Tổng quan chương trình'),
+    ).toBeInTheDocument();
+  });
+
+  it('puts a duplicate-code refusal under the code field', async () => {
+    renderForm('/programs/new', {
+      write: () =>
+        json(
+          {
+            code: 'PROGRAM_CODE_TAKEN',
+            message: 'Mã chương trình đã tồn tại.',
+            details: [{ field: 'programCode', constraints: ['unique'] }],
+          },
+          409,
+        ),
+    });
+    await fillValid('1024034');
+    fireEvent.click(screen.getByRole('button', { name: 'Lưu' }));
+    expect(
+      await screen.findByText('Mã chương trình đã tồn tại.'),
+    ).toBeInTheDocument();
+  });
+
+  it('fills edit mode from the Draft, disables the code and patches without it', async () => {
+    const fetchMock = renderForm('/programs/p1/edit');
+    const code = await screen.findByLabelText('Mã chương trình');
+    await waitFor(() => expect(code).toHaveValue('1024034'));
+    expect(code).toBeDisabled();
+    expect(screen.getByLabelText('Tổng số tín chỉ')).toHaveValue('150');
+    fill('Tên chương trình', 'Tên đã sửa');
+    fireEvent.click(screen.getByRole('button', { name: 'Lưu' }));
+    await waitFor(() => expect(writes(fetchMock)).toHaveLength(1));
+    const [url, init] = writes(fetchMock)[0];
+    expect(String(url)).toBe('/api/programs/p1');
+    expect(init?.method).toBe('PATCH');
+    const body = JSON.parse(String(init?.body));
+    expect(body).not.toHaveProperty('programCode');
+    expect(body).toMatchObject({
+      programName: 'Tên đã sửa',
+      totalCredits: '150',
+      semesterCount: 10,
+    });
+  });
+
+  it('sends the caller back to the overview when the edit must go through a request', async () => {
+    renderForm('/programs/p1/edit', {
+      program: { ...PROGRAM, editPath: 'VIA_REQUEST', draftVersion: null },
+    });
+    expect(
+      await screen.findByText('Tổng quan chương trình'),
+    ).toBeInTheDocument();
+  });
+});

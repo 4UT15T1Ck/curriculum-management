@@ -7,8 +7,13 @@ export interface AppMenuItem {
   path?: string;
   label: string;
   permission?: PermissionCode;
+  // Hidden when every role the caller holds is listed (display only; the server refuses anyway).
+  hideForRoles?: readonly string[];
   children?: readonly AppMenuItem[];
 }
+
+// R6: students see their program through the portal (F-20), not the school-wide list (US-018 AC3).
+export const STUDENT_ROLE_CODE = 'R6';
 
 export const APP_MENU: readonly AppMenuItem[] = [
   { path: ROUTES.home, label: 'Trang chính' },
@@ -43,6 +48,12 @@ export const APP_MENU: readonly AppMenuItem[] = [
     ],
   },
   {
+    path: ROUTES.programs,
+    label: 'Chương trình đào tạo',
+    permission: PERMISSIONS.programView,
+    hideForRoles: [STUDENT_ROLE_CODE],
+  },
+  {
     path: ROUTES.permissionMatrix,
     label: 'Ma trận quyền',
     permission: PERMISSIONS.permissionView,
@@ -56,27 +67,41 @@ type MenuEntry =
 
 const groupKey = (item: AppMenuItem) => `group:${item.label}`;
 
+function isHiddenForRoles(
+  item: AppMenuItem,
+  roleCodes: readonly string[],
+): boolean {
+  return (
+    item.hideForRoles !== undefined &&
+    roleCodes.length > 0 &&
+    roleCodes.every((roleCode) => item.hideForRoles?.includes(roleCode))
+  );
+}
+
 function isVisible(
   item: AppMenuItem,
   permissions: readonly PermissionCode[],
+  roleCodes: readonly string[],
 ): boolean {
+  if (isHiddenForRoles(item, roleCodes)) return false;
   return item.children
-    ? item.children.some((child) => isVisible(child, permissions))
+    ? item.children.some((child) => isVisible(child, permissions, roleCodes))
     : !item.permission || permissions.includes(item.permission);
 }
 
 export function toMenuItems(
   items: readonly AppMenuItem[],
   permissions: readonly PermissionCode[],
+  roleCodes: readonly string[] = [],
 ): MenuEntry[] {
   return items
-    .filter((item) => isVisible(item, permissions))
+    .filter((item) => isVisible(item, permissions, roleCodes))
     .map((item) =>
       item.children
         ? {
             key: groupKey(item),
             label: item.label,
-            children: toMenuItems(item.children, permissions),
+            children: toMenuItems(item.children, permissions, roleCodes),
           }
         : {
             key: item.path ?? item.label,

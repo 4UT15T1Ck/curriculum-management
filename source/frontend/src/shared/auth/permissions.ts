@@ -12,6 +12,10 @@ export const PERMISSIONS = {
   courseView: 'course.view',
   courseEdit: 'course.edit',
   courseRelationEdit: 'courseRelation.edit',
+  programView: 'program.view',
+  programEditInfo: 'program.editInfo',
+  programClone: 'program.clone',
+  directorAssign: 'director.assign',
 } as const satisfies Record<string, PermissionCode>;
 
 export function hasPermission(

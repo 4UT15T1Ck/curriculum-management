@@ -14,4 +14,8 @@ export const ROUTES = {
   courseDetail: '/courses/:courseId',
   courseEdit: '/courses/:courseId/edit',
   equivalenceGroups: '/equivalence-groups',
+  programs: '/programs',
+  programNew: '/programs/new',
+  programDetail: '/programs/:programId',
+  programEdit: '/programs/:programId/edit',
 } as const;

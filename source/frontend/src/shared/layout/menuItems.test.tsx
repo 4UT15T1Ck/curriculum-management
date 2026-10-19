@@ -33,4 +33,21 @@ describe('app menu', () => {
     ]);
     expect(openMenuGroups(APP_MENU, ROUTES.users)).toEqual([]);
   });
+
+  it('lists the programs for staff and hides them for a caller who only holds the student role', () => {
+    const permissions = ['program.view' as const];
+    expect(
+      toMenuItems(APP_MENU, permissions, ['R2']).map((item) => item.key),
+    ).toContain(ROUTES.programs);
+    expect(
+      toMenuItems(APP_MENU, permissions, ['R6']).map((item) => item.key),
+    ).not.toContain(ROUTES.programs);
+    // A student who also holds a staff role keeps the entry.
+    expect(
+      toMenuItems(APP_MENU, permissions, ['R6', 'R5']).map((item) => item.key),
+    ).toContain(ROUTES.programs);
+    expect(selectedMenuPath(APP_MENU, '/programs/p1/edit')).toBe(
+      ROUTES.programs,
+    );
+  });
 });

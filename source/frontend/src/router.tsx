@@ -57,6 +57,21 @@ const EquivalenceGroupsPage = lazy(() =>
     (module) => ({ default: module.EquivalenceGroupsPage }),
   ),
 );
+const ProgramListPage = lazy(() =>
+  import('./features/programs/pages/ProgramListPage').then((module) => ({
+    default: module.ProgramListPage,
+  })),
+);
+const ProgramOverviewPage = lazy(() =>
+  import('./features/programs/pages/ProgramOverviewPage').then((module) => ({
+    default: module.ProgramOverviewPage,
+  })),
+);
+const ProgramFormPage = lazy(() =>
+  import('./features/programs/pages/ProgramFormPage').then((module) => ({
+    default: module.ProgramFormPage,
+  })),
+);
 
 const HomePage = lazy(() =>
   import('./features/home/pages/HomePage').then((module) => ({
@@ -171,6 +186,38 @@ export const router = createBrowserRouter([
             element: (
               <RequirePermission code={PERMISSIONS.courseView}>
                 <EquivalenceGroupsPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.programs,
+            element: (
+              <RequirePermission code={PERMISSIONS.programView}>
+                <ProgramListPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.programNew,
+            element: (
+              <RequirePermission code={PERMISSIONS.programEditInfo}>
+                <ProgramFormPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.programDetail,
+            element: (
+              <RequirePermission code={PERMISSIONS.programView}>
+                <ProgramOverviewPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.programEdit,
+            element: (
+              <RequirePermission code={PERMISSIONS.programEditInfo}>
+                <ProgramFormPage />
               </RequirePermission>
             ),
           },

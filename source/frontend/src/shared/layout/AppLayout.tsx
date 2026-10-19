@@ -54,7 +54,11 @@ export function AppLayout() {
             mode="inline"
             selectedKeys={[selectedPath]}
             defaultOpenKeys={openMenuGroups(APP_MENU, selectedPath)}
-            items={toMenuItems(APP_MENU, me?.permissions ?? [])}
+            items={toMenuItems(
+              APP_MENU,
+              me?.permissions ?? [],
+              me?.roles.map((role) => role.roleCode) ?? [],
+            )}
           />
         </Layout.Sider>
         <Layout.Content style={{ padding: 24 }}>

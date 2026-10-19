@@ -8,7 +8,7 @@ import { useCan } from '../../../shared/auth/useCan';
 import { errorMessage } from '../../../shared/forms/applyFieldErrors';
 import type { CourseRelation, RelatedCourse } from '../api/courseRelations';
 import type { CourseDetail } from '../api/courses';
-import { CHANGE_REQUEST_PENDING_TOOLTIP } from '../constants/courseLabels';
+import { CHANGE_REQUEST_PENDING_TOOLTIP } from '../../../shared/constants/editPath';
 import { relationLabel, type RelationSide } from '../constants/relationLabels';
 import {
   useCourseRelations,

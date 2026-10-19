@@ -2,7 +2,7 @@ import { Button, Tooltip } from 'antd';
 import { generatePath, useNavigate } from 'react-router';
 import { ROUTES } from '../../../routes';
 import type { CourseDetail } from '../api/courses';
-import { CHANGE_REQUEST_PENDING_TOOLTIP } from '../constants/courseLabels';
+import { CHANGE_REQUEST_PENDING_TOOLTIP } from '../../../shared/constants/editPath';
 
 interface CourseEditButtonProps {
   course: CourseDetail;
