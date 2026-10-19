@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { App } from 'antd';
+import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 import { OrgUnitTreePage } from './OrgUnitTreePage';
 import type { OrgUnit } from '../../../shared/org-units/orgUnits';
@@ -48,9 +49,15 @@ describe('OrgUnitTreePage', () => {
     );
     vi.stubGlobal('fetch', fetchMock);
     render(
-      <QueryClientProvider client={new QueryClient()}>
+      <QueryClientProvider
+        client={
+          new QueryClient({ defaultOptions: { queries: { retry: false } } })
+        }
+      >
         <App>
-          <OrgUnitTreePage />
+          <MemoryRouter>
+            <OrgUnitTreePage />
+          </MemoryRouter>
         </App>
       </QueryClientProvider>,
     );
@@ -87,13 +94,20 @@ describe('OrgUnitTreePage', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
     render(
-      <QueryClientProvider client={new QueryClient()}>
+      <QueryClientProvider
+        client={
+          new QueryClient({ defaultOptions: { queries: { retry: false } } })
+        }
+      >
         <App>
-          <OrgUnitTreePage />
+          <MemoryRouter>
+            <OrgUnitTreePage />
+          </MemoryRouter>
         </App>
       </QueryClientProvider>,
     );
-    await screen.findByText('Trường');
+    // unit name and its type tag share the text "Trường"
+    expect(await screen.findAllByText('Trường')).toHaveLength(2);
     fireEvent.click(screen.getByRole('button', { name: 'Thêm đơn vị' }));
     fireEvent.change(screen.getByLabelText('Mã đơn vị'), {
       target: { value: 'F' },

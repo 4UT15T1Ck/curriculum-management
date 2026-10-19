@@ -45,11 +45,17 @@ export function OrgUnitTreePage() {
   const units = useOrgUnits();
   const groups = useSubjectGroups();
   const [selected, setSelected] = useState<OrgUnit | null>(null);
+  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
   const [editor, setEditor] = useState<Editor | null>(null);
   const tree = useMemo(
     () => buildOrgTree(units.data ?? [], groups.data ?? []),
     [units.data, groups.data],
   );
+  // Every node is expanded unless the user collapsed it, so a unit added later
+  // under a childless parent is visible at once.
+  const expandedKeys = (units.data ?? [])
+    .map((unit) => unit.id)
+    .filter((key) => !collapsed.has(key));
   if (units.isPending || groups.isPending) return <Skeleton active />;
   if (units.isError)
     return <Result status="error" title="Không tải được cây đơn vị" />;
@@ -70,7 +76,16 @@ export function OrgUnitTreePage() {
             }
           >
             <Tree
-              defaultExpandAll
+              expandedKeys={expandedKeys}
+              onExpand={(_keys, info) =>
+                setCollapsed((current) => {
+                  const next = new Set(current);
+                  const key = String(info.node.key);
+                  if (info.expanded) next.delete(key);
+                  else next.add(key);
+                  return next;
+                })
+              }
               blockNode
               treeData={tree.map((node) => toDataNode(node, setSelected))}
               onSelect={(_selectedKeys, info) => {

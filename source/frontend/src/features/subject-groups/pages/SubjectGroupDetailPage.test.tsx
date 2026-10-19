@@ -33,7 +33,11 @@ describe('SubjectGroupDetailPage', () => {
       { initialEntries: ['/subject-groups/g'] },
     );
     render(
-      <QueryClientProvider client={new QueryClient()}>
+      <QueryClientProvider
+        client={
+          new QueryClient({ defaultOptions: { queries: { retry: false } } })
+        }
+      >
         <App>
           <RouterProvider router={router} />
         </App>
@@ -65,7 +69,11 @@ describe('SubjectGroupDetailPage', () => {
       { initialEntries: ['/subject-groups/g'] },
     );
     render(
-      <QueryClientProvider client={new QueryClient()}>
+      <QueryClientProvider
+        client={
+          new QueryClient({ defaultOptions: { queries: { retry: false } } })
+        }
+      >
         <App>
           <RouterProvider router={router} />
         </App>

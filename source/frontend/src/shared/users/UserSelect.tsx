@@ -32,7 +32,7 @@ export function UserSelect({
     <Select
       showSearch
       value={value}
-      onChange={onChange}
+      onChange={(next) => onChange?.(next)}
       onSearch={setSearch}
       filterOption={false}
       loading={isFetching}
