@@ -145,23 +145,61 @@ model SubjectGroup {
 }
 
 model Course {
-  id             String        @id @default(cuid(2))
-  courseCode     String        @unique
-  courseName     String
-  englishName    String?
-  credits        Decimal       @db.Decimal(5, 2)
-  courseType     CourseType
-  status         CourseStatus  @default(ACTIVE)
-  ownerFacultyId String
-  ownerFaculty   OrgUnit       @relation("CourseOwnerFaculty", fields: [ownerFacultyId], references: [id], onDelete: Restrict)
-  ownerGroupId   String?
-  ownerGroup     SubjectGroup? @relation("CourseOwnerGroup", fields: [ownerGroupId], references: [id], onDelete: Restrict)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  id                 String                 @id @default(cuid(2))
+  courseCode         String                 @unique
+  courseName         String
+  englishName        String?
+  credits            Decimal                @db.Decimal(5, 2)
+  courseType         CourseType
+  status             CourseStatus           @default(ACTIVE)
+  ownerFacultyId     String
+  ownerFaculty       OrgUnit                @relation("CourseOwnerFaculty", fields: [ownerFacultyId], references: [id], onDelete: Restrict)
+  ownerGroupId       String?
+  ownerGroup         SubjectGroup?          @relation("CourseOwnerGroup", fields: [ownerGroupId], references: [id], onDelete: Restrict)
+  equivalenceGroupId String?
+  equivalenceGroup   EquivalentCourseGroup? @relation("CourseEquivalence", fields: [equivalenceGroupId], references: [id], onDelete: SetNull)
+  relationsAsSource  CourseRelation[]       @relation("RelationSource")
+  relationsAsTarget  CourseRelation[]       @relation("RelationTarget")
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
 
   @@index([ownerFacultyId])
   @@index([ownerGroupId])
   @@index([courseName])
+  @@index([equivalenceGroupId])
+}
+
+enum CourseRelationType {
+  PRIOR
+  PREREQUISITE
+  COREQUISITE
+  REPLACEMENT
+}
+
+// sourceCourse = the course studied first (or the discontinued one); targetCourse = the course that has the requirement.
+// Two CHECK constraints are added by hand in the migration (not modelled by Prisma): see database_and_models.md.
+model CourseRelation {
+  id             String             @id @default(cuid(2))
+  sourceCourseId String
+  sourceCourse   Course             @relation("RelationSource", fields: [sourceCourseId], references: [id], onDelete: Restrict)
+  targetCourseId String
+  targetCourse   Course             @relation("RelationTarget", fields: [targetCourseId], references: [id], onDelete: Restrict)
+  relationType   CourseRelationType
+  minScore       Decimal?           @db.Decimal(4, 2)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@unique([sourceCourseId, targetCourseId, relationType])
+  @@index([targetCourseId])
+}
+
+model EquivalentCourseGroup {
+  id        String   @id @default(cuid(2))
+  groupCode String   @unique
+  note      String?
+  members   Course[] @relation("CourseEquivalence")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model SubjectGroupMember {

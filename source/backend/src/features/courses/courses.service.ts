@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
+  CourseRelationType,
   CourseStatus,
   OrgUnitStatus,
   OrgUnitType,
@@ -13,7 +14,13 @@ import {
   type EditState,
 } from '../../shared/authz/edit-path.js';
 import { PERMISSIONS } from '../../shared/authz/permission-codes.js';
+import { courseEditState } from '../../shared/courses/course-edit-state.js';
+import { courseTarget } from '../../shared/courses/course-target.js';
 import { CourseUsageReader } from '../../shared/courses/course-usage.reader.js';
+import {
+  RELATED_COURSE_SELECT,
+  toRelatedCourseDto,
+} from '../../shared/courses/related-course.js';
 import { AppException } from '../../shared/exception/app.exception.js';
 import { COMMON_ERRORS } from '../../shared/exception/error-codes.js';
 import { HOME_FACULTY_CODE } from '../../shared/org-units/home-faculty.js';
@@ -28,7 +35,6 @@ import {
 import { CourseQueryDto } from './course-query.dto.js';
 import {
   COURSE_INCLUDE,
-  courseTarget,
   toCourseSummaryDto,
   type CourseDetailDto,
   type CourseRow,
@@ -129,7 +135,7 @@ export class CoursesService {
       access,
       PERMISSIONS.COURSE_EDIT,
       courseTarget(current),
-      await this.editState(current),
+      await courseEditState(this.usage, current),
     );
     const nextFacultyId = dto.ownerFacultyId ?? current.ownerFacultyId;
     const nextGroupId =
@@ -172,6 +178,7 @@ export class CoursesService {
     courseId: string,
     transition: CourseTransition,
     access: AccessContext,
+    options: { replacementCourseId?: string } = {},
   ): Promise<CourseDetailDto> {
     const current = await this.findOrThrow(courseId);
     if (current.status === CourseStatus.CANCELLED) {
@@ -189,26 +196,75 @@ export class CoursesService {
       throw new AppException(COURSE_ERRORS.STATUS_TRANSITION_INVALID);
     }
     if (
-      transition === COURSE_TRANSITION.DISCONTINUE &&
-      !(await this.usage.hasActiveReplacement(courseId))
-    ) {
-      throw new AppException(COURSE_ERRORS.REPLACEMENT_REQUIRED);
-    }
-    if (
       transition === COURSE_TRANSITION.CANCEL &&
       (await this.isInUse(courseId))
     ) {
       throw new AppException(COURSE_ERRORS.COURSE_IN_USE);
     }
-    const row = await this.prisma.course.update({
-      where: { id: courseId },
-      data: { status: rule.to },
-      include: COURSE_INCLUDE,
-    });
+    const row =
+      transition === COURSE_TRANSITION.DISCONTINUE
+        ? await this.discontinue(current, options.replacementCourseId)
+        : await this.prisma.course.update({
+            where: { id: courseId },
+            data: { status: rule.to },
+            include: COURSE_INCLUDE,
+          });
     this.logger.log(
       `Course ${row.courseCode} ${transition} by ${access.userId}`,
     );
     return this.toDetail(row, access);
+  }
+
+  // The replacement relation and the status change commit together or not at all (D11).
+  private discontinue(
+    current: CourseRow,
+    replacementCourseId: string | undefined,
+  ): Promise<CourseRow> {
+    return this.prisma.$transaction(async (tx) => {
+      if (replacementCourseId) {
+        await this.addReplacement(tx, current, replacementCourseId);
+      }
+      if (!(await this.usage.hasActiveReplacement(current.id, tx))) {
+        throw new AppException(COURSE_ERRORS.REPLACEMENT_REQUIRED);
+      }
+      return tx.course.update({
+        where: { id: current.id },
+        data: { status: CourseStatus.DISCONTINUED },
+        include: COURSE_INCLUDE,
+      });
+    });
+  }
+
+  private async addReplacement(
+    tx: Prisma.TransactionClient,
+    course: CourseRow,
+    replacementCourseId: string,
+  ): Promise<void> {
+    if (replacementCourseId === course.id) {
+      throw new AppException(COURSE_ERRORS.REPLACEMENT_INVALID);
+    }
+    const replacement = await tx.course.findUnique({
+      where: { id: replacementCourseId },
+      select: { status: true },
+    });
+    if (!replacement || replacement.status !== CourseStatus.ACTIVE) {
+      throw new AppException(COURSE_ERRORS.REPLACEMENT_INVALID);
+    }
+    await tx.courseRelation.upsert({
+      where: {
+        sourceCourseId_targetCourseId_relationType: {
+          sourceCourseId: course.id,
+          targetCourseId: replacementCourseId,
+          relationType: CourseRelationType.REPLACEMENT,
+        },
+      },
+      create: {
+        sourceCourseId: course.id,
+        targetCourseId: replacementCourseId,
+        relationType: CourseRelationType.REPLACEMENT,
+      },
+      update: {},
+    });
   }
 
   private listWhere(
@@ -251,9 +307,10 @@ export class CoursesService {
   ): Promise<CourseDetailDto> {
     const cancelled = row.status === CourseStatus.CANCELLED;
     const target = courseTarget(row);
-    const [programsUsing, state] = await Promise.all([
+    const [programsUsing, state, equivalenceGroup] = await Promise.all([
       this.usage.programsUsing(row.id),
-      this.editState(row),
+      courseEditState(this.usage, row),
+      this.equivalents(row),
     ]);
     return Object.assign(toCourseSummaryDto(row), {
       programsUsing,
@@ -263,17 +320,38 @@ export class CoursesService {
       canChangeStatus:
         !cancelled &&
         access.modeFor(PERMISSIONS.COURSE_EDIT, target) === 'DIRECT',
+      equivalenceGroup,
       createdAt: row.createdAt.toISOString(),
       updatedAt: row.updatedAt.toISOString(),
     });
   }
 
-  private async editState(row: CourseRow): Promise<EditState> {
-    return {
-      released: await this.usage.inReleasedVersion(row.id),
-      draftOpenToRequestHolders:
-        row.ownerFaculty.unitCode === HOME_FACULTY_CODE,
-    };
+  // The group the course belongs to, listing the other members only (US-017 AC1).
+  private async equivalents(
+    row: CourseRow,
+  ): Promise<CourseDetailDto['equivalenceGroup']> {
+    if (row.equivalenceGroupId === null) {
+      return null;
+    }
+    const group = await this.prisma.equivalentCourseGroup.findUnique({
+      where: { id: row.equivalenceGroupId },
+      select: {
+        id: true,
+        groupCode: true,
+        members: {
+          where: { id: { not: row.id } },
+          select: RELATED_COURSE_SELECT,
+          orderBy: { courseCode: 'asc' },
+        },
+      },
+    });
+    return group
+      ? {
+          id: group.id,
+          groupCode: group.groupCode,
+          members: group.members.map(toRelatedCourseDto),
+        }
+      : null;
   }
 
   private async isInUse(courseId: string): Promise<boolean> {

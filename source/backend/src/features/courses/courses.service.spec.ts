@@ -46,6 +46,7 @@ function row(patch: Partial<CourseRow> = {}): CourseRow {
     ownerFaculty: HOME,
     ownerGroupId: G1.id,
     ownerGroup: G1,
+    equivalenceGroupId: null,
     createdAt: NOW,
     updatedAt: NOW,
     ...patch,
@@ -128,6 +129,8 @@ describe('CoursesService', () => {
   >;
   let orgUnit: { findUnique: ReturnType<typeof vi.fn> };
   let subjectGroup: { findUnique: ReturnType<typeof vi.fn> };
+  let courseRelation: { upsert: ReturnType<typeof vi.fn> };
+  let equivalentCourseGroup: { findUnique: ReturnType<typeof vi.fn> };
   let usage: Record<keyof CourseUsageReader, ReturnType<typeof vi.fn>>;
   let service: CoursesService;
 
@@ -165,13 +168,22 @@ describe('CoursesService', () => {
       programsUsing: vi.fn().mockResolvedValue([]),
       hasActiveReplacement: vi.fn().mockResolvedValue(false),
     };
+    courseRelation = { upsert: vi.fn().mockResolvedValue({}) };
+    equivalentCourseGroup = { findUnique: vi.fn().mockResolvedValue(null) };
+    const client: Record<string, unknown> = {
+      course,
+      orgUnit,
+      subjectGroup,
+      courseRelation,
+      equivalentCourseGroup,
+    };
+    // Interactive transactions run the callback against the same mock; array transactions resolve together.
+    client.$transaction = (work: unknown) =>
+      typeof work === 'function'
+        ? (work as (tx: unknown) => Promise<unknown>)(client)
+        : Promise.all(work as Promise<unknown>[]);
     service = new CoursesService(
-      {
-        course,
-        orgUnit,
-        subjectGroup,
-        $transaction: (queries: Promise<unknown>[]) => Promise.all(queries),
-      } as unknown as PrismaService,
+      client as unknown as PrismaService,
       usage as unknown as CourseUsageReader,
     );
   });
@@ -269,6 +281,46 @@ describe('CoursesService', () => {
         editPath: 'VIA_REQUEST',
         canChangeStatus: true,
       });
+    });
+  });
+
+  describe('equivalence group on the detail', () => {
+    it('is null for a course in no group and lists the other members otherwise (US-017 AC1)', async () => {
+      await expect(service.detail('course', R6)).resolves.toMatchObject({
+        equivalenceGroup: null,
+      });
+      expect(equivalentCourseGroup.findUnique).not.toHaveBeenCalled();
+      course.findUnique.mockResolvedValue(row({ equivalenceGroupId: 'grp' }));
+      equivalentCourseGroup.findUnique.mockResolvedValue({
+        id: 'grp',
+        groupCode: 'EQ1',
+        members: [
+          {
+            id: 'b',
+            courseCode: 'IT900',
+            courseName: 'B',
+            credits: new Prisma.Decimal('3.00'),
+            status: CourseStatus.ACTIVE,
+          },
+        ],
+      });
+      const detail = await service.detail('course', R6);
+      expect(detail.equivalenceGroup).toEqual({
+        id: 'grp',
+        groupCode: 'EQ1',
+        members: [
+          {
+            id: 'b',
+            courseCode: 'IT900',
+            courseName: 'B',
+            credits: '3',
+            status: CourseStatus.ACTIVE,
+          },
+        ],
+      });
+      expect(
+        equivalentCourseGroup.findUnique.mock.calls[0][0].select.members.where,
+      ).toEqual({ id: { not: 'course' } });
     });
   });
 
@@ -444,6 +496,63 @@ describe('CoursesService', () => {
       await expect(
         service.transition('course', 'reopen', R1),
       ).resolves.toMatchObject({ status: CourseStatus.ACTIVE });
+    });
+
+    it('discontinues with a replacement given in the same call, writing the relation first (US-014 AC1)', async () => {
+      course.findUnique.mockImplementation(({ where }) =>
+        Promise.resolve(
+          where.id === 'course'
+            ? row()
+            : { ...row({ id: 'other' }), status: CourseStatus.ACTIVE },
+        ),
+      );
+      usage.hasActiveReplacement.mockResolvedValue(true);
+      await expect(
+        service.transition('course', 'discontinue', R1, {
+          replacementCourseId: 'other',
+        }),
+      ).resolves.toMatchObject({ status: CourseStatus.DISCONTINUED });
+      expect(courseRelation.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          create: {
+            sourceCourseId: 'course',
+            targetCourseId: 'other',
+            relationType: 'REPLACEMENT',
+          },
+          update: {},
+        }),
+      );
+      expect(usage.hasActiveReplacement).toHaveBeenCalledWith(
+        'course',
+        expect.anything(),
+      );
+    });
+
+    it('refuses a replacement that is the course itself, missing or not Active', async () => {
+      await expect(
+        service.transition('course', 'discontinue', R1, {
+          replacementCourseId: 'course',
+        }),
+      ).rejects.toMatchObject({ code: 'REPLACEMENT_INVALID' });
+      course.findUnique.mockImplementation(({ where }) =>
+        Promise.resolve(
+          where.id === 'course' ? row() : { status: CourseStatus.DISCONTINUED },
+        ),
+      );
+      await expect(
+        service.transition('course', 'discontinue', R1, {
+          replacementCourseId: 'other',
+        }),
+      ).rejects.toMatchObject({ code: 'REPLACEMENT_INVALID' });
+      course.findUnique.mockImplementation(({ where }) =>
+        Promise.resolve(where.id === 'course' ? row() : null),
+      );
+      await expect(
+        service.transition('course', 'discontinue', R1, {
+          replacementCourseId: 'missing',
+        }),
+      ).rejects.toMatchObject({ code: 'REPLACEMENT_INVALID' });
+      expect(course.update).not.toHaveBeenCalled();
     });
 
     it('refuses reopening an active course', async () => {

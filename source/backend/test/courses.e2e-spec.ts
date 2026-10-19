@@ -314,6 +314,69 @@ describe('course catalog', () => {
     expect(reopen.body.code).toBe('STATUS_TRANSITION_INVALID');
   });
 
+  it('discontinues with a replacement in one step, then reopens (KB-008, NT-B1-05)', async () => {
+    const x = await createCourse(app, { courseCode: 'KB008_X' });
+    const y = await createCourse(app, { courseCode: 'KB008_Y' });
+    const refused = await admin
+      .post(`/api/courses/${x.id}/discontinue`)
+      .set(CSRF)
+      .expect(409);
+    expect(refused.body.code).toBe('REPLACEMENT_REQUIRED');
+
+    const invalid = await admin
+      .post(`/api/courses/${x.id}/discontinue`)
+      .set(CSRF)
+      .send({ replacementCourseId: x.id })
+      .expect(400);
+    expect(invalid.body.code).toBe('REPLACEMENT_INVALID');
+    expect(
+      await prisma.courseRelation.count({ where: { sourceCourseId: x.id } }),
+    ).toBe(0);
+
+    const done = await admin
+      .post(`/api/courses/${x.id}/discontinue`)
+      .set(CSRF)
+      .send({ replacementCourseId: y.id })
+      .expect(200);
+    expect(done.body.status).toBe(CourseStatus.DISCONTINUED);
+    const relation = await prisma.courseRelation.findFirstOrThrow({
+      where: { sourceCourseId: x.id },
+    });
+    expect(relation).toMatchObject({
+      targetCourseId: y.id,
+      relationType: 'REPLACEMENT',
+    });
+
+    const reopened = await admin
+      .post(`/api/courses/${x.id}/reopen`)
+      .set(CSRF)
+      .expect(200);
+    expect(reopened.body.status).toBe(CourseStatus.ACTIVE);
+    // The relation stays; discontinuing again needs no body.
+    await admin.post(`/api/courses/${x.id}/discontinue`).set(CSRF).expect(200);
+    expect(
+      await prisma.courseRelation.count({ where: { sourceCourseId: x.id } }),
+    ).toBe(1);
+  });
+
+  it('refuses a Discontinued or Cancelled replacement and writes nothing', async () => {
+    const x = await createCourse(app, { courseCode: 'KB008_X2' });
+    const old = await createCourse(app, {
+      courseCode: 'KB008_OLD',
+      status: CourseStatus.DISCONTINUED,
+    });
+    const res = await admin
+      .post(`/api/courses/${x.id}/discontinue`)
+      .set(CSRF)
+      .send({ replacementCourseId: old.id })
+      .expect(400);
+    expect(res.body.code).toBe('REPLACEMENT_INVALID');
+    const after = await prisma.course.findUniqueOrThrow({
+      where: { id: x.id },
+    });
+    expect(after.status).toBe(CourseStatus.ACTIVE);
+  });
+
   it('cancels a never-used course once, then keeps it final and hidden', async () => {
     const course = await createCourse(app, { courseCode: 'CANCEL01' });
     await admin

@@ -24,6 +24,7 @@ import { CourseQueryDto } from './course-query.dto.js';
 import { CourseDetailDto, CoursePageDto } from './course.dto.js';
 import { CoursesService } from './courses.service.js';
 import { CreateCourseDto } from './create-course.dto.js';
+import { DiscontinueCourseDto } from './discontinue-course.dto.js';
 import { UpdateCourseDto } from './update-course.dto.js';
 
 @ApiTags('courses')
@@ -74,11 +75,13 @@ export class CoursesController {
   discontinue(
     @Param('courseId') courseId: string,
     @CurrentAccess() access: AccessContext,
+    @Body() dto?: DiscontinueCourseDto,
   ) {
     return this.courses.transition(
       courseId,
       COURSE_TRANSITION.DISCONTINUE,
       access,
+      { replacementCourseId: dto?.replacementCourseId },
     );
   }
 

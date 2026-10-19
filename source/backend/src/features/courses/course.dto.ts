@@ -4,8 +4,8 @@ import {
   CourseType,
   type Prisma,
 } from '../../generated/prisma/client.js';
-import type { ScopeTarget } from '../../shared/authz/access-context.js';
 import { EDIT_PATHS, type EditPath } from '../../shared/authz/edit-path.js';
+import { RelatedCourseDto } from '../../shared/courses/related-course.js';
 import { toWireDecimal } from '../../shared/decimal/decimal.js';
 import {
   OrgUnitRefDto,
@@ -43,11 +43,19 @@ export class CourseUsageDto {
   @ApiProperty({ nullable: true, type: String }) versionLabel!: string | null;
 }
 
+export class CourseEquivalenceDto {
+  @ApiProperty() id!: string;
+  @ApiProperty() groupCode!: string;
+  @ApiProperty({ type: [RelatedCourseDto] }) members!: RelatedCourseDto[];
+}
+
 export class CourseDetailDto extends CourseSummaryDto {
   @ApiProperty({ type: [CourseUsageDto] }) programsUsing!: CourseUsageDto[];
   @ApiProperty({ enum: EDIT_PATHS, enumName: 'EditPath', nullable: true })
   editPath!: EditPath | null;
   @ApiProperty() canChangeStatus!: boolean;
+  @ApiProperty({ type: CourseEquivalenceDto, nullable: true })
+  equivalenceGroup!: CourseEquivalenceDto | null;
   @ApiProperty() createdAt!: string;
   @ApiProperty() updatedAt!: string;
 }
@@ -75,15 +83,5 @@ export function toCourseSummaryDto(row: CourseRow): CourseSummaryDto {
     ownerFaculty: row.ownerFaculty,
     ownerGroup: row.ownerGroup,
     isForeign: row.ownerFaculty.unitCode !== HOME_FACULTY_CODE,
-  };
-}
-
-export function courseTarget(course: {
-  ownerFacultyId: string;
-  ownerGroupId: string | null;
-}): ScopeTarget {
-  return {
-    subjectGroupIds: course.ownerGroupId ? [course.ownerGroupId] : [],
-    orgUnitIds: [course.ownerFacultyId],
   };
 }

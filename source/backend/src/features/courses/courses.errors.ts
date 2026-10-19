@@ -40,6 +40,11 @@ export const COURSE_ERRORS = {
     message:
       'Hãy khai báo học phần thay thế (quan hệ Thay thế tới một học phần đang sử dụng) trước khi ngừng mở lớp.',
   },
+  REPLACEMENT_INVALID: {
+    status: HttpStatus.BAD_REQUEST,
+    code: 'REPLACEMENT_INVALID',
+    message: 'Học phần thay thế phải là một học phần khác đang sử dụng.',
+  },
   COURSE_IN_USE: {
     status: HttpStatus.CONFLICT,
     code: 'COURSE_IN_USE',

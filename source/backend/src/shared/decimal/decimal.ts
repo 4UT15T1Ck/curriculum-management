@@ -9,3 +9,8 @@ export const CREDITS_MESSAGE =
 export function toWireDecimal(value: Prisma.Decimal): string {
   return value.toString();
 }
+
+// 4-point scale, Decimal(4,2): 0 to 4 with at most two decimals (DEC-11).
+export const GRADE_POINT_PATTERN = /^(4(\.0{1,2})?|[0-3](\.\d{1,2})?)$/;
+export const GRADE_POINT_MESSAGE =
+  'Ngưỡng điểm theo thang 4: từ 0 đến 4, tối đa 2 chữ số thập phân (ví dụ 2 hoặc 2.5).';

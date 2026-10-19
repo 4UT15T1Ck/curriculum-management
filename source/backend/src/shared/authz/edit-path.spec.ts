@@ -3,6 +3,7 @@ import { ScopeSource, ScopeType } from '../../generated/prisma/client.js';
 import { AccessContext, type ActiveAssignment } from './access-context.js';
 import {
   assertDirectEdit,
+  assertSchoolWideDirect,
   editPathFor,
   EDIT_PATH,
   resolveEditPath,
@@ -106,5 +107,62 @@ describe('edit path', () => {
         }),
       ),
     ).toBe('CHANGE_REQUEST_REQUIRED');
+  });
+});
+
+describe('assertSchoolWideDirect', () => {
+  function withCell(
+    mode: 'DIRECT' | 'VIA_REQUEST',
+    scope: 'ALL' | 'SCOPED',
+  ): AccessContext {
+    const assignment: ActiveAssignment = {
+      assignmentId: 'a',
+      roleId: 'r',
+      roleCode: 'R',
+      roleName: 'R',
+      scopeSource: ScopeSource.NONE,
+      scopeType: ScopeType.UNIT,
+      scopeUnit: null,
+      scope: {
+        all: false,
+        orgUnitIds: new Set(['unit-1']),
+        subjectGroupIds: new Set(['g1']),
+        programIds: new Set(),
+        studentIds: new Set(),
+      },
+      permissions: new Map([[CODE, { mode, scope }]]),
+    };
+    return new AccessContext('user', [assignment]);
+  }
+
+  it('passes for a direct unscoped cell (X)', () => {
+    expect(() =>
+      assertSchoolWideDirect(withCell('DIRECT', 'ALL'), CODE),
+    ).not.toThrow();
+  });
+
+  it('refuses a request-only unscoped cell (Đ)', () => {
+    expect(
+      codeOf(() =>
+        assertSchoolWideDirect(withCell('VIA_REQUEST', 'ALL'), CODE),
+      ),
+    ).toBe('PERMISSION_DENIED');
+  });
+
+  it('refuses scoped cells even when direct, as no unit or group owns the data (Đ(P), P)', () => {
+    expect(
+      codeOf(() =>
+        assertSchoolWideDirect(withCell('VIA_REQUEST', 'SCOPED'), CODE),
+      ),
+    ).toBe('PERMISSION_DENIED');
+    expect(
+      codeOf(() => assertSchoolWideDirect(withCell('DIRECT', 'SCOPED'), CODE)),
+    ).toBe('PERMISSION_DENIED');
+  });
+
+  it('refuses a caller with no cell', () => {
+    expect(codeOf(() => assertSchoolWideDirect(access(null), CODE))).toBe(
+      'PERMISSION_DENIED',
+    );
   });
 });

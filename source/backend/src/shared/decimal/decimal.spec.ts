@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { Prisma } from '../../generated/prisma/client.js';
-import { CREDITS_PATTERN, toWireDecimal } from './decimal.js';
+import {
+  CREDITS_PATTERN,
+  GRADE_POINT_PATTERN,
+  toWireDecimal,
+} from './decimal.js';
 
 describe('credits decimal', () => {
   it.each(['0', '2.5', '2.50', '999.99', '3'])('accepts %s', (value) => {
@@ -19,4 +23,20 @@ describe('credits decimal', () => {
     expect(toWireDecimal(new Prisma.Decimal('3.00'))).toBe('3');
     expect(toWireDecimal(new Prisma.Decimal('0'))).toBe('0');
   });
+});
+
+describe('grade point decimal', () => {
+  it.each(['0', '2', '2.5', '4', '4.00', '3.99', '0.05'])(
+    'accepts %s',
+    (value) => {
+      expect(GRADE_POINT_PATTERN.test(value)).toBe(true);
+    },
+  );
+
+  it.each(['4.01', '5', '-1', '2.555', '', ' 2', '.5', '2.', '10'])(
+    'rejects %j',
+    (value) => {
+      expect(GRADE_POINT_PATTERN.test(value)).toBe(false);
+    },
+  );
 });
