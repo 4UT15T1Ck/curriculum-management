@@ -27,6 +27,9 @@ export const VERSION_SELECT = {
   programId: true,
   programName: true,
   versionNumber: true,
+  totalCredits: true,
+  compulsoryCredits: true,
+  electiveCredits: true,
   program: { select: { id: true, facultyId: true, programCode: true } },
 } as const satisfies Prisma.ProgramVersionSelect;
 export type VersionRow = Prisma.ProgramVersionGetPayload<{

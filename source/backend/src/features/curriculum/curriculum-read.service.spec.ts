@@ -27,6 +27,9 @@ const VERSION: VersionRow = {
   programId: 'p1',
   programName: 'Kỹ thuật máy tính',
   versionNumber: null,
+  totalCredits: new Prisma.Decimal('150'),
+  compulsoryCredits: new Prisma.Decimal('100'),
+  electiveCredits: new Prisma.Decimal('50'),
   program: { id: 'p1', facultyId: 'home', programCode: '1024034' },
 };
 
@@ -124,6 +127,7 @@ describe('CurriculumReadService.read', () => {
     findFirst: ReturnType<typeof vi.fn>;
   };
   let curriculumItem: { findMany: ReturnType<typeof vi.fn> };
+  let electiveGroup: { findMany: ReturnType<typeof vi.fn> };
   let service: CurriculumReadService;
 
   beforeEach(() => {
@@ -132,10 +136,11 @@ describe('CurriculumReadService.read', () => {
       findFirst: vi.fn().mockResolvedValue(null),
     };
     curriculumItem = { findMany: vi.fn().mockResolvedValue([]) };
+    electiveGroup = { findMany: vi.fn().mockResolvedValue([]) };
     const client = {
       programVersion,
       curriculumItem,
-      electiveGroup: { findMany: vi.fn().mockResolvedValue([]) },
+      electiveGroup,
       knowledgeBlock: {
         findMany: vi.fn().mockResolvedValue([
           {
@@ -174,6 +179,34 @@ describe('CurriculumReadService.read', () => {
     expect(result.warnings).toEqual([
       expect.objectContaining({ code: 'EMPTY_SEMESTER', semester: 8 }),
     ]);
+  });
+
+  it('counts an elective group by its minimum, not its listed credits (KB-013)', async () => {
+    curriculumItem.findMany.mockResolvedValue([
+      row('A', 1, 1),
+      ...['B', 'C', 'D'].map((code, index) =>
+        row(code, 2, index + 1, {
+          isElective: true,
+          electiveGroupId: 'g1',
+        }),
+      ),
+    ]);
+    electiveGroup.findMany.mockResolvedValue([
+      {
+        id: 'g1',
+        groupCode: 'TC1',
+        groupName: 'Nhóm 1',
+        minCredits: new Prisma.Decimal('6'),
+        minCourses: null,
+        items: [],
+      },
+    ]);
+    const result = await service.read('v1', R1);
+    expect(result.programCredits).toEqual({
+      computed: { compulsory: '3', elective: '6', total: '9' },
+      declared: { compulsory: '100', elective: '50', total: '150' },
+      mismatch: true,
+    });
   });
 
   it('numbers rows 1.. in the order the database returns them (semester, then order)', async () => {

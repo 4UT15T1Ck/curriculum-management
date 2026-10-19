@@ -15,6 +15,7 @@ import {
   WARNING_SEVERITY,
   type CurriculumWarning,
 } from '../../shared/curriculum/curriculum-warnings.js';
+import { CreditBreakdownDto } from '../../shared/curriculum/credit-breakdown.dto.js';
 import { ElectiveGroupDto } from './elective-group.dto.js';
 import {
   CURRICULUM_REQUISITE_TYPES,
@@ -117,6 +118,13 @@ export class CurriculumWarningDto {
   @ApiProperty() message!: string;
   @ApiProperty({ nullable: true, type: Number }) semester!: number | null;
   @ApiProperty({ nullable: true, type: String }) itemId!: string | null;
+  @ApiProperty({ nullable: true, type: String }) groupId!: string | null;
+}
+
+export class ProgramCreditsDto {
+  @ApiProperty({ type: CreditBreakdownDto }) computed!: CreditBreakdownDto;
+  @ApiProperty({ type: CreditBreakdownDto }) declared!: CreditBreakdownDto;
+  @ApiProperty() mismatch!: boolean;
 }
 
 export class CurriculumDto {
@@ -132,6 +140,7 @@ export class CurriculumDto {
   knowledgeBlocks!: KnowledgeBlockDto[];
   @ApiProperty({ type: [ElectiveGroupDto] })
   electiveGroups!: ElectiveGroupDto[];
+  @ApiProperty({ type: ProgramCreditsDto }) programCredits!: ProgramCreditsDto;
   @ApiProperty({ type: [CurriculumWarningDto] })
   warnings!: CurriculumWarningDto[];
 }

@@ -3,7 +3,12 @@ import { ProgramVersionStatus } from '../../generated/prisma/client.js';
 import type { AccessContext } from '../../shared/authz/access-context.js';
 import { EDIT_PATH, editPathFor } from '../../shared/authz/edit-path.js';
 import { PERMISSIONS } from '../../shared/authz/permission-codes.js';
-import { curriculumWarnings } from '../../shared/curriculum/curriculum-warnings.js';
+import { toCreditBreakdownDto } from '../../shared/curriculum/credit-breakdown.dto.js';
+import {
+  curriculumWarnings,
+  toWarningItem,
+} from '../../shared/curriculum/curriculum-warnings.js';
+import { programCredits } from '../../shared/curriculum/program-credits.js';
 import { AppException } from '../../shared/exception/app.exception.js';
 import { PrismaService } from '../../shared/prisma/prisma.service.js';
 import {
@@ -97,6 +102,14 @@ export class CurriculumReadService {
       credits: row.course.credits,
       blockSymbol: row.blockSymbol,
     }));
+    const warningItems = rows.map(toWarningItem);
+    const warningGroups = groups.map((group) => ({
+      id: group.id,
+      groupCode: group.groupCode,
+      minCredits: group.minCredits,
+      minCourses: group.minCourses,
+    }));
+    const computed = programCredits(warningItems, warningGroups);
     return {
       version: toCurriculumVersionDto(version),
       editPath,
@@ -110,16 +123,22 @@ export class CurriculumReadService {
       blocks: blockTotals(totalsInput, blockNames),
       knowledgeBlocks: blocks.map(toKnowledgeBlockDto),
       electiveGroups: groups.map(toElectiveGroupDto),
-      warnings: curriculumWarnings(
-        version.semesterCount,
-        rows.map((row) => ({
-          id: row.id,
-          courseId: row.courseId,
-          courseCode: row.course.courseCode,
-          plannedSemester: row.plannedSemester,
-          requisites: row.requisites,
-        })),
-      ),
+      programCredits: {
+        computed: toCreditBreakdownDto(computed),
+        declared: toCreditBreakdownDto({
+          compulsory: version.compulsoryCredits,
+          elective: version.electiveCredits,
+          total: version.totalCredits,
+        }),
+        mismatch:
+          !computed.compulsory.equals(version.compulsoryCredits) ||
+          !computed.elective.equals(version.electiveCredits),
+      },
+      warnings: curriculumWarnings({
+        semesterCount: version.semesterCount,
+        items: warningItems,
+        groups: warningGroups,
+      }),
     };
   }
 

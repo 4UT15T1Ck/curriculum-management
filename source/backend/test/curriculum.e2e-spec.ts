@@ -537,6 +537,11 @@ describe('curriculum, requisites and elective groups', () => {
     expect(assigned.body).toMatchObject({ itemCount: 5, listedCredits: '15' });
     const curriculum = await readCurriculum(admin, versionId);
     expect(curriculum.electiveGroups[0].itemIds).toHaveLength(5);
+    // The program total counts the group by its minimum (6), not by its 15 listed credits (US-029 AC1).
+    expect(curriculum.programCredits).toMatchObject({
+      computed: { elective: '6' },
+      mismatch: true,
+    });
     expect(curriculum.items[0].electiveGroup).toEqual({
       id: created.body.id,
       groupCode: 'TC1',

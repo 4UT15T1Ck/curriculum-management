@@ -548,4 +548,19 @@ export const PERMISSION_TABLE: PermissionCase[] = [
     allowedRole: 'R1',
     deniedRole: 'R2',
   },
+  {
+    permission: PERMISSIONS.PROGRAM_VIEW,
+    method: 'get',
+    path: `/api/program-versions/${PLACEHOLDER_ID}/consistency`,
+    allowedRole: 'R5',
+    deniedRole: NO_ROLE,
+  },
+  {
+    permission: PERMISSIONS.PROGRAM_EDIT_INFO,
+    method: 'put',
+    path: `/api/program-versions/${PLACEHOLDER_ID}/credit-mismatch-acceptance`,
+    body: {},
+    allowedRole: 'R3',
+    deniedRole: 'R4',
+  },
 ];
