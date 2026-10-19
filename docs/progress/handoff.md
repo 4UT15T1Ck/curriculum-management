@@ -2,7 +2,7 @@
 
 **Ngày**: 2026-10-19 · **Nhánh**: `claude/keen-meitner-2y7yf1` (chưa gộp vào `main`, chưa mở PR)
 
-Đọc kèm: `docs/progress/todo.md` (trạng thái từng tính năng), `docs/implement-report/f-*-implement-report.md` (chi tiết, lệch kế hoạch, bước đi thử của từng tính năng).
+Đọc kèm: `docs/system-overview.md` (hệ thống làm gì, ai dùng), `docs/testing/setup-and-test-guide.md` (cài đặt, kiểm thử, thứ tự đi thử), `docs/progress/todo.md` (trạng thái từng tính năng), `docs/implement-report/f-*-implement-report.md` (chi tiết, lệch kế hoạch, bước đi thử của từng tính năng).
 
 ## 1. Đã xong
 
