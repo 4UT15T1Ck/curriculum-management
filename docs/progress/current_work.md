@@ -4,7 +4,7 @@
 
 - **Last updated**: 2026-10-19
 - **Active area**: dựng bản MVP (`docs/planning/epics.md` §0)
-- **Start here**: mã MVP đã đủ (F-01..F-08, F-10, F-11, F-13, F-14, F-15). Bước tiếp theo: đồng bộ tài liệu + đối chiếu chức năng toàn bộ.
+- **Start here**: đọc `docs/progress/handoff.md` — MVP đã dựng xong mã; tiếp theo là kiểm tra chức năng xuyên tính năng và đồng bộ tài liệu.
 
 ---
 
