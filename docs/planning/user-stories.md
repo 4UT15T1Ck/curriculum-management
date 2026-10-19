@@ -521,10 +521,10 @@
 ### US-041 — Đính kèm bản đề cương đã ký (đợt 1)
 
 - **Vai trò:** R1, R3, R4, R5 · **Bậc:** B3 · **Epic:** EP-10
-- **Là** người soạn đề cương, **tôi muốn** đính kèm tệp PDF hoặc Word của bản đề cương đã ký, **để** bản có chữ ký nằm cạnh bản soạn trong hệ thống.
+- **Là** người soạn đề cương, **tôi muốn** đính kèm tệp PDF, Word, Excel hoặc ảnh của bản đề cương đã ký, **để** bản có chữ ký nằm cạnh bản soạn trong hệ thống.
 - **Tiêu chí chấp nhận**
-  1. **Cho** đề cương ở trạng thái Nháp — **Khi** tải lên một tệp PDF hoặc Word — **Thì** tệp hiện trong danh sách đính kèm với tên, người tải, thời điểm.
-  2. **Cho** tệp không phải PDF hay Word, hoặc vượt dung lượng cấu hình — **Khi** tải lên — **Thì** bị từ chối, thông báo nêu loại tệp và dung lượng cho phép.
+  1. **Cho** đề cương ở trạng thái Nháp — **Khi** tải lên một tệp PDF, Word (.docx), Excel (.xlsx) hoặc ảnh (PNG, JPEG) — **Thì** tệp hiện trong danh sách đính kèm với tên, người tải, thời điểm.
+  2. **Cho** tệp không thuộc các loại trên, hoặc vượt dung lượng cấu hình (mặc định 20 MB) — **Khi** tải lên — **Thì** bị từ chối, thông báo nêu loại tệp và dung lượng cho phép.
   3. **Cho** tệp đã đính kèm vào bản Nháp — **Khi** người tải bỏ tệp — **Thì** tệp rời danh sách; việc gắn tệp theo phiên bản đã ban hành có ở US-077.
 - **Bao phủ:** FR-47 (đợt 1) · UC-34 · BR — · EC — · khác: NFR-24
 
@@ -555,11 +555,11 @@
 ### US-044 — Soạn ma trận CLO–PLO theo cặp chương trình, học phần
 
 - **Vai trò:** R1, R3, R4, R5 · **Bậc:** B3 · **Epic:** EP-11
-- **Là** người soạn chuẩn đầu ra, **tôi muốn** khai báo mức đóng góp của từng CLO vào từng PLO cho riêng một học phần trong một chương trình, **để** cùng một học phần đóng góp khác nhau ở các chương trình khác nhau.
+- **Là** người soạn chuẩn đầu ra, **tôi muốn** gắn từng CLO vào các PLO cho riêng một học phần trong một chương trình, **để** cùng một học phần đóng góp khác nhau ở các chương trình khác nhau.
 - **Tiêu chí chấp nhận**
-  1. **Cho** học phần trong khung của chương trình A — **Khi** đặt CLO1 đóng góp mức M cho PLO2 — **Thì** ô được lưu cho cặp (A, học phần).
-  2. **Cho** cùng học phần ở chương trình B — **Khi** đặt CLO1 đóng góp mức I cho PLO5 của B — **Thì** lưu được và ô của chương trình A không đổi.
-  3. **Cho** thang đang dùng là I–R–M — **Khi** nhập giá trị ngoài thang — **Thì** bị chặn; đổi thang sang 1–2–3 là một tham số cấu hình.
+  1. **Cho** học phần trong khung của chương trình A, đã gắn PLO2 ở ma trận học phần–PLO — **Khi** gắn CLO1 vào PLO2 — **Thì** liên kết được lưu cho cặp (A, học phần).
+  2. **Cho** cùng học phần ở chương trình B — **Khi** gắn CLO1 vào PLO5 của B — **Thì** lưu được và liên kết của chương trình A không đổi.
+  3. **Cho** một PLO học phần chưa gắn ở ma trận học phần–PLO — **Khi** gắn CLO vào PLO đó — **Thì** bị chặn; liên kết CLO–PLO không mang mức.
   4. **Cho** bất kỳ học phần nào trong khung, kể cả học phần của khoa khác — **Khi** mở ma trận — **Thì** khai báo được.
 - **Bao phủ:** FR-40 · UC-28 · BR-19, BR-21 · EC — · khác: DEC-03, M-6, Q-25, NFR-24
 
@@ -573,14 +573,14 @@
   3. **Cho** người chỉ có quyền xem — **Khi** mở ma trận — **Thì** không có ô nào sửa được.
 - **Bao phủ:** FR-38, FR-39, FR-40 · UC-25 · BR — · EC — · khác: NFR-18
 
-### US-046 — Ma trận học phần–PLO suy diễn và ghi đè
+### US-046 — Ma trận học phần–PLO kèm trọng số
 
 - **Vai trò:** R1, R3 · **Bậc:** B3 · **Epic:** EP-11
-- **Là** Giám đốc CTĐT, **tôi muốn** hệ thống tự tổng hợp ma trận học phần–PLO từ ma trận CLO–PLO và cho tôi ghi đè từng ô, **để** có bảng tổng quan mà vẫn chỉnh được khi cần.
+- **Là** Giám đốc CTĐT, **tôi muốn** nhập trực tiếp ma trận học phần–PLO với trọng số đóng góp của từng ô, **để** có bảng tổng quan và giới hạn PLO mà CLO của học phần được gắn.
 - **Tiêu chí chấp nhận**
-  1. **Cho** học phần có CLO1 mức I và CLO2 mức M cùng trỏ vào PLO3 — **Khi** mở ma trận học phần–PLO — **Thì** ô (học phần, PLO3) hiện mức cao nhất là M.
-  2. **Cho** một ô suy diễn — **Khi** ghi đè bằng giá trị khác — **Thì** ô mang dấu "ghi đè" và giữ giá trị đó dù ma trận CLO–PLO đổi.
-  3. **Cho** ô đã ghi đè — **Khi** bỏ ghi đè — **Thì** ô trở lại giá trị suy diễn.
+  1. **Cho** học phần trong khung và PLO3 — **Khi** nhập trọng số 0,5 cho ô (học phần, PLO3) — **Thì** ô được lưu với trọng số đó.
+  2. **Cho** một ô — **Khi** nhập trọng số ngoài khoảng (0; 1] hoặc quá hai chữ số thập phân — **Thì** bị chặn.
+  3. **Cho** ô có CLO đang gắn vào PLO đó — **Khi** xóa ô — **Thì** hệ thống nêu số liên kết CLO–PLO sẽ mất, yêu cầu xác nhận, rồi xóa cả các liên kết đó.
 - **Bao phủ:** FR-41 · UC-29, UC-30 · BR — · EC — · khác: E-5, Q-26
 
 ### US-047 — Cảnh báo lỗ hổng chuẩn đầu ra
@@ -600,7 +600,7 @@
 - **Vai trò:** R1 · **Bậc:** B3 · **Epic:** EP-11
 - **Là** Phòng Đào tạo, **tôi muốn** bản nhân bản mang theo cả PLO và ma trận của chương trình nguồn, **để** khóa mới không phải khai báo lại chuẩn đầu ra.
 - **Tiêu chí chấp nhận**
-  1. **Cho** chương trình nguồn có PLO và ma trận CLO–PLO — **Khi** nhân bản — **Thì** bản mới có đủ PLO, đủ ô ma trận, đủ ô ghi đè của ma trận học phần–PLO.
+  1. **Cho** chương trình nguồn có PLO và ma trận CLO–PLO — **Khi** nhân bản — **Thì** bản mới có đủ PLO, đủ ô ma trận CLO–PLO và đủ ô ma trận học phần–PLO.
   2. **Cho** bản nhân bản — **Khi** sửa một PLO của nó — **Thì** PLO cùng mã ở chương trình nguồn không đổi.
   3. **Cho** bản nhân bản — **Khi** mở đề cương của một học phần — **Thì** đó vẫn là đề cương dùng chung, không có bản sao.
 - **Bao phủ:** FR-25 (đợt 2) · UC-20 · BR-17, BR-18 · EC — · khác: DEC-02, DEC-03

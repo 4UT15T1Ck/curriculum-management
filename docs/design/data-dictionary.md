@@ -45,10 +45,10 @@
 | unitCode | maDonVi | Chuỗi | C | |
 | unitName | tenDonVi | Chuỗi | C | |
 | unitType | loaiDonVi | Liệt kê | C | `UNIVERSITY` Trường · `FACULTY` Khoa · `OFFICE` Phòng |
-| parentUnit | donViCha | → `OrgUnit` | K | Chỉ nút Trường được để trống |
-| ⊕ status | — | Liệt kê | C | `ACTIVE` Đang hoạt động · `INACTIVE` Ngừng hoạt động. Không xóa đơn vị đã có dữ liệu |
+| parentUnit | donViCha | → `OrgUnit` | K | Chỉ nút Trường được để trống. Khoa và Phòng nằm ngay dưới Trường; máy chủ từ chối đổi cha tạo vòng |
+| ⊕ status | — | Liệt kê | C | `ACTIVE` Đang hoạt động · `INACTIVE` Ngừng hoạt động. Không xóa đơn vị đã có dữ liệu. Không ngừng được khi còn đơn vị con hoặc nhóm chuyên môn đang hoạt động |
 
-Duy nhất: `unitCode`.
+Duy nhất: `unitCode`. `unitCode` và `unitType` không đổi sau khi tạo.
 
 ### `SubjectGroup` — SRS: NhomChuyenMon
 
@@ -59,9 +59,9 @@ Nhóm chuyên môn thuộc khoa (FR-02). Người điều phối không lưu ở
 | groupCode | maNhom | Chuỗi | C | |
 | groupName | tenNhom | Chuỗi | C | |
 | faculty | khoa | → `OrgUnit` | C | Đơn vị loại Khoa |
-| ⊕ status | — | Liệt kê | C | `ACTIVE` Đang sử dụng · `INACTIVE` Ngừng sử dụng |
+| ⊕ status | — | Liệt kê | C | `ACTIVE` Đang sử dụng · `INACTIVE` Ngừng sử dụng. Ngừng sử dụng giữ nguyên các dòng `SubjectGroupMember` nhưng thành viên, Điều phối mất phạm vi trên nhóm |
 
-Duy nhất: `groupCode`.
+Duy nhất: `groupCode`; không đổi sau khi tạo.
 
 ### `User` — SRS: NguoiDung
 
@@ -76,8 +76,9 @@ Tài khoản của mọi vai trò, kể cả sinh viên. Không xóa cứng tài
 | status | trangThai | Liệt kê | C | `ACTIVE` Hoạt động · `DISABLED` Vô hiệu hóa |
 | ⊕ username | — | Chuỗi | C | Tài khoản nội bộ (quyết định tạm của Q-13) |
 | ⊕ passwordHash | — | Chuỗi | C | Không lưu mật khẩu dạng rõ (NFR-06) |
+| ⊕ mustChangePassword | — | Logic | C | Mặc định sai; đúng với tài khoản khởi tạo và sau khi R1 đặt lại mật khẩu — chỉ gọi được `me`, đổi mật khẩu, đăng xuất cho tới khi đổi (F00-16, F01-04) |
 
-Duy nhất: `userCode`; `username`.
+Duy nhất: `userCode`; `username` (lưu đã cắt khoảng trắng, chữ thường).
 
 ### `Role` — SRS: VaiTro
 
@@ -88,7 +89,8 @@ Sáu vai trò R1..R6 của SRS mục 3.1. Vai trò được làm gì ghi ở `Ro
 | roleCode | maVaiTro | Chuỗi | C | |
 | roleName | tenVaiTro | Chuỗi | C | |
 | description | moTa | Chuỗi | K | |
-| ⊕ isSystemRole | — | Logic | C | Có với R1..R6: không xóa, không đổi mã. Để dành cho vai trò tự định nghĩa (E-13); hiện chưa có đường tạo vai trò mới |
+| ⊕ isSystemRole | — | Logic | C | Có với R1..R6: không xóa, không đổi mã. Để dành cho vai trò tự định nghĩa (E-13); hiện chưa có đường tạo vai trò mới (F02-03) |
+| ⊕ scopeSource | — | Liệt kê | C | `NONE` gán tay qua `RoleAssignment` · `PROGRAM_DIRECTOR` suy ra từ `ProgramDirectorAssignment` · `SUBJECT_GROUP_COORDINATOR` suy ra từ `SubjectGroupMember` vai trò Điều phối · `SUBJECT_GROUP_MEMBER` suy ra từ mọi dòng `SubjectGroupMember` · `OWN_ENROLLMENT` suy ra từ `ProgramEnrollment` của chính sinh viên. R1, R2 = `NONE`; R3..R6 lần lượt bốn giá trị còn lại. Người dùng giữ vai trò suy ra đúng khi bảng nguồn có dòng còn hiệu lực (M-7) — không gán tay lần thứ hai |
 
 Duy nhất: `roleCode`.
 
@@ -108,7 +110,7 @@ Duy nhất: `permissionCode`. Ràng buộc: không xóa quyền còn dòng `Role
 
 ### ⊕ `RolePermission`
 
-Vai trò nào có quyền nào, ghi thẳng hay phải qua đề xuất, trên mọi đối tượng hay chỉ trong phạm vi (M-10). Không có dòng nghĩa là không có quyền. Mọi thay đổi ở đây ghi nhật ký như `RoleAssignment` (FR-10).
+Vai trò nào có quyền nào, ghi thẳng hay phải qua đề xuất, trên mọi đối tượng hay chỉ trong phạm vi (M-10). Không có dòng nghĩa là không có quyền. R1 sửa ô của sáu vai trò có sẵn trên MH-15 (F02-02); mỗi lần sửa ghi `updatedBy` và một dòng nhật ký ứng dụng có giá trị trước/sau (nhật ký kiểm toán hoãn theo F01-07). Ô R1 × `permission.manage` và R1 × `user.manage` bị khóa để R1 không tự mất đường quản trị.
 
 | Tên lập trình | Tên SRS | Kiểu | BB | Mô tả, ràng buộc |
 |---|---|---|---|---|
@@ -117,22 +119,27 @@ Vai trò nào có quyền nào, ghi thẳng hay phải qua đề xuất, trên m
 | mode | — | Liệt kê | C | `DIRECT` Trực tiếp · `VIA_REQUEST` Qua đề xuất. Qua đề xuất là ô `Đ` của SRS. Dữ liệu đã ban hành vẫn chỉ đổi qua đề xuất với mọi chế độ (FR-55); bản Nháp thì cả hai chế độ đều sửa trực tiếp (H-4) |
 | scope | — | Liệt kê | C | `ALL` Toàn bộ · `SCOPED` Theo phạm vi. Theo phạm vi là ô `P` của SRS; phạm vi đọc ở chỗ M-7 chỉ ra, với Sinh viên là các dòng `ProgramEnrollment` của chính mình |
 
+| ⊕ updatedBy | — | → `User` | K | Người sửa ô gần nhất; trống với ô nạp sẵn |
+
 Duy nhất: (`role`, `permission`).
 
 ### `RoleAssignment` — SRS: PhanQuyen
 
-Một người dùng giữ một vai trò trong một phạm vi, có thời hạn (FR-07). Mọi thay đổi ở đây ghi nhật ký (FR-10).
+Một người dùng giữ một vai trò trong một phạm vi, có thời hạn (FR-07). Chỉ chứa vai trò có `scopeSource` = `NONE` (R1, R2), phạm vi `SYSTEM` hoặc `UNIT`; vai trò suy ra (R3..R6) không có dòng ở đây. Dòng không bao giờ bị xóa hay sửa vai trò, phạm vi, thời hạn: thu hồi ghi `revokedAt`/`revokedBy`, đổi phạm vi = thu hồi dòng cũ + thêm dòng mới. Các dòng này chính là lịch sử phân quyền của FR-10 / US-006 khi nhật ký kiểm toán còn hoãn (F01-07).
 
 | Tên lập trình | Tên SRS | Kiểu | BB | Mô tả, ràng buộc |
 |---|---|---|---|---|
 | user | nguoiDung | → `User` | C | |
 | role | vaiTro | → `Role` | C | |
-| scopeType | loaiPhamVi | Liệt kê | C | `SYSTEM` Toàn hệ thống · `UNIT` Đơn vị · `ASSIGNMENT` Theo phân công. "Theo phân công" nghĩa là phạm vi đọc từ `ProgramDirectorAssignment` hoặc `SubjectGroupMember` (M-7) |
-| scopeUnit | donViPhamVi | → `OrgUnit` | K | Bắt buộc khi `scopeType` = Đơn vị |
-| validFrom | tuNgay | Ngày | C | |
-| validTo | denNgay | Ngày | K | Trống = không thời hạn |
+| scopeType | loaiPhamVi | Liệt kê | C | `SYSTEM` Toàn hệ thống · `UNIT` Đơn vị · `ASSIGNMENT` Theo phân công. Dòng lưu chỉ có `SYSTEM` hoặc `UNIT`; `ASSIGNMENT` chỉ xuất hiện khi hiển thị vai trò suy ra (M-7) |
+| scopeUnit | donViPhamVi | → `OrgUnit` | K | Bắt buộc khi `scopeType` = Đơn vị; phạm vi gồm đơn vị đó và mọi đơn vị con |
+| validFrom | tuNgay | Ngày | C | Ngày lịch theo giờ Việt Nam |
+| validTo | denNgay | Ngày | K | Trống = không thời hạn; còn hiệu lực trọn ngày `validTo` |
+| ⊕ assignedBy | — | → `User` | K | Người gán; trống với dòng nạp sẵn |
+| ⊕ revokedAt | — | Ngày giờ | K | Có = đã thu hồi, không còn hiệu lực |
+| ⊕ revokedBy | — | → `User` | K | Bắt buộc khi có `revokedAt` |
 
-Duy nhất: (`user`, `role`, `scopeUnit`, `validFrom`).
+Duy nhất: (`user`, `role`, `scopeUnit`, `validFrom`). PostgreSQL coi `scopeUnit` trống là khác nhau, nên máy chủ còn kiểm không chồng thời hạn giữa các dòng chưa thu hồi cùng (`user`, `role`, `scopeUnit`).
 
 ### `SubjectGroupMember` — SRS: ThanhVienNhomCM
 
@@ -143,10 +150,18 @@ Giảng viên thuộc nhóm chuyên môn, quan hệ n–n (FR-03). Dòng có vai
 | subjectGroup | nhomChuyenMon | → `SubjectGroup` | C | |
 | lecturer | giangVien | → `User` | C | |
 | memberRole | vaiTroTrongNhom | Liệt kê | C | `MEMBER` Thành viên · `COORDINATOR` Điều phối |
-| ⊕ validFrom | — | Ngày | C | Thời gian hiệu lực mà FR-04 yêu cầu |
-| ⊕ validTo | — | Ngày | K | |
+| ⊕ validFrom | — | Ngày | C | Thời gian hiệu lực mà FR-04 yêu cầu; ngày lịch theo giờ Việt Nam |
+| ⊕ validTo | — | Ngày | K | Trống = không thời hạn; còn hiệu lực trọn ngày `validTo` |
+| ⊕ assignedBy | — | → `User` | K | Người gán |
+| ⊕ revokedAt | — | Ngày giờ | K | Có = dòng nhập nhầm, đã thu hồi, không còn hiệu lực |
+| ⊕ revokedBy | — | → `User` | K | Bắt buộc khi có `revokedAt` |
 
-Ràng buộc: tại một thời điểm, mỗi nhóm có nhiều nhất một dòng "Điều phối" đang hiệu lực.
+Ràng buộc:
+- Một nhóm có thể có nhiều Điều phối cùng lúc; mọi Điều phối đang hiệu lực đều duyệt cấp 1 (F03-04).
+- Không có hai dòng chưa thu hồi cùng (`subjectGroup`, `lecturer`, `memberRole`) chồng thời hạn (US-009 AC3).
+- Dòng `COORDINATOR` phải nằm trọn trong thời hạn của một dòng `MEMBER` chưa thu hồi của cùng người, cùng nhóm (US-010 AC3).
+- Dòng còn hiệu lực = chưa thu hồi, `validFrom` ≤ hôm nay ≤ `validTo` (hoặc `validTo` trống), **và** nhóm đang `ACTIVE`.
+- Không xóa, không kéo dài tại chỗ: "kết thúc" chỉ đặt hoặc rút ngắn `validTo`; kéo dài = thêm dòng mới. Kết thúc dòng `MEMBER` thì các dòng `COORDINATOR` bên trong kết thúc theo (thu hồi nếu chưa bắt đầu). Thu hồi dòng `MEMBER` bị từ chối khi còn dòng `COORDINATOR` dựa vào.
 
 ### `ProgramDirectorAssignment` — SRS: PhanCongGiamDoc
 
@@ -156,8 +171,18 @@ Giám đốc CTĐT phụ trách 1..n chương trình (FR-08, FR-26).
 |---|---|---|---|---|
 | director | giamDoc | → `User` | C | |
 | program | chuongTrinh | → `Program` | C | |
-| startDate | ngayBatDau | Ngày | C | |
-| endDate | ngayKetThuc | Ngày | K | |
+| validFrom | ngayBatDau | Ngày | C | Tên SRS `startDate`; đổi tên để dùng chung quy tắc thời hạn với `SubjectGroupMember` |
+| validTo | ngayKetThuc | Ngày | K | Tên SRS `endDate`. Trống = không thời hạn |
+| ⊕ assignedBy | — | → `User` | K | R1 phân công |
+| ⊕ revokedAt | — | Thời điểm | K | Thu hồi dòng nhập nhầm |
+| ⊕ revokedBy | — | → `User` | K | |
+
+Ràng buộc (F06-06, US-020):
+- Một chương trình có thể có nhiều Giám đốc CTĐT cùng lúc; mọi người đang hiệu lực đều duyệt cấp 2.
+- Không có hai dòng chưa thu hồi cùng (`program`, `director`) chồng thời hạn. Người được phân công phải là tài khoản đang hoạt động.
+- Dòng còn hiệu lực = chưa thu hồi, `validFrom` ≤ hôm nay ≤ `validTo` (hoặc `validTo` trống), **và** chương trình đang `ACTIVE`. Phạm vi R3 tính từ các dòng này ở mỗi yêu cầu.
+- Không xóa, không kéo dài tại chỗ: "kết thúc" chỉ đặt hoặc rút ngắn `validTo`; kéo dài = thêm dòng mới. Dòng hết hạn vẫn hiện trong lịch sử.
+- Chỉ R1 phân công, kết thúc, thu hồi.
 
 ### `ApprovalDelegation` — SRS: UyQuyenDuyet
 
@@ -182,17 +207,19 @@ Học phần trong danh mục dùng chung (FR-11..16). Không gắn phiên bản
 
 | Tên lập trình | Tên SRS | Kiểu | BB | Mô tả, ràng buộc |
 |---|---|---|---|---|
-| courseCode | maHocPhan | Chuỗi | C | Ví dụ 3190111 |
+| courseCode | maHocPhan | Chuỗi | C | Ví dụ 3190111. Cắt khoảng trắng, viết hoa khi ghi; không sửa được sau khi tạo (F04-04) |
 | courseName | tenHocPhan | Chuỗi | C | Tên tiếng Việt (FR-13) |
 | englishName | tenTiengAnh | Chuỗi | K | |
 | credits | soTinChi | Số thực | C | ≥ 0; nhận 0 và số lẻ như 2.5 (BR-01) |
 | ownerFaculty | khoaPhuTrach | → `OrgUnit` | C | Có thể là khoa khác (FR-05) |
-| ownerGroup | nhomPhuTrach | → `SubjectGroup` | K | Trống với học phần của khoa khác |
+| ownerGroup | nhomPhuTrach | → `SubjectGroup` | K | Trống với học phần của khoa khác. Khi có, phải là nhóm đang hoạt động thuộc chính `ownerFaculty` |
 | courseType | loaiHocPhan | Liệt kê | C | `THEORY` Lý thuyết · `PRACTICE` Thực hành · `LAB` Thí nghiệm · `PROJECT` Đồ án · `CAPSTONE` Đồ án tốt nghiệp · `INTERNSHIP` Thực tập · `CONDITIONAL` Học phần điều kiện |
-| status | trangThai | Liệt kê | C | `ACTIVE` Đang sử dụng · `DISCONTINUED` Ngừng mở lớp · `CANCELLED` Đã hủy. "Ngừng mở lớp" đòi một quan hệ QH5 trỏ tới học phần thay thế (FR-15) |
+| status | trangThai | Liệt kê | C | `ACTIVE` Đang sử dụng · `DISCONTINUED` Ngừng mở lớp · `CANCELLED` Đã hủy. "Ngừng mở lớp" đòi một quan hệ QH5 trỏ tới học phần thay thế đang sử dụng (FR-15). "Đã hủy" là trạng thái cuối, chỉ cho học phần chưa từng nằm trong phiên bản đã ban hành và chưa có kết quả học tập; "Ngừng mở lớp" mở lại được (F04-02). Chỉ R1 đổi trạng thái |
 | ⊕ equivalenceGroup | — | → `EquivalentCourseGroup` | K | Một học phần thuộc nhiều nhất một nhóm (M-4) |
 
 Duy nhất: `courseCode`.
+
+Quyền sửa (F04-01, F04-05): học phần của khoa khác chỉ R1 sửa; Khoa CNTT chỉ đề xuất. Học phần đã nằm trong một phiên bản không còn Nháp thì thông tin danh mục chỉ sửa qua đề xuất thay đổi; trước đó sửa trực tiếp theo ô quyền `course.edit`. Học phần "khoa khác" = khoa phụ trách khác `KHOA_CNTT`.
 
 ### `CourseRelation` — SRS: QuanHeHocPhan
 
@@ -203,9 +230,11 @@ Quan hệ có hướng giữa hai học phần ở cấp danh mục (FR-18..20).
 | sourceCourse | hocPhanNguon | → `Course` | C | Học phần phải học trước / đạt trước / học cùng; hoặc học phần ngừng mở lớp (QH5) |
 | targetCourse | hocPhanDich | → `Course` | C | Khác `sourceCourse` |
 | relationType | loaiQuanHe | Liệt kê | C | `PRIOR` QH1 Học trước · `PREREQUISITE` QH2 Tiên quyết · `COREQUISITE` QH3 Song hành · `REPLACEMENT` QH5 Thay thế |
-| minScore | nguongDiem | Số thực | K | "Điều kiện điểm kèm theo"; chỉ dùng với QH2 (FR-19). Xem E-1 |
+| minScore | nguongDiem | Số thập phân (4,2) | K | "Điều kiện điểm kèm theo"; chỉ dùng với QH2 (FR-19); thang 4, từ 0 đến 4 (F05-03, DEC-11). Trống = không yêu cầu điểm; khi đó lấy `minStudiedScore` của mục khung (F05-02). Xem E-1 |
 
-Duy nhất: (`sourceCourse`, `targetCourse`, `relationType`). Ràng buộc: đồ thị QH1 và QH2 không có chu trình (BR-11).
+Duy nhất: (`sourceCourse`, `targetCourse`, `relationType`). Ràng buộc: `sourceCourse` khác `targetCourse`; không quan hệ với học phần Đã hủy; đồ thị QH1 và QH2 không có chu trình (BR-11) — QH3 được khai báo cả hai chiều, QH3 và QH5 không xét chu trình (F05-04). Khi báo chu trình, thông báo nêu đường đi của vòng theo mã học phần.
+
+Quyền sửa: quan hệ thuộc về học phần đích với QH1, QH2, QH3 và học phần nguồn với QH5; phạm vi và đường sửa (trực tiếp hay qua đề xuất) xét theo học phần đó, như thông tin danh mục của `Course`. Không gỡ được quan hệ QH5 cuối cùng còn hiệu lực của một học phần Ngừng mở lớp.
 
 ### `EquivalentCourseGroup` — SRS: NhomHocPhanTuongDuong
 
@@ -216,7 +245,7 @@ Nhóm học phần thay thế được cho nhau khi xét tốt nghiệp (FR-21, 
 | groupCode | maNhom | Chuỗi | C | |
 | note | ghiChu | Chuỗi | K | |
 
-Duy nhất: `groupCode`.
+Duy nhất: `groupCode` (lưu đã cắt khoảng trắng, chữ hoa). Ràng buộc: ít nhất 2 học phần; mỗi học phần thuộc nhiều nhất một nhóm — thêm học phần đã thuộc nhóm khác bị chặn và đề nghị gộp hai nhóm (F05-01). Bớt thành viên khi còn 2 bị chặn; kết thúc nhóm bằng "giải thể". Chỉ R1 tạo, sửa, gộp, giải thể; sửa trực tiếp kể cả sau ban hành vì nhóm nằm ngoài ảnh chụp phiên bản (M-4, E-11).
 
 ---
 
@@ -234,7 +263,9 @@ Danh tính của một chương trình. Phần mô tả nằm ở `ProgramVersio
 | status | trangThai | Liệt kê | C | `ACTIVE` Đang sử dụng · `INACTIVE` Ngừng sử dụng. Cấm xóa cứng (EC-50) |
 | ⊕ clonedFrom | — | → `ProgramVersion` | K | Phiên bản được dùng làm nền khi nhân bản (FR-25) |
 
-Duy nhất: `programCode`.
+Duy nhất: `programCode` (cắt khoảng trắng; không sửa được sau khi tạo).
+
+Quyền sửa (F06-02, F06-03): chỉ R1 tạo chương trình, đổi trạng thái và nhân bản. Thông tin mô tả (trên phiên bản Nháp) và `degreeLevel` sửa trực tiếp theo ô quyền `program.editInfo` (R1 toàn trường, R3 chương trình mình phụ trách) cho đến khi chương trình có phiên bản rời Nháp; sau đó chỉ sửa qua đề xuất thay đổi. Chương trình mới luôn kèm một phiên bản Nháp. Nhân bản tạo chương trình mới với phiên bản Nháp chép từ phiên bản nguồn, chưa có Giám đốc CTĐT.
 
 ### `ProgramVersion` — SRS: PhienBanCTDT
 
@@ -262,8 +293,14 @@ Một phiên bản của chương trình. Bất biến từ khi rời trạng th
 | ⊕ correctionReason | — | Chuỗi | K | Bắt buộc khi có `correctionOf` (DEC-08) |
 | ⊕ sourceRequest | — | → `ChangeRequest` | K | Trống ở phiên bản khởi tạo và bản đính chính. Xem E-3 |
 | ⊕ creditMismatchReason | — | Chuỗi | K | Lý do ghi đè khi tổng tín chỉ tính được khác số khai báo (FR-78) |
+| ⊕ creditMismatchCompulsoryGap | — | Số thực | K | Chênh lệch tín chỉ bắt buộc (tính từ khung − khai báo) tại lúc chấp nhận; có thể âm |
+| ⊕ creditMismatchElectiveGap | — | Số thực | K | Chênh lệch tín chỉ tự chọn tại lúc chấp nhận; có thể âm |
+| ⊕ creditMismatchAcceptedBy | — | → `User` | K | Người chấp nhận chênh lệch (US-030 AC3) |
+| ⊕ creditMismatchAcceptedAt | — | Thời điểm | K | Thời điểm chấp nhận |
 
-Duy nhất: (`program`, `versionNumber`). Ràng buộc: mỗi chương trình có nhiều nhất một phiên bản Đang hiệu lực (BR-22) và nhiều nhất một phiên bản Nháp. Khóa áp dụng ghi ở `CohortVersion`.
+Năm cột `creditMismatch*` hoặc cùng có giá trị, hoặc cùng rỗng. Việc chấp nhận chỉ còn hiệu lực khi chênh lệch bắt buộc và tự chọn hiện tại đúng bằng hai giá trị đã lưu; chênh lệch đổi thì cảnh báo hiện lại mà không cần xóa (US-030 AC4). Chỉ chấp nhận trên phiên bản Nháp; nhân bản chương trình không chép các cột này. Kết quả kiểm tra nhất quán không lưu (F08-03), chỉ việc chấp nhận được lưu.
+
+Duy nhất: (`program`, `versionNumber`). Ràng buộc: mỗi chương trình có nhiều nhất một phiên bản Đang hiệu lực (BR-22) và nhiều nhất một phiên bản Nháp — cả hai giữ bằng chỉ mục duy nhất có điều kiện. Số tín chỉ lưu Số thập phân (5,2). Khóa áp dụng ghi ở `CohortVersion`.
 
 ### `CurriculumItem` — SRS: DongKhungCTDT
 
@@ -272,7 +309,7 @@ Một dòng của khung chương trình, tương ứng một dòng trong bảng 
 | Tên lập trình | Tên SRS | Kiểu | BB | Mô tả, ràng buộc |
 |---|---|---|---|---|
 | programVersion | phienBan | → `ProgramVersion` | C | |
-| sortOrder | thuTu | Số nguyên | C | Cột TT |
+| sortOrder | thuTu | Số nguyên | C | Thứ tự trong một học kỳ (từ 1). Cột TT của Excel không lưu: suy ra khi đọc theo (`plannedSemester`, `sortOrder`) |
 | plannedSemester | hocKyDuKien | Số nguyên | C | 1..`semesterCount` của phiên bản (EC-08) |
 | course | hocPhan | → `Course` | C | |
 | blockSymbol | kyHieu | Chuỗi | K | Mã khối kiến thức, giữ nguyên giá trị gốc (DEC-05). Xem E-2 |
@@ -280,8 +317,8 @@ Một dòng của khung chương trình, tương ứng một dòng trong bảng 
 | electiveGroup | nhomTuChon | → `ElectiveGroup` | K | Chỉ có khi `isElective` (EC-05); cùng phiên bản với dòng khung |
 | htDa | htDA | Logic | C | Cột HT ĐA. Lưu nguyên trạng, chưa gắn logic (Q-04) |
 | tqDa | tqDA | Logic | C | Cột TQ ĐA. Như trên |
-| minStudiedScore | diemHoc | Số thực | K | Cột Điểm học. Giá trị mẫu 3 · 3.5 · 4 |
-| minTransferScore | diemChuyen | Số thực | K | Cột Điểm chuyển |
+| minStudiedScore | diemHoc | Số thực | K | Cột Điểm học, thang 4, `Decimal(4,2)`. Giá trị mẫu 3 · 3.5 · 4 |
+| minTransferScore | diemChuyen | Số thực | K | Cột Điểm chuyển, thang 4, `Decimal(4,2)` |
 | note | ghiChu | Chuỗi | K | |
 | ⊕ syllabus | — | → `Syllabus` | K | Bản đề cương được ghim (M-1); phải thuộc đúng `course`. Bắt buộc khi phiên bản rời Nháp (EC-44) |
 | ⊕ courseNameSnapshot | — | Chuỗi | K | Tên học phần tại thời điểm ban hành (M-5). Ghi khi phiên bản rời Nháp |
@@ -298,10 +335,10 @@ Nhóm học phần tự chọn của một phiên bản (FR-29).
 | programVersion | phienBan | → `ProgramVersion` | C | |
 | groupCode | maNhom | Chuỗi | C | |
 | groupName | tenNhom | Chuỗi | C | |
-| minCredits | soTinChiToiThieu | Số thực | K | |
-| minCourses | soHocPhanToiThieu | Số nguyên | K | |
+| minCredits | soTinChiToiThieu | Số thực | K | `Decimal(5,2)` như tín chỉ học phần |
+| minCourses | soHocPhanToiThieu | Số nguyên | K | ≥ 1 |
 
-Duy nhất: (`programVersion`, `groupCode`). Ràng buộc: có ít nhất một trong hai mức tối thiểu. Tổng tín chỉ các học phần trong nhóm được phép lớn hơn mức tối thiểu (BR-04).
+Duy nhất: (`programVersion`, `groupCode`). Ràng buộc: có ít nhất một trong hai mức tối thiểu; có cả hai thì sinh viên phải đạt cả hai. Tổng tín chỉ các học phần trong nhóm được phép lớn hơn mức tối thiểu (BR-04).
 
 ### `KnowledgeBlock` — SRS: KhoiKienThuc
 
@@ -313,20 +350,20 @@ Danh mục khối kiến thức. Xem E-2.
 | blockName | tenKhoi | Chuỗi | C | |
 | requiredCredits | soTinChiYeuCau | Số thực | K | |
 
-Duy nhất: `blockCode`.
+Duy nhất: `blockCode`. Danh mục dùng chung cho mọi chương trình, nạp bằng seed; ký hiệu trên dòng khung là chuỗi tự do, không khóa ngoại tới bảng này (F07-02).
 
 ### ⊕ `CurriculumRequisite`
 
-Ràng buộc học trước / tiên quyết / song hành của một dòng khung, chép từ `CourseRelation` khi ban hành (M-5). Ở phiên bản Nháp, bảng này tương ứng ba cột "HP cần học trước", "HP song hành", "Cần HP tiên quyết" của file Excel.
+Ràng buộc học trước / tiên quyết / song hành của một dòng khung (M-5). Chép từ `CourseRelation` của danh mục ngay khi thêm dòng vào khung (bỏ quan hệ thay thế và học phần nguồn đã hủy), sau đó sửa riêng cho khung này khi phiên bản còn Nháp; đóng băng cùng phiên bản khi ban hành. Bảng này tương ứng ba cột "HP cần học trước", "HP song hành", "Cần HP tiên quyết" của file Excel.
 
 | Tên lập trình | Tên SRS | Kiểu | BB | Mô tả, ràng buộc |
 |---|---|---|---|---|
 | curriculumItem | — | → `CurriculumItem` | C | Dòng của học phần đích |
 | sourceCourse | — | → `Course` | C | Có thể không nằm trong khung (EC-13) |
 | relationType | — | Liệt kê | C | `PRIOR` QH1 · `PREREQUISITE` QH2 · `COREQUISITE` QH3 |
-| minScore | — | Số thực | K | Chỉ dùng với QH2. Xem E-1 |
+| minScore | — | Số thực | K | Chỉ dùng với QH2, thang 4, `Decimal(4,2)`. Xem E-1 |
 
-Duy nhất: (`curriculumItem`, `sourceCourse`, `relationType`).
+Duy nhất: (`curriculumItem`, `sourceCourse`, `relationType`). Đồ thị học trước + tiên quyết gồm cạnh của danh mục và cạnh riêng của khung không được có chu trình (BR-11, EC-09).
 
 ### ⊕ `Cohort`
 
@@ -400,27 +437,25 @@ Duy nhất: (`syllabus`, `cloCode`).
 
 ### `CLOPLOMapping` — SRS: MaTranCLO_PLO
 
-Mức đóng góp của một CLO vào một PLO, khai báo theo cặp (chương trình, học phần) (FR-40, BR-19).
+Liên kết một CLO với một PLO, khai báo theo cặp (chương trình, học phần) (FR-40, BR-19). Không mang mức độ (F11-03).
 
 | Tên lập trình | Tên SRS | Kiểu | BB | Mô tả, ràng buộc |
 |---|---|---|---|---|
 | curriculumItem | dongKhung | → `CurriculumItem` | C | Cặp (phiên bản chương trình, học phần) |
 | clo | clo | → `CLO` | C | Thuộc bản đề cương mà `curriculumItem` đang ghim |
-| plo | plo | → `PLO` | C | Cùng phiên bản với `curriculumItem` |
-| contributionLevel | mucDoDongGop | Liệt kê | C | `I` · `R` · `M`, hoặc `1` · `2` · `3` (BR-21) |
+| plo | plo | → `PLO` | C | Cùng phiên bản với `curriculumItem`; phải có dòng `CoursePLOMapping` (`curriculumItem`, `plo`) |
 
-Duy nhất: (`curriculumItem`, `clo`, `plo`).
+Duy nhất: (`curriculumItem`, `clo`, `plo`). Xóa dòng `CoursePLOMapping` thì các dòng CLO–PLO của cùng (`curriculumItem`, `plo`) bị xóa theo.
 
 ### `CoursePLOMapping` — SRS: MaTranHP_PLO
 
-Mức đóng góp của một học phần vào một PLO, suy diễn từ `CLOPLOMapping` và ghi đè được (FR-41). Xem E-5.
+Học phần đóng góp vào PLO nào, với trọng số bao nhiêu, nhập trực tiếp theo chương trình (FR-41, F11-02). Xem E-5.
 
 | Tên lập trình | Tên SRS | Kiểu | BB | Mô tả, ràng buộc |
 |---|---|---|---|---|
 | curriculumItem | dongKhung | → `CurriculumItem` | C | |
 | plo | plo | → `PLO` | C | Cùng phiên bản với `curriculumItem` |
-| contributionLevel | mucDoDongGop | Liệt kê | C | Cùng thang với `CLOPLOMapping` |
-| ⊕ isOverridden | — | Logic | C | Có = người dùng nhập tay, không tính lại |
+| ⊕ weight | mucDoDongGop | Số thực | C | Thuộc (0, 1], hai chữ số thập phân (BR-21) |
 
 Duy nhất: (`curriculumItem`, `plo`).
 
@@ -448,7 +483,7 @@ Một bản đề cương của một học phần. Mỗi học phần có một
 | ⊕ sourceRequest | — | → `ChangeRequest` | K | Đề xuất sinh ra bản này |
 | ⊕ publishedAt | — | Thời điểm | K | |
 
-Duy nhất: (`course`, `revisionNumber`). Ràng buộc: mỗi học phần có nhiều nhất một bản Nháp và nhiều nhất một bản Đã ban hành. Phần "thông tin chung" của FR-45 lấy từ `Course`.
+Duy nhất: (`course`, `revisionNumber`). Ràng buộc: mỗi học phần có nhiều nhất một bản Nháp và nhiều nhất một bản Đã ban hành (chỉ mục duy nhất một phần theo `status`). Phần "thông tin chung" của FR-45 lấy từ `Course`. Các phần văn bản lưu HTML đã lọc theo danh sách thẻ cho phép. `failingScore` được tạo cùng F-12, `sourceRequest` cùng F-13.
 
 ### `WeeklyContent` — SRS: NoiDungTheoTuan
 
@@ -510,8 +545,9 @@ Bản đề cương đã ký, đính kèm theo bản đề cương (FR-47).
 |---|---|---|---|---|
 | syllabus | deCuong | → `Syllabus` | C | |
 | fileName | tenTep | Chuỗi | C | |
-| fileType | loaiTep | Liệt kê | C | `PDF` · `WORD` Word |
-| filePath | duongDan | Chuỗi | C | Đường dẫn lưu trữ |
+| fileType | loaiTep | Liệt kê | C | `PDF` · `DOCX` Word · `XLSX` Excel · `IMAGE` Ảnh (PNG, JPEG). Nhận diện theo đuôi tệp và chữ ký nội dung |
+| ⊕ sizeBytes | — | Số nguyên | C | Tối đa `ATTACHMENT_MAX_MB` (mặc định 20 MB) |
+| filePath | duongDan | Chuỗi | C | Đường dẫn tương đối dưới `FILES_ROOT`; duy nhất |
 | uploadedBy | nguoiTaiLen | → `User` | C | |
 | recordedAt | thoiDiem | Thời điểm | C | |
 
@@ -723,9 +759,23 @@ Một lần nhập Excel, kể cả lần chạy thử (FR-34, FR-101).
 | totalRows | tongDong | Số nguyên | C | |
 | successRows | soDongThanhCong | Số nguyên | C | |
 | errorRows | soDongLoi | Số nguyên | C | Khác 0 thì không ghi dòng nào (FR-35) |
-| status | trangThai | Liệt kê | C | `DRY_RUN` Chạy thử · `COMMITTED` Đã ghi · `ABORTED` Không ghi do lỗi |
+| status | trangThai | Liệt kê | C | ⊕ `VALIDATING` Đang chạy thử · `DRY_RUN` Chạy thử · ⊕ `COMMITTING` Đang ghi · `COMMITTED` Đã ghi · `ABORTED` Không ghi do lỗi. Hai trạng thái ⊕ là lúc tác vụ nền đang xử lý tệp (`state-diagrams.md` §8) |
+| ⊕ programId | — | → `Program` | K | Bắt buộc khi `importType` = `CURRICULUM`, để trống với loại khác; dùng để lọc lịch sử theo phạm vi chương trình |
+| ⊕ versionId | — | → `ProgramVersion` | K | Bản nháp nhận dữ liệu khi nhập khung; về rỗng nếu bản nháp đó bị xóa (bản nháp của đề xuất bị hủy), phiên nhập vẫn còn trong lịch sử |
 | ⊕ recordedAt | — | Thời điểm | C | |
-| ⊕ errorReport | — | JSON | K | Lỗi và cảnh báo theo từng dòng (FR-34) |
+| ⊕ finishedAt | — | Thời điểm | K | Lúc phiên rời trạng thái đang xử lý lần gần nhất |
+| ⊕ errorReport | — | JSON | K | Lỗi định dạng của tệp và lỗi, cảnh báo, lưu ý theo từng dòng (FR-34) |
+
+### ⊕ `ImportBatchFile`
+
+Tệp gốc của một phiên nhập, giữ 30 ngày để tải lại và để kiểm tra lại khi xác nhận ghi (F09-05). Tách khỏi `ImportBatch` để danh sách lịch sử không phải đọc nội dung tệp.
+
+| Tên lập trình | Tên SRS | Kiểu | BB | Mô tả, ràng buộc |
+|---|---|---|---|---|
+| batchId | — | → `ImportBatch` | C | Khóa chính; xóa phiên thì xóa tệp |
+| content | — | Nhị phân | C | Tối đa 5 MB |
+| sizeBytes | — | Số nguyên | C | |
+| expiresAt | — | Thời điểm | C | Hết hạn thì tác vụ dọn hằng ngày xóa dòng này; phiên vẫn còn, không tải lại hay xác nhận ghi được nữa |
 
 ### `SyncLog` — SRS: LogDongBo
 
@@ -758,7 +808,7 @@ Duy nhất: `clientName`.
 
 ## 9. Ma trận quyền ban đầu
 
-Các dòng `Permission` và `RolePermission` nạp sẵn khi khởi tạo (M-10). 40 quyền: 28 chép từ SRS mục 3.4, 12 bổ sung cho chức năng mà ma trận SRS không có dòng (E-12).
+Các dòng `Permission` và `RolePermission` nạp sẵn khi khởi tạo (M-10). 41 quyền: 28 chép từ SRS mục 3.4, 13 bổ sung cho chức năng mà ma trận SRS không có dòng (E-12, F02-02). Nạp lại không tạo lại ô R1 đã xóa: ô chỉ được tạo cùng lúc quyền của nó được tạo lần đầu.
 
 | Ký hiệu | `mode` | `scope` |
 |---|---|---|
@@ -777,6 +827,7 @@ Cột Nguồn: "3.4" là dòng cùng tên của SRS mục 3.4; mã khác là yê
 | subjectGroup.view | Xem nhóm chuyên môn và thành viên | G-2 | X | P | – | P | – | – |
 | user.manage | Quản lý người dùng, gán vai trò | 3.4 | X | – | – | – | – | – |
 | permission.view | Xem ma trận quyền | M-10 | X | – | – | – | – | – |
+| permission.manage | Sửa ma trận quyền của vai trò có sẵn | F02-02 | X | – | – | – | – | – |
 | director.assign | Phân công Giám đốc CTĐT | 3.4 | X | – | – | – | – | – |
 | delegation.manage | Ủy quyền phê duyệt | FR-09, US-114 | X | – | P | P | – | – |
 | integrationClient.manage | Quản lý bên tích hợp và khóa truy cập | FR-94, US-098 | X | – | – | – | – | – |
@@ -790,7 +841,7 @@ Cột Nguồn: "3.4" là dòng cùng tên của SRS mục 3.4; mã khác là yê
 | program.view | Xem CTĐT | 3.4, G-8 | X | X | X | X | X | P |
 | program.editInfo | Sửa thông tin CTĐT | 3.4 | X | – | P | – | – | – |
 | program.clone | Nhân bản CTĐT | FR-25, US-022 | X | – | – | – | – | – |
-| curriculum.edit | Sửa khung chương trình | 3.4 | X | – | Đ(P) | Đ | Đ | – |
+| curriculum.edit | Sửa khung chương trình | 3.4 | X | – | Đ(P) | Đ(P) | Đ(P) | – |
 | curriculum.importExportExcel | Nhập/xuất Excel khung chương trình | 3.4 | X | – | P | – | – | – |
 | version.assignCohort | Gán phiên bản cho khóa tuyển sinh | FR-74, US-080 | X | – | – | – | – | – |
 | **Chuẩn đầu ra** | | | | | | | | |

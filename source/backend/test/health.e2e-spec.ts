@@ -1,33 +1,25 @@
-import type { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import type { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import type { StartedRedisContainer } from '@testcontainers/redis';
 import request from 'supertest';
-import { configureApp } from '../src/app.setup.js';
 import { startPostgres, startRedis } from './containers.js';
+import { setAppEnv } from './test-env.js';
+import { createTestApp } from './test-app.js';
 
 describe('GET /api/health', () => {
   let postgres: StartedPostgreSqlContainer;
   let redis: StartedRedisContainer;
-  let app: INestApplication;
+  let app: NestExpressApplication;
 
   beforeAll(async () => {
     [postgres, redis] = await Promise.all([
       startPostgres({ vietnameseCollation: true }),
       startRedis(),
     ]);
-    process.env.DATABASE_URL = postgres.getConnectionUri();
-    process.env.REDIS_HOST = redis.getHost();
-    process.env.REDIS_PORT = String(redis.getPort());
+    setAppEnv(postgres, redis);
 
     // Imported late: ConfigModule.forRoot validates the environment while AppModule is being decorated.
-    const { AppModule } = await import('../src/app.module.js');
-    const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-    app = moduleRef.createNestApplication();
-    configureApp(app);
-    await app.init();
+    app = await createTestApp();
   });
 
   afterAll(async () => {

@@ -1,15 +1,121 @@
-import { createBrowserRouter, Navigate } from 'react-router';
-import { AppLayout } from './layout/AppLayout';
-import { HealthPage } from './pages/HealthPage';
+import { lazy } from 'react';
+import { createBrowserRouter } from 'react-router';
+import { LoginPage } from './features/auth/pages/LoginPage';
 import { ROUTES } from './routes';
+import { RequireAuth } from './shared/auth/RequireAuth';
+import { AppLayout } from './shared/layout/AppLayout';
+import { RequirePermission } from './shared/auth/RequirePermission';
+import { PERMISSIONS } from './shared/auth/permissions';
+
+const UserListPage = lazy(() =>
+  import('./features/users/pages/UserListPage').then((module) => ({
+    default: module.UserListPage,
+  })),
+);
+const UserDetailPage = lazy(() =>
+  import('./features/users/pages/UserDetailPage').then((module) => ({
+    default: module.UserDetailPage,
+  })),
+);
+const PermissionMatrixPage = lazy(() =>
+  import('./features/permissions/pages/PermissionMatrixPage').then(
+    (module) => ({ default: module.PermissionMatrixPage }),
+  ),
+);
+const OrgUnitTreePage = lazy(() =>
+  import('./features/org-units/pages/OrgUnitTreePage').then((module) => ({
+    default: module.OrgUnitTreePage,
+  })),
+);
+const SubjectGroupListPage = lazy(() =>
+  import('./features/subject-groups/pages/SubjectGroupListPage').then(
+    (module) => ({ default: module.SubjectGroupListPage }),
+  ),
+);
+const SubjectGroupDetailPage = lazy(() =>
+  import('./features/subject-groups/pages/SubjectGroupDetailPage').then(
+    (module) => ({ default: module.SubjectGroupDetailPage }),
+  ),
+);
+
+const HomePage = lazy(() =>
+  import('./features/home/pages/HomePage').then((module) => ({
+    default: module.HomePage,
+  })),
+);
+const AccountPage = lazy(() =>
+  import('./features/auth/pages/AccountPage').then((module) => ({
+    default: module.AccountPage,
+  })),
+);
+const HealthPage = lazy(() =>
+  import('./features/health/pages/HealthPage').then((module) => ({
+    default: module.HealthPage,
+  })),
+);
 
 export const router = createBrowserRouter([
+  { path: ROUTES.login, element: <LoginPage /> },
   {
-    path: ROUTES.home,
-    element: <AppLayout />,
+    element: <RequireAuth />,
     children: [
-      { index: true, element: <Navigate to={ROUTES.health} replace /> },
-      { path: ROUTES.health, element: <HealthPage /> },
+      {
+        path: ROUTES.home,
+        element: <AppLayout />,
+        children: [
+          { index: true, element: <HomePage /> },
+          { path: ROUTES.account, element: <AccountPage /> },
+          { path: ROUTES.health, element: <HealthPage /> },
+          {
+            path: ROUTES.users,
+            element: (
+              <RequirePermission code={PERMISSIONS.userManage}>
+                <UserListPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.userDetail,
+            element: (
+              <RequirePermission code={PERMISSIONS.userManage}>
+                <UserDetailPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.permissionMatrix,
+            element: (
+              <RequirePermission code={PERMISSIONS.permissionView}>
+                <PermissionMatrixPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.orgUnits,
+            element: (
+              <RequirePermission code={PERMISSIONS.orgUnitManage}>
+                <OrgUnitTreePage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.subjectGroups,
+            element: (
+              <RequirePermission code={PERMISSIONS.subjectGroupView}>
+                <SubjectGroupListPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.subjectGroupDetail,
+            element: (
+              <RequirePermission code={PERMISSIONS.subjectGroupView}>
+                <SubjectGroupDetailPage />
+              </RequirePermission>
+            ),
+          },
+        ],
+      },
     ],
   },
 ]);

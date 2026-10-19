@@ -276,26 +276,35 @@ Một lần nhập Excel, theo quy trình của SRS mục 6.3.
 
 ```mermaid
 stateDiagram-v2
+    state "Đang chạy thử" as VALIDATING
     state "Chạy thử" as DRY_RUN
+    state "Đang ghi" as COMMITTING
     state "Đã ghi" as COMMITTED
     state "Không ghi do lỗi" as ABORTED
 
-    [*] --> DRY_RUN : chạy thử, không có dòng lỗi
-    [*] --> ABORTED : chạy thử, có dòng lỗi
-    DRY_RUN --> COMMITTED : xác nhận ghi
-    DRY_RUN --> ABORTED : xác nhận ghi nhưng phát sinh lỗi
+    [*] --> ABORTED : tệp sai định dạng
+    [*] --> VALIDATING : tải tệp lên
+    VALIDATING --> DRY_RUN : không có dòng lỗi
+    VALIDATING --> ABORTED : có dòng lỗi, hoặc xử lý hỏng
+    DRY_RUN --> COMMITTING : xác nhận ghi
+    COMMITTING --> COMMITTED : kiểm tra lại không lỗi, đã ghi
+    COMMITTING --> ABORTED : kiểm tra lại phát sinh lỗi, hoặc ghi hỏng
     COMMITTED --> [*]
     ABORTED --> [*]
 ```
 
 | # | Từ | Sự kiện | Điều kiện | Đến | Tác nhân | Nguồn |
 |---|---|---|---|---|---|---|
-| NL-01 | `[*]` | Tải tệp lên và chạy thử | Tệp đúng định dạng mẫu; `errorRows` = 0. Dòng mức CẢNH BÁO không chặn. Chưa ghi dữ liệu nghiệp vụ | `DRY_RUN` | R1; R3 trong phạm vi phân công | FR-34, SRS mục 6.3, UC-72 |
-| NL-02 | `[*]` | Tải tệp lên và chạy thử | Tệp sai định dạng (EC-47), hoặc `errorRows` > 0 (EC-45, EC-46, chu trình tiên quyết). `errorReport` ghi từng dòng | `ABORTED` | R1; R3 trong phạm vi phân công | FR-34, FR-35, EC-45, EC-46, EC-47 |
-| NL-03 | `DRY_RUN` | Xác nhận ghi | Hệ thống kiểm tra lại toàn bộ tệp (UC-75) và vẫn không có lỗi; ghi toàn bộ trong một giao dịch | `COMMITTED` | Người đã chạy thử | FR-35, FR-101, UC-73 |
-| NL-04 | `DRY_RUN` | Xác nhận ghi | Kiểm tra lại phát sinh lỗi vì dữ liệu nền đã đổi sau lúc chạy thử, hoặc việc ghi hỏng giữa chừng; hoàn tác toàn bộ | `ABORTED` | Hệ thống | FR-35, S-12 |
+| NL-01 | `[*]` | Tải tệp lên | Tệp đúng định dạng mẫu: đủ cột bắt buộc, có dòng dữ liệu. Tệp được lưu, tác vụ nền bắt đầu chạy thử | `VALIDATING` | R1; R3 trong phạm vi phân công | FR-34, SRS mục 6.3, UC-72 |
+| NL-02 | `[*]` | Tải tệp lên | Tệp sai định dạng (EC-47): báo ngay tên cột sai, không kiểm từng dòng. `errorReport` ghi lỗi định dạng | `ABORTED` | R1; R3 trong phạm vi phân công | FR-34, EC-47 |
+| NL-03 | `VALIDATING` | Chạy thử xong | `errorRows` = 0. Dòng mức CẢNH BÁO, LƯU Ý không chặn. Chưa ghi dữ liệu nghiệp vụ | `DRY_RUN` | Hệ thống | FR-34 |
+| NL-04 | `VALIDATING` | Chạy thử xong | `errorRows` > 0 (EC-45, EC-46, chu trình tiên quyết), hoặc tác vụ nền hỏng sau số lần thử lại. `errorReport` ghi từng dòng | `ABORTED` | Hệ thống | FR-34, FR-35, EC-45, EC-46 |
+| NL-05 | `DRY_RUN` | Xác nhận ghi | Người đã chạy thử; tệp gốc còn lưu; với khung chương trình, phiên bản vẫn là bản nháp của chương trình chưa từng ban hành | `COMMITTING` | Người đã chạy thử | FR-35, UC-73 |
+| NL-06 | `COMMITTING` | Ghi xong | Hệ thống kiểm tra lại toàn bộ tệp (UC-75) và vẫn không có lỗi; ghi toàn bộ trong một giao dịch | `COMMITTED` | Hệ thống | FR-35, FR-101 |
+| NL-07 | `COMMITTING` | Ghi không thành | Kiểm tra lại phát sinh lỗi vì dữ liệu nền đã đổi sau lúc chạy thử, phiên bản không còn là bản nháp, hoặc việc ghi hỏng sau số lần thử lại; hoàn tác toàn bộ, `errorReport` ghi báo cáo mới | `ABORTED` | Hệ thống | FR-35, S-12 |
+| NL-08 | `VALIDATING`, `COMMITTING` | Dọn hằng ngày | Phiên đứng ở trạng thái đang xử lý quá một giờ (tác vụ nền đã mất) | `ABORTED` | Hệ thống | F09-05 |
 
-Phiên Chạy thử không được xác nhận thì giữ nguyên Chạy thử và vẫn nằm trong lịch sử phiên nhập (FR-101).
+Phiên Chạy thử không được xác nhận thì giữ nguyên Chạy thử và vẫn nằm trong lịch sử phiên nhập (FR-101). Sau 30 ngày tệp gốc bị xóa; phiên vẫn còn nhưng không xác nhận ghi được nữa (F09-05).
 
 ---
 

@@ -12,15 +12,19 @@ Cần Node.js 22 (≥ 22.22), pnpm 10, Docker.
 4. `pnpm dev` — API ở `http://localhost:3000/api`, tài liệu API ở `http://localhost:3000/api/docs`.
 5. Kiểm tra: `GET /api/health` trả `200 {"status":"ok","database":"up","redis":"up"}`.
 
-| Biến           | Giá trị mẫu                                  | Bắt buộc                      |
-| -------------- | -------------------------------------------- | ----------------------------- |
-| `NODE_ENV`     | `development`                                | Không, mặc định `development` |
-| `PORT`         | `3000`                                       | Không, mặc định `3000`        |
-| `DATABASE_URL` | `postgresql://ctdt:ctdt@localhost:5432/ctdt` | Có                            |
-| `REDIS_HOST`   | `localhost`                                  | Không, mặc định `localhost`   |
-| `REDIS_PORT`   | `6379`                                       | Không, mặc định `6379`        |
+| Biến                   | Giá trị mẫu                                  | Bắt buộc                            |
+| ---------------------- | -------------------------------------------- | ----------------------------------- |
+| `NODE_ENV`             | `development`                                | Không, mặc định `development`       |
+| `PORT`                 | `3000`                                       | Không, mặc định `3000`              |
+| `DATABASE_URL`         | `postgresql://ctdt:ctdt@localhost:5432/ctdt` | Có                                  |
+| `REDIS_HOST`           | `localhost`                                  | Không, mặc định `localhost`         |
+| `REDIS_PORT`           | `6379`                                       | Không, mặc định `6379`              |
+| `SESSION_SECRET`       | chuỗi ngẫu nhiên ≥ 32 ký tự                  | Có                                  |
+| `SESSION_IDLE_MINUTES` | `60`                                         | Không, mặc định `60`                |
+| `SEED_ADMIN_USERNAME`  | `admin`                                      | Chỉ khi chạy seed, mặc định `admin` |
+| `SEED_ADMIN_PASSWORD`  | mật khẩu tạm ≥ 8 ký tự, có chữ và số         | Chỉ khi chạy seed                   |
 
-Biến sai kiểu hoặc thiếu `DATABASE_URL` thì ứng dụng dừng ngay khi khởi động (`src/config/env.validation.ts`).
+Biến sai kiểu hoặc thiếu giá trị bắt buộc thì ứng dụng dừng ngay khi khởi động (`src/shared/config/env.validation.ts`).
 
 ## Lệnh
 

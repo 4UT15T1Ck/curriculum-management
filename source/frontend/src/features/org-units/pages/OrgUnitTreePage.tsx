@@ -1,0 +1,106 @@
+import { useMemo, useState } from 'react';
+import { Button, Card, Col, Result, Row, Skeleton, Tag, Tree } from 'antd';
+import type { DataNode } from 'antd/es/tree';
+import { Link, generatePath } from 'react-router';
+import { ROUTES } from '../../../routes';
+import { useOrgUnits } from '../../../shared/org-units/useOrgUnits';
+import { useSubjectGroups } from '../../../shared/subject-groups/useSubjectGroups';
+import type { OrgUnit } from '../../../shared/org-units/orgUnits';
+import { buildOrgTree, type OrgTreeNode } from '../utils/buildOrgTree';
+import { UNIT_TYPE_LABELS } from '../constants/orgUnitLabels';
+import { OrgUnitDetailPanel } from '../components/OrgUnitDetailPanel';
+import { OrgUnitFormModal } from '../components/OrgUnitFormModal';
+
+type Editor = { mode: 'create' | 'edit'; parent?: OrgUnit; unit?: OrgUnit };
+function toDataNode(
+  node: OrgTreeNode,
+  select: (unit: OrgUnit) => void,
+): DataNode {
+  if (node.kind === 'group')
+    return {
+      key: node.key,
+      title: (
+        <Link
+          to={generatePath(ROUTES.subjectGroupDetail, {
+            groupId: node.group.id,
+          })}
+        >
+          {node.group.groupName} <Tag>Nhóm chuyên môn</Tag>
+        </Link>
+      ),
+      children: [],
+    };
+  return {
+    key: node.key,
+    title: (
+      <span onClick={() => select(node.unit)}>
+        {node.unit.unitName} <Tag>{UNIT_TYPE_LABELS[node.unit.unitType]}</Tag>
+        {node.unit.status === 'INACTIVE' && <Tag>Ngừng hoạt động</Tag>}
+      </span>
+    ),
+    children: node.children.map((child) => toDataNode(child, select)),
+  };
+}
+export function OrgUnitTreePage() {
+  const units = useOrgUnits();
+  const groups = useSubjectGroups();
+  const [selected, setSelected] = useState<OrgUnit | null>(null);
+  const [editor, setEditor] = useState<Editor | null>(null);
+  const tree = useMemo(
+    () => buildOrgTree(units.data ?? [], groups.data ?? []),
+    [units.data, groups.data],
+  );
+  if (units.isPending || groups.isPending) return <Skeleton active />;
+  if (units.isError)
+    return <Result status="error" title="Không tải được cây đơn vị" />;
+  const root = units.data?.find((unit) => unit.unitType === 'UNIVERSITY');
+  return (
+    <>
+      <Row gutter={16}>
+        <Col span={12}>
+          <Card
+            title="Cây đơn vị"
+            extra={
+              <Button
+                type="primary"
+                onClick={() => setEditor({ mode: 'create', parent: root })}
+              >
+                Thêm đơn vị
+              </Button>
+            }
+          >
+            <Tree
+              defaultExpandAll
+              blockNode
+              treeData={tree.map((node) => toDataNode(node, setSelected))}
+              onSelect={(_selectedKeys, info) => {
+                const found = units.data?.find(
+                  (unit) => unit.id === String(info.node.key),
+                );
+                if (found) setSelected(found);
+              }}
+            />
+          </Card>
+        </Col>
+        <Col span={12}>
+          {selected ? (
+            <OrgUnitDetailPanel
+              unit={selected}
+              onEdit={(unit) => setEditor({ mode: 'edit', unit })}
+              onAddChild={(parent) => setEditor({ mode: 'create', parent })}
+            />
+          ) : (
+            <Card>Chọn một đơn vị</Card>
+          )}
+        </Col>
+      </Row>
+      <OrgUnitFormModal
+        open={editor !== null}
+        mode={editor?.mode ?? 'create'}
+        parent={editor?.parent}
+        unit={editor?.unit}
+        onClose={() => setEditor(null)}
+      />
+    </>
+  );
+}

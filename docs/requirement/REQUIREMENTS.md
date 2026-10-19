@@ -317,8 +317,8 @@ Quyền trong hệ thống được xác định bởi cặp **(Vai trò × Ph�
 |---|---|
 | `PLO` | Chuẩn đầu ra chương trình, thuộc Chương trình đào tạo — mã PLO, mô tả tiếng Việt, mô tả tiếng Anh, nhóm năng lực, thứ tự |
 | `CLO` | Chuẩn đầu ra học phần, thuộc **Đề cương chi tiết** — mã CLO, mô tả tiếng Việt, mô tả tiếng Anh, mức nhận thức, thứ tự |
-| `MaTranCLO_PLO` | **Chương trình đào tạo, học phần, CLO, PLO, mức độ đóng góp** |
-| `MaTranHP_PLO` | Suy diễn từ ma trận CLO–PLO, cho phép ghi đè — Chương trình đào tạo, học phần, PLO, mức độ đóng góp |
+| `MaTranCLO_PLO` | **Chương trình đào tạo, học phần, CLO, PLO** — liên kết trơn, không mang mức độ (cập nhật 2026-10-18, Q-26) |
+| `MaTranHP_PLO` | Nhập trực tiếp — Chương trình đào tạo, học phần, PLO, trọng số (cập nhật 2026-10-18, Q-26) |
 
 #### 4.2.5. Nhóm Đề cương chi tiết
 
@@ -483,8 +483,8 @@ Bảng dưới đây ánh xạ các cột trong file Excel hiện hành sang th�
 |---|---|---|
 | FR-38 | Hệ thống quản lý danh sách PLO thuộc từng Chương trình đào tạo, gồm mã, mô tả tiếng Việt, mô tả tiếng Anh, nhóm năng lực | BẮT BUỘC |
 | FR-39 | Hệ thống quản lý CLO thuộc đề cương chi tiết học phần | BẮT BUỘC |
-| FR-40 | Hệ thống quản lý ma trận CLO – PLO theo từng cặp (Chương trình đào tạo, Học phần), với mức độ đóng góp theo thang I/R/M hoặc thang 1–3 | BẮT BUỘC |
-| FR-41 | Hệ thống tự động suy diễn ma trận Học phần – PLO từ ma trận CLO – PLO, cho phép người dùng ghi đè thủ công | NÊN CÓ |
+| FR-40 | Hệ thống quản lý ma trận CLO – PLO theo từng cặp (Chương trình đào tạo, Học phần); một CLO chỉ gắn được PLO mà học phần đã gắn ở ma trận Học phần – PLO. Liên kết không mang mức độ (cập nhật 2026-10-18, Q-26) | BẮT BUỘC |
+| FR-41 | Hệ thống quản lý ma trận Học phần – PLO theo từng chương trình: người dùng nhập trực tiếp các PLO mà học phần đóng góp, mỗi ô kèm trọng số (cập nhật 2026-10-18, Q-26; trước đó: suy diễn từ CLO – PLO, cho ghi đè) | NÊN CÓ |
 | FR-42 | Hệ thống cảnh báo các lỗ hổng: PLO không được học phần nào đáp ứng · CLO không liên kết PLO nào · Học phần không đóng góp vào PLO nào | BẮT BUỘC |
 | FR-43 | Hệ thống cho phép xuất ma trận chuẩn đầu ra ra Excel phục vụ công tác kiểm định | NÊN CÓ |
 ### 5.5. M5 — Quản lý Đề cương chi tiết và Công thức điểm
@@ -937,7 +937,7 @@ HÀM XetTotNghiep(sinhVien):
 | BR-18 | Mỗi CLO thuộc về **đúng một** đề cương chi tiết học phần |
 | BR-19 | Ma trận CLO–PLO được khai báo theo **cặp (Chương trình đào tạo, Học phần)**, vì một học phần thuộc nhiều chương trình sẽ có bộ PLO khác nhau |
 | BR-20 | Mọi PLO phải được **ít nhất một học phần** trong khung chương trình đóng góp; nếu không, sinh cảnh báo |
-| BR-21 | Mức độ đóng góp dùng thang **I–R–M** (Introduce – Reinforce – Master) hoặc thang số **1–2–3** |
+| BR-21 | Mức đóng góp của học phần vào PLO là **trọng số số thực** trên ma trận Học phần – PLO; liên kết CLO – PLO không mang mức độ (cập nhật 2026-10-18, Q-26; trước đó: thang I–R–M hoặc 1–2–3) |
 
 > **[Ghi chú port — xung đột nội tại]** BR-19 (ma trận CLO–PLO tách theo CTĐT) kết hợp với DEC-02 (một đề cương dùng chung cho mọi CTĐT) dẫn tới hệ quả: **CLO dùng chung nhưng ánh xạ CLO→PLO tách riêng**. DEC-03 giải quyết điều này, và Q-01 ghi nhận rằng nếu Khoa yêu cầu **CLO** cũng phải khác nhau theo từng CTĐT thì DEC-02 phải được xem xét lại. Nội dung trên được port nguyên văn, **không chỉnh sửa**. **Cập nhật 2026-10-11:** Q-01 đã chốt — CLO dùng chung theo học phần, xem DEC-03.
 
@@ -1346,7 +1346,7 @@ Mục này liệt kê các vấn đề đã được **quyết định tạm th�
 | Q-23 | Trường có **văn bản quy định chính thức** về quy trình điều chỉnh CTĐT không? | Chưa có tài liệu; mục 6.1 và 6.4 dựa trên ghi chú phỏng vấn | Khi nhận được văn bản, phải đối chiếu lại mục 6.1, 6.4 và các câu Q-18..Q-22 |
 | Q-24 | "Khoa quản lý khung chương trình của mình" — người chịu trách nhiệm chính là **Ban lãnh đạo khoa** hay **Giám đốc CTĐT**? | Giám đốc CTĐT duyệt cấp 2; Ban lãnh đạo khoa chỉ xem và bình luận (FR-62, DEC-04) | Nếu Ban lãnh đạo khoa phải duyệt, thêm một cấp qua bảng cấu hình (NFR-24) |
 | Q-25 | Có phải chỉ **học phần cốt lõi** mới đóng góp vào PLO? `plo-clo-backend` chỉ cho gán PLO vào học phần được đánh dấu cốt lõi của chương trình; chưa rõ "cốt lõi" có trùng với "bắt buộc" (không tự chọn) hay không | Mọi học phần trong khung đều khai báo được ma trận CLO–PLO (FR-40) | Nếu chỉ học phần cốt lõi, cần cờ cốt lõi trên `DongKhungCTDT` và ràng buộc khi khai báo ma trận; BR-20 và FR-42 phải tính lại theo tập học phần đó |
-| Q-26 | Ma trận **Học phần–PLO** được suy diễn từ CLO–PLO (FR-41), hay nhập trực tiếp như `plo-clo-backend`? Ở đó Học phần–PLO được nhập trước kèm trọng số số thực và giới hạn CLO chỉ được ánh xạ tới PLO mà học phần đã gắn; liên kết CLO–PLO không mang mức độ đóng góp | Giữ FR-41 và BR-21: suy diễn từ CLO–PLO, cho phép ghi đè, thang I–R–M hoặc 1–2–3 | Nếu phải khớp `plo-clo-backend`, Học phần–PLO trở thành dữ liệu nhập và là ràng buộc của CLO–PLO; cần thêm trường trọng số và bỏ hoặc đổi nghĩa mức độ trên `MaTranCLO_PLO` |
+| Q-26 | Ma trận **Học phần–PLO** được suy diễn từ CLO–PLO (FR-41), hay nhập trực tiếp như `plo-clo-backend`? Ở đó Học phần–PLO được nhập trước kèm trọng số số thực và giới hạn CLO chỉ được ánh xạ tới PLO mà học phần đã gắn; liên kết CLO–PLO không mang mức độ đóng góp | **ĐÃ CHỐT 2026-10-18** (F11-02 B, F11-03): nhập trực tiếp Học phần–PLO kèm trọng số; CLO chỉ gắn được PLO mà học phần đã gắn; CLO–PLO không mang mức. FR-40, FR-41, BR-21 đã sửa theo | Nếu phải khớp `plo-clo-backend`, Học phần–PLO trở thành dữ liệu nhập và là ràng buộc của CLO–PLO; cần thêm trường trọng số và bỏ hoặc đổi nghĩa mức độ trên `MaTranCLO_PLO` |
 | Q-27 | Phạm vi của **giảng viên** xác định theo nhóm chuyên môn (mục 3.3) hay theo "học phần do mình soạn đề cương" như ghi chú khảo sát lần 2? | Giữ theo nhóm chuyên môn (mục 3.3) | Nếu theo người soạn, cần thuộc tính người soạn trên `DeCuongChiTiet` và sửa quy tắc phạm vi của R5 |
 | Q-28 | `plo-clo-backend` cũng lưu PLO, CLO và liên kết CLO–PLO. Hệ thống nào là **nguồn chuẩn**, và hai bên có cần đồng bộ không? | Hai hệ thống độc lập, chưa đồng bộ; mô hình ở đây giữ tương thích (CLO theo học phần, PLO theo chương trình) để có thể đồng bộ sau | Nếu phải đồng bộ, bổ sung yêu cầu tích hợp vào M10 và chốt Q-25, Q-26 trước |
 

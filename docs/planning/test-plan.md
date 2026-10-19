@@ -189,7 +189,7 @@
 | KB-030 | CLO chưa được thành phần đánh giá nào đo | HT | Đề cương Nháp có CLO3 không gắn thành phần nào | Lưu đề cương; gắn CLO3 vào một thành phần; kiểm tra lại | Lưu được kèm cảnh báo nêu CLO3; sau khi gắn thì hết cảnh báo | BR-14, EC-40 | US-052 | CV-134 |
 | KB-031 | PLO thuộc đúng một chương trình | ĐV | Hai chương trình đều có PLO mã PLO1 | Sửa mô tả PLO1 của chương trình thứ nhất | PLO1 của chương trình thứ hai không đổi; thêm PLO1 lần nữa trong cùng phiên bản thì bị chặn | BR-17 | US-042 | CV-135 |
 | KB-032 | CLO thuộc đúng một đề cương và dùng chung cho mọi chương trình | ĐV | Học phần nằm trong khung của hai chương trình | Thêm CLO vào đề cương; mở ma trận của từng chương trình | Cả hai chương trình thấy cùng danh sách CLO; thêm trùng mã CLO trong cùng đề cương thì bị chặn | BR-18 | US-043 | CV-135 |
-| KB-033 | Ma trận CLO–PLO theo cặp chương trình, học phần và theo thang | HT | Học phần nằm trong khung của chương trình A và B; thang đang dùng là I–R–M | Ở A đặt CLO1 mức M cho PLO2; ở B đặt CLO1 mức I cho PLO5; nhập giá trị 4 vào một ô | Hai ô đầu lưu được và không ảnh hưởng nhau; giá trị ngoài thang bị chặn | BR-19, BR-21 | US-044 | CV-135 |
+| KB-033 | Liên kết CLO–PLO theo cặp chương trình, học phần và chỉ tới PLO học phần đã gắn | HT | Học phần nằm trong khung của chương trình A và B; ở A học phần đã gắn PLO2, ở B đã gắn PLO5 trong ma trận học phần–PLO | Ở A gắn CLO1 với PLO2; ở B gắn CLO1 với PLO5; ở A gắn CLO1 với PLO3 mà học phần chưa gắn | Hai liên kết đầu lưu được và không ảnh hưởng nhau; liên kết thứ ba bị chặn, thông báo nêu học phần chưa gắn PLO3 | BR-19 | US-044 | CV-135 |
 | KB-034 | PLO không có học phần nào đóng góp | HT | Chương trình có PLO6 chưa được ô ma trận nào trỏ tới | Mở báo cáo độ bao phủ; lưu ma trận | PLO6 nằm trong mục "PLO chưa có học phần đóng góp"; việc lưu không bị chặn | BR-20, EC-41 | US-047 | CV-123 |
 | KB-035 | Bản nhân bản có PLO riêng, đề cương vẫn dùng chung | HT | Chương trình nguồn có PLO và ma trận | Nhân bản; sửa một PLO của bản mới; mở đề cương của một học phần từ bản mới | PLO cùng mã ở nguồn không đổi; đề cương là bản dùng chung, không có bản sao | BR-17, BR-18 | US-048 | CV-125 |
 | KB-036 | Học phần chưa có đề cương vẫn nằm trong khung được | HT | Khung có học phần X chưa có đề cương | Mở đề cương của X từ khung | Hệ thống nói rõ "chưa có đề cương" và hiện nút tạo cho người có quyền; X vẫn ở trong khung | EC-44 | US-038 | CV-135 |
@@ -309,8 +309,8 @@ Việc chốt bậc: CV-098.
 |---|---|---|---|---|
 | NT-B3-01 | Soạn đề cương cho một học phần đủ các phần của FR-45 bằng trình soạn thảo định dạng; nhập tên, mô tả và CLO bằng cả tiếng Việt và tiếng Anh; đính kèm bản đề cương đã ký. | US-039, US-040, US-041 | — |  |
 | NT-B3-02 | Mở học phần đó từ hai chương trình khác nhau → cùng một đề cương, cùng bộ CLO (DEC-02). | US-038 | KB-036 |  |
-| NT-B3-03 | Khai báo PLO cho từng chương trình; lập ma trận CLO–PLO cho cùng học phần ở hai chương trình với mức đóng góp khác nhau (DEC-03). | US-042, US-044 | KB-031, KB-033 |  |
-| NT-B3-04 | Xem ma trận Học phần–PLO suy diễn, ghi đè thủ công một ô. | US-046 | — |  |
+| NT-B3-03 | Khai báo PLO cho từng chương trình; gắn cùng học phần vào các PLO khác nhau ở hai chương trình rồi gắn CLO của nó vào các PLO đó (DEC-03). | US-042, US-044 | KB-031, KB-033 |  |
+| NT-B3-04 | Nhập trực tiếp ma trận học phần–PLO kèm trọng số; nhập 1,5 → bị chặn; xóa một ô đã có CLO gắn → hệ thống nêu số liên kết sẽ mất, xác nhận rồi xóa. | US-046 | — |  |
 | NT-B3-05 | Để một PLO không có học phần nào đáp ứng và một CLO không gắn PLO nào → có cảnh báo. | US-047 | KB-034 |  |
 | NT-B3-06 | Khai báo công thức điểm tổng 90% → bị chặn lưu; sửa thành 100% → lưu được. | US-049 | KB-027, KB-028 |  |
 | NT-B3-07 | Đánh dấu thành phần điều kiện kèm ngưỡng; khai báo điểm liệt. | US-050 | KB-029 |  |

@@ -1,16 +1,41 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { validateEnv } from './config/env.validation.js';
-import { HealthModule } from './health/health.module.js';
-import { PrismaModule } from './prisma/prisma.module.js';
-import { QueueModule } from './queue/queue.module.js';
+import { HealthModule } from './features/health/health.module.js';
+import { validateEnv } from './shared/config/env.validation.js';
+import { PrismaModule } from './shared/prisma/prisma.module.js';
+import { QueueModule } from './shared/queue/queue.module.js';
+import { SessionModule } from './shared/session/session.module.js';
+import { PasswordModule } from './shared/password/password.module.js';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthenticatedGuard } from './shared/auth/authenticated.guard.js';
+import { CsrfGuard } from './shared/auth/csrf.guard.js';
+import { AuthModule } from './features/auth/auth.module.js';
+import { AuthzModule } from './shared/authz/authz.module.js';
+import { PermissionGuard } from './shared/authz/permission.guard.js';
+import { UsersModule } from './features/users/users.module.js';
+import { PermissionsModule } from './features/permissions/permissions.module.js';
+import { OrgUnitsModule } from './features/org-units/org-units.module.js';
+import { SubjectGroupsModule } from './features/subject-groups/subject-groups.module.js';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, validate: validateEnv }),
     PrismaModule,
     QueueModule,
+    SessionModule,
+    PasswordModule,
     HealthModule,
+    AuthModule,
+    AuthzModule,
+    UsersModule,
+    PermissionsModule,
+    OrgUnitsModule,
+    SubjectGroupsModule,
+  ],
+  providers: [
+    { provide: APP_GUARD, useClass: CsrfGuard },
+    { provide: APP_GUARD, useClass: AuthenticatedGuard },
+    { provide: APP_GUARD, useClass: PermissionGuard },
   ],
 })
 export class AppModule {}

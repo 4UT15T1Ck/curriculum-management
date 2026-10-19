@@ -1,7 +1,7 @@
 import type { ConfigService } from '@nestjs/config';
 import type { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
-import type { Env } from '../src/config/env.validation.js';
-import { PrismaService } from '../src/prisma/prisma.service.js';
+import type { Env } from '../src/shared/config/env.validation.js';
+import { PrismaService } from '../src/shared/prisma/prisma.service.js';
 import { startPostgres } from './containers.js';
 
 function prismaFor(container: StartedPostgreSqlContainer): PrismaService {

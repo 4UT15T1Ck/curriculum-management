@@ -1,5 +1,3 @@
-// Models arrive with the task that first needs them; names follow docs/design/data-dictionary.md.
-
 generator client {
   provider     = "prisma-client"
   output       = "../src/generated/prisma"
@@ -8,4 +6,217 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum OrgUnitType {
+  UNIVERSITY
+  FACULTY
+  OFFICE
+}
+
+enum OrgUnitStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum SubjectGroupStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum SubjectGroupMemberRole {
+  MEMBER
+  COORDINATOR
+}
+
+enum ScopeSource {
+  NONE
+  PROGRAM_DIRECTOR
+  SUBJECT_GROUP_COORDINATOR
+  SUBJECT_GROUP_MEMBER
+  OWN_ENROLLMENT
+}
+
+enum FunctionGroup {
+  SYSTEM_ADMIN
+  COURSE_CATALOG
+  PROGRAM
+  LEARNING_OUTCOME
+  SYLLABUS
+  APPROVAL
+  VERSION
+  DATA_REPORT
+  STUDENT_LOOKUP
+}
+
+enum PermissionMode {
+  DIRECT
+  VIA_REQUEST
+}
+
+enum PermissionScope {
+  ALL
+  SCOPED
+}
+
+enum ScopeType {
+  SYSTEM
+  UNIT
+  ASSIGNMENT
+}
+
+model OrgUnit {
+  id              String           @id @default(cuid(2))
+  unitCode        String           @unique
+  unitName        String
+  unitType        OrgUnitType
+  parentUnitId    String?
+  parentUnit      OrgUnit?         @relation("OrgUnitTree", fields: [parentUnitId], references: [id], onDelete: Restrict)
+  childUnits      OrgUnit[]        @relation("OrgUnitTree")
+  status          OrgUnitStatus    @default(ACTIVE)
+  users           User[]
+  roleAssignments RoleAssignment[]
+  subjectGroups   SubjectGroup[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([parentUnitId])
+}
+
+model User {
+  id                      String               @id @default(cuid(2))
+  userCode                String               @unique
+  fullName                String
+  email                   String?
+  status                  UserStatus           @default(ACTIVE)
+  username                String               @unique
+  passwordHash            String
+  mustChangePassword      Boolean              @default(false)
+  orgUnitId               String?
+  orgUnit                 OrgUnit?             @relation(fields: [orgUnitId], references: [id], onDelete: Restrict)
+  roleAssignments         RoleAssignment[]     @relation("AssignmentHolder")
+  grantedAssignments      RoleAssignment[]     @relation("AssignmentGrantor")
+  revokedAssignments      RoleAssignment[]     @relation("AssignmentRevoker")
+  subjectGroupMemberships SubjectGroupMember[] @relation("MembershipHolder")
+  grantedMemberships      SubjectGroupMember[] @relation("MembershipGrantor")
+  revokedMemberships      SubjectGroupMember[] @relation("MembershipRevoker")
+  updatedRolePermissions  RolePermission[]
+  createdAt               DateTime             @default(now())
+  updatedAt               DateTime             @updatedAt
+
+  @@index([orgUnitId])
+}
+
+model SubjectGroup {
+  id        String               @id @default(cuid(2))
+  groupCode String               @unique
+  groupName String
+  facultyId String
+  faculty   OrgUnit              @relation(fields: [facultyId], references: [id], onDelete: Restrict)
+  status    SubjectGroupStatus   @default(ACTIVE)
+  members   SubjectGroupMember[]
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+
+  @@index([facultyId])
+}
+
+model SubjectGroupMember {
+  id             String                 @id @default(cuid(2))
+  subjectGroupId String
+  subjectGroup   SubjectGroup           @relation(fields: [subjectGroupId], references: [id], onDelete: Restrict)
+  lecturerId     String
+  lecturer       User                   @relation("MembershipHolder", fields: [lecturerId], references: [id], onDelete: Restrict)
+  memberRole     SubjectGroupMemberRole
+  validFrom      DateTime               @db.Date
+  validTo        DateTime?              @db.Date
+  assignedById   String?
+  assignedBy     User?                  @relation("MembershipGrantor", fields: [assignedById], references: [id], onDelete: Restrict)
+  revokedAt      DateTime?
+  revokedById    String?
+  revokedBy      User?                  @relation("MembershipRevoker", fields: [revokedById], references: [id], onDelete: Restrict)
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  @@index([lecturerId])
+  @@index([subjectGroupId])
+}
+
+model Role {
+  id              String           @id @default(cuid(2))
+  roleCode        String           @unique
+  roleName        String
+  description     String?
+  isSystemRole    Boolean          @default(false)
+  scopeSource     ScopeSource      @default(NONE)
+  rolePermissions RolePermission[]
+  assignments     RoleAssignment[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model Permission {
+  id              String           @id @default(cuid(2))
+  permissionCode  String           @unique
+  permissionName  String
+  functionGroup   FunctionGroup
+  description     String?
+  source          String?
+  rolePermissions RolePermission[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model RolePermission {
+  id           String          @id @default(cuid(2))
+  roleId       String
+  role         Role            @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  permissionId String
+  permission   Permission      @relation(fields: [permissionId], references: [id], onDelete: Restrict)
+  mode         PermissionMode
+  scope        PermissionScope
+  updatedById  String?
+  updatedBy    User?           @relation(fields: [updatedById], references: [id], onDelete: Restrict)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@unique([roleId, permissionId])
+  @@index([permissionId])
+}
+
+model RoleAssignment {
+  id           String    @id @default(cuid(2))
+  userId       String
+  user         User      @relation("AssignmentHolder", fields: [userId], references: [id], onDelete: Restrict)
+  roleId       String
+  role         Role      @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  scopeType    ScopeType
+  scopeUnitId  String?
+  scopeUnit    OrgUnit?  @relation(fields: [scopeUnitId], references: [id], onDelete: Restrict)
+  validFrom    DateTime  @db.Date
+  validTo      DateTime? @db.Date
+  assignedById String?
+  assignedBy   User?     @relation("AssignmentGrantor", fields: [assignedById], references: [id], onDelete: Restrict)
+  revokedAt    DateTime?
+  revokedById  String?
+  revokedBy    User?     @relation("AssignmentRevoker", fields: [revokedById], references: [id], onDelete: Restrict)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([userId, roleId, scopeUnitId, validFrom])
+  @@index([userId])
+}
+
+model Session {
+  sid    String   @id @db.VarChar
+  sess   Json     @db.Json
+  expire DateTime @db.Timestamp(6)
+
+  @@index([expire], map: "IDX_session_expire")
+  @@map("session")
 }

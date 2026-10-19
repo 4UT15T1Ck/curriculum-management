@@ -1,0 +1,241 @@
+import {
+  PERMISSIONS,
+  type PermissionCode,
+} from '../src/shared/authz/permission-codes.js';
+
+export interface PermissionCase {
+  permission: PermissionCode;
+  method: 'get' | 'post' | 'put' | 'patch' | 'delete';
+  path: string;
+  body?: object;
+  allowedRole: string;
+  deniedRole: string;
+}
+
+export const NO_ROLE = 'NO_ROLE';
+const PLACEHOLDER_ID = 'placeholder-id';
+
+export const PERMISSION_TABLE: PermissionCase[] = [
+  {
+    permission: PERMISSIONS.ORG_UNIT_MANAGE,
+    method: 'post',
+    path: '/api/org-units',
+    body: {
+      unitCode: 'X',
+      unitName: 'X',
+      unitType: 'FACULTY',
+      parentUnitId: PLACEHOLDER_ID,
+    },
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.ORG_UNIT_MANAGE,
+    method: 'patch',
+    path: `/api/org-units/${PLACEHOLDER_ID}`,
+    body: { unitName: 'X' },
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.ORG_UNIT_MANAGE,
+    method: 'post',
+    path: `/api/org-units/${PLACEHOLDER_ID}/deactivate`,
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.ORG_UNIT_MANAGE,
+    method: 'post',
+    path: `/api/org-units/${PLACEHOLDER_ID}/activate`,
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.SUBJECT_GROUP_VIEW,
+    method: 'get',
+    path: '/api/subject-groups',
+    allowedRole: 'R2',
+    deniedRole: NO_ROLE,
+  },
+  {
+    permission: PERMISSIONS.SUBJECT_GROUP_VIEW,
+    method: 'get',
+    path: `/api/subject-groups/${PLACEHOLDER_ID}`,
+    allowedRole: 'R1',
+    deniedRole: NO_ROLE,
+  },
+  {
+    permission: PERMISSIONS.ORG_UNIT_MANAGE,
+    method: 'post',
+    path: '/api/subject-groups',
+    body: { groupCode: 'X', groupName: 'X', facultyId: PLACEHOLDER_ID },
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.ORG_UNIT_MANAGE,
+    method: 'patch',
+    path: `/api/subject-groups/${PLACEHOLDER_ID}`,
+    body: { groupName: 'X' },
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.ORG_UNIT_MANAGE,
+    method: 'get',
+    path: `/api/subject-groups/${PLACEHOLDER_ID}/deactivation-impact`,
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.ORG_UNIT_MANAGE,
+    method: 'post',
+    path: `/api/subject-groups/${PLACEHOLDER_ID}/deactivate`,
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.ORG_UNIT_MANAGE,
+    method: 'post',
+    path: `/api/subject-groups/${PLACEHOLDER_ID}/activate`,
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.ORG_UNIT_MANAGE,
+    method: 'post',
+    path: `/api/subject-groups/${PLACEHOLDER_ID}/members`,
+    body: {
+      lecturerId: PLACEHOLDER_ID,
+      memberRole: 'MEMBER',
+      validFrom: '2026-01-01',
+    },
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.ORG_UNIT_MANAGE,
+    method: 'post',
+    path: `/api/subject-groups/${PLACEHOLDER_ID}/members/${PLACEHOLDER_ID}/end`,
+    body: { validTo: '2026-01-01' },
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.ORG_UNIT_MANAGE,
+    method: 'post',
+    path: `/api/subject-groups/${PLACEHOLDER_ID}/members/${PLACEHOLDER_ID}/revoke`,
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.ORG_UNIT_MANAGE,
+    method: 'get',
+    path: `/api/subject-group-memberships?userId=${PLACEHOLDER_ID}`,
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.USER_MANAGE,
+    method: 'get',
+    path: '/api/users',
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.USER_MANAGE,
+    method: 'post',
+    path: '/api/users',
+    body: { username: 'x', userCode: 'X', fullName: 'X' },
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.USER_MANAGE,
+    method: 'get',
+    path: '/api/users/:userId',
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.USER_MANAGE,
+    method: 'patch',
+    path: '/api/users/:userId',
+    body: {},
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.USER_MANAGE,
+    method: 'post',
+    path: '/api/users/:userId/disable',
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.USER_MANAGE,
+    method: 'post',
+    path: '/api/users/:userId/enable',
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.USER_MANAGE,
+    method: 'post',
+    path: '/api/users/:userId/reset-password',
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.USER_MANAGE,
+    method: 'get',
+    path: '/api/users/:userId/role-assignments',
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.USER_MANAGE,
+    method: 'post',
+    path: '/api/users/:userId/role-assignments',
+    body: {},
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.USER_MANAGE,
+    method: 'post',
+    path: '/api/users/:userId/role-assignments/:assignmentId/revoke',
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.USER_MANAGE,
+    method: 'get',
+    path: '/api/roles',
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.PERMISSION_VIEW,
+    method: 'get',
+    path: '/api/permissions/matrix',
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.PERMISSION_MANAGE,
+    method: 'put',
+    path: '/api/roles/:roleCode/permissions/:permissionCode',
+    body: { mode: 'DIRECT', scope: 'ALL' },
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+  {
+    permission: PERMISSIONS.PERMISSION_MANAGE,
+    method: 'delete',
+    path: '/api/roles/:roleCode/permissions/:permissionCode',
+    allowedRole: 'R1',
+    deniedRole: 'R2',
+  },
+];

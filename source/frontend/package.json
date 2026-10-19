@@ -13,7 +13,7 @@
     "preview": "vite preview",
     "lint": "oxlint src/",
     "test": "vitest run",
-    "api:types": "openapi-typescript http://localhost:3000/api/docs-json -o src/api/schema.d.ts",
+    "api:types": "openapi-typescript http://localhost:3000/api/docs-json -o src/shared/api/schema.d.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

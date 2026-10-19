@@ -7,8 +7,32 @@
 | Ngày lập | 2026-10-11 |
 | Nguồn yêu cầu | `docs/requirement/REQUIREMENTS.md` — 109 FR (90 BẮT BUỘC · 17 NÊN CÓ · 2 TÙY CHỌN) |
 | Nguồn use case | `docs/Bo_so_do_Use_Case_CTDT/Thuyet_minh_Use_Case.md` — UC-01..UC-84 |
-| Phạm vi | **Toàn bộ 109 FR.** Không có bản MVP, không cắt giảm yêu cầu nào |
+| Phạm vi | **Toàn bộ 109 FR**, không cắt giảm yêu cầu nào. Giao trước một bản MVP (mục 0); phần còn lại giao sau, phạm vi giữ nguyên |
 | Không gồm | Công nghệ, ước lượng thời gian, phân công người, user story, kế hoạch sprint — thuộc các tài liệu sau |
+
+---
+
+## 0. Bản MVP
+
+Chốt 2026-10-18. MVP là **thứ tự giao hàng**, không thu hẹp phạm vi: mọi tính năng ngoài MVP vẫn làm, sau MVP.
+
+MVP khép kín một vòng: dựng chương trình và khung → viết đề cương, PLO, CLO → tạo đề xuất thay đổi → duyệt ba cấp → ban hành phiên bản.
+
+| Bậc | Tính năng trong MVP | Điểm |
+|---|---|---|
+| B1 | F-01 Đăng nhập, phiên · F-02 Tài khoản, vai trò, phạm vi quyền · F-03 Đơn vị và nhóm chuyên môn · F-04 Danh mục học phần · F-05 Quan hệ học phần, nhóm tương đương | 79 |
+| B2 | F-06 Thông tin chương trình · F-07 Khung chương trình, nhóm tự chọn · F-08 Kiểm tra nhất quán | 57 |
+| B3 | F-10 Đề cương · F-11 PLO, CLO, ma trận | 47 |
+| B4 | F-13 Đề xuất thay đổi · F-14 Duyệt ba cấp, thông báo · F-15 Ban hành, ảnh chụp phiên bản | 115 |
+| | **13 tính năng** | **298 / 519** |
+
+Giao sau MVP: F-09 Nhập, xuất Excel; F-12 Công thức điểm, đánh giá–CLO; F-16 So sánh phiên bản, gán khóa; F-26 Sao lưu; toàn bộ B5, B6.
+
+Hệ quả:
+- B2, B3 giao thiếu (F-09, F-12), nên nguyên tắc 2 (mỗi bậc kết thúc bằng một phiên bản chạy được) áp cho cả MVP thay vì từng bậc. Kịch bản nghiệm thu B2, B3 ở mục 3 chạy đủ khi F-09, F-12 xong.
+- Không có F-09: dữ liệu MVP nhập tay qua giao diện.
+- F-08 nằm trong MVP vì F-13 (gửi đề xuất) và F-15 (ban hành) phải chặn khung còn lỗi (`ConsistencyChecker.assertPasses`).
+- Không có F-26: sao lưu cơ sở dữ liệu và thư mục tệp làm tay cho tới khi F-26 xong.
 
 ---
 

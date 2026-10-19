@@ -39,3 +39,18 @@ Nguồn: `docs/requirement/Quy dinh Xay dung cap nhat CTDT_02-07-2024_Quy trinh.
 | Đối sánh với chương trình cùng ngành (Điều 11.4; Điều 12, bước 5) | Quyền `report.benchmark` |
 | Hội đồng Khoa, Hội đồng thẩm định, Hội đồng KH&ĐT Trường họp ngoài hệ thống (Điều 10, 12, 13, 15) | Phương án tạm của Q-20: đi chung luồng ba cấp; biên bản là hồ sơ đính kèm (FR-109); thành viên hội đồng không phải người dùng. Vì vậy quy định về thành phần hội đồng không ảnh hưởng hệ thống |
 | Hiệu trưởng ký quyết định ban hành (Điều 12.3e, 13.6) | `ProgramVersion.decisionNumber`, `signedDate` |
+
+---
+
+## 2. Theo quyết định của nhóm
+
+### 2.1. Nhật ký kiểm toán
+
+| | |
+|---|---|
+| Quyết định | F01-07 (2026-10-18): chưa làm nhật ký kiểm toán lúc này |
+| Bỏ khỏi phiên bản này | US-002 Ghi nhật ký bất biến, US-003 Tra cứu nhật ký (7 điểm); bảng `AuditLog`; FR-105, FR-106; NFR-10; phần "ghi nhật ký" của NFR-08; MH tra cứu nhật ký |
+| Còn giữ | Lịch sử có bảng riêng của nghiệp vụ vẫn làm: các bước duyệt của đề xuất (`ApprovalStep`, gồm lý do bỏ cấp FR-61 và duyệt thay BR-31), lần đồng bộ (`SyncLog`, FR-99), phiên nhập (`ImportBatch`), lời gọi API (F-21). Đăng nhập sai ghi vào log ứng dụng |
+| Câu "ghi nhật ký" ở tài liệu khác | FR-10 (đổi phân quyền), EC-19, EC-20 và các câu tương tự: ghi vào bảng lịch sử của nghiệp vụ đó nếu có, nếu không thì log ứng dụng. Kế hoạch từng tính năng ghi rõ chọn chỗ nào |
+| Khi làm thì đổi gì | Thêm `AuditLog` (người, thời điểm, hành động, loại + mã đối tượng, giá trị trước/sau dạng JSON), ghi ở service trong cùng giao dịch (phương án A của F01-07); tài khoản ứng dụng không có UPDATE, DELETE trên bảng này; màn hình tra cứu cho R1, R2 |
+| Cỡ | Vừa; mỗi service có thao tác ghi phải thêm một lời gọi |

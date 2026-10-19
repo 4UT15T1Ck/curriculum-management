@@ -160,7 +160,7 @@
 | moTa | `description` | `Role`, `PLO`, `CLO` |
 | moTaHocPhan | `courseDescription` | `Syllabus` |
 | moTaTiengAnh | `englishDescription` | `PLO`, `CLO` |
-| mucDoDongGop | `contributionLevel` | `CLOPLOMapping`, `CoursePLOMapping` |
+| mucDoDongGop | `weight` | `CoursePLOMapping` (trọng số trong (0, 1]; `CLOPLOMapping` không mang mức độ, F11-02, F11-03) |
 | mucNhanThuc | `cognitiveLevel` | `CLO` |
 | mucTieu | `objectives` | `Syllabus` |
 | nganh | `major` | `Student` |

@@ -1,10 +1,11 @@
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module.js';
 import { configureApp } from './app.setup.js';
-import type { Env } from './config/env.validation.js';
+import type { Env } from './shared/config/env.validation.js';
 
-const app = await NestFactory.create(AppModule);
+const app = await NestFactory.create<NestExpressApplication>(AppModule);
 configureApp(app);
 app.enableShutdownHooks();
 const config: ConfigService<Env, true> = app.get(ConfigService);

@@ -1,0 +1,106 @@
+import type { NestExpressApplication } from '@nestjs/platform-express';
+import type { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
+import type { StartedRedisContainer } from '@testcontainers/redis';
+import request from 'supertest';
+import { PrismaService } from '../src/shared/prisma/prisma.service.js';
+import { seedAccessControl } from '../prisma/seed-data/seed-access-control.js';
+import {
+  createAccount,
+  loginAgent,
+  type TestAccount,
+} from './fixtures/accounts.js';
+import { startPostgres, startRedis } from './containers.js';
+import { applyMigrations } from './migrations.js';
+import { setAppEnv } from './test-env.js';
+import { createTestApp } from './test-app.js';
+import { NO_ROLE, PERMISSION_TABLE } from './permission-table.js';
+
+const CSRF = { 'X-Requested-With': 'XMLHttpRequest' };
+
+describe('permission table', () => {
+  let postgres: StartedPostgreSqlContainer;
+  let redis: StartedRedisContainer;
+  let app: NestExpressApplication;
+  let prisma: PrismaService;
+  const agents = new Map<string, ReturnType<typeof request.agent>>();
+
+  beforeAll(async () => {
+    [postgres, redis] = await Promise.all([
+      startPostgres({ vietnameseCollation: true }),
+      startRedis(),
+    ]);
+    setAppEnv(postgres, redis);
+    applyMigrations(postgres.getConnectionUri());
+    app = await createTestApp();
+    prisma = app.get(PrismaService);
+    await seedAccessControl(prisma);
+    const roleCodes = [
+      ...new Set(
+        PERMISSION_TABLE.flatMap((row) => [row.allowedRole, row.deniedRole]),
+      ),
+    ];
+    const accounts = new Map<string, TestAccount>();
+    for (const roleCode of roleCodes) {
+      accounts.set(
+        roleCode,
+        await createAccount(
+          app,
+          `perm${roleCode.toLowerCase()}`,
+          roleCode === NO_ROLE ? undefined : roleCode,
+          roleCode === 'R2' ? { unitCode: 'KHOA_CNTT' } : undefined,
+        ),
+      );
+    }
+    for (const roleCode of roleCodes) {
+      agents.set(roleCode, await loginAgent(app, accounts.get(roleCode)!));
+    }
+  });
+
+  afterAll(async () => {
+    await app?.close();
+    await Promise.all([postgres?.stop(), redis?.stop()]);
+  });
+
+  it.each(PERMISSION_TABLE)(
+    '$permission allows $allowedRole and denies $deniedRole',
+    async (testCase) => {
+      const allowedAgent = agents.get(testCase.allowedRole)!;
+      const deniedAgent = agents.get(testCase.deniedRole)!;
+      const allowedResponse = await sendRequest(allowedAgent, testCase);
+      expect(allowedResponse.status).not.toBe(403);
+      const beforeDeniedCount = await countWrites(testCase.path);
+      const deniedResponse = await sendRequest(deniedAgent, testCase);
+      expect(deniedResponse.status).toBe(403);
+      expect(deniedResponse.body.code).toBe('PERMISSION_DENIED');
+      if (testCase.method !== 'get') {
+        expect(await countWrites(testCase.path)).toBe(beforeDeniedCount);
+      }
+    },
+  );
+
+  async function sendRequest(
+    agent: ReturnType<typeof request.agent>,
+    testCase: (typeof PERMISSION_TABLE)[number],
+  ) {
+    const path = testCase.path
+      .replace(':userId', 'unknown-user')
+      .replace(':assignmentId', 'unknown-assignment')
+      .replace(':roleCode', 'R2')
+      .replace(':permissionCode', 'course.view');
+    const call = agent[testCase.method](path).set(CSRF);
+    if (testCase.body) call.send(testCase.body);
+    return call;
+  }
+
+  async function countWrites(path: string): Promise<number> {
+    if (path.startsWith('/api/org-units')) return prisma.orgUnit.count();
+    if (path.startsWith('/api/subject-groups')) {
+      return path.includes('/members')
+        ? prisma.subjectGroupMember.count()
+        : prisma.subjectGroup.count();
+    }
+    return path.startsWith('/api/users')
+      ? prisma.user.count()
+      : prisma.rolePermission.count();
+  }
+});

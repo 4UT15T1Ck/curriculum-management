@@ -15,3 +15,14 @@ Object.defineProperty(window, 'matchMedia', {
       dispatchEvent: () => false,
     }) as MediaQueryList,
 });
+
+// jsdom has no ResizeObserver; Ant Design's Select and virtual list observe their popup size.
+class ResizeObserverStub {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+Object.defineProperty(window, 'ResizeObserver', {
+  writable: true,
+  value: ResizeObserverStub,
+});

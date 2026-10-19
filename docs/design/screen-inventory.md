@@ -59,7 +59,7 @@
 | Mã | Tên | Vai trò | Mục đích | Dữ liệu chính | Thao tác | UC / FR | Bậc |
 |---|---|---|---|---|---|---|---|
 | MH-05 | Danh sách tài khoản | R1 T | Tìm và quản lý tài khoản người dùng | `User`, `OrgUnit` | Tìm theo tên, tên đăng nhập, đơn vị, trạng thái; thêm tài khoản; mở chi tiết | UC-05 · FR-06 | B1 |
-| MH-06 | Chi tiết tài khoản | R1 T | Sửa một tài khoản, gán vai trò kèm phạm vi, xem lịch sử phân quyền | `User`, `RoleAssignment`, `Role`, `AuditLog` | Sửa thông tin; vô hiệu hóa hoặc kích hoạt lại (có hộp xác nhận); đặt lại mật khẩu; thêm và thu hồi vai trò kèm phạm vi và thời hạn; xem ai đã cấp quyền gì, khi nào | UC-05, UC-06 · FR-06, FR-07, FR-10 | B1 |
+| MH-06 | Chi tiết tài khoản | R1 T | Sửa một tài khoản, gán vai trò kèm phạm vi, xem lịch sử phân quyền | `User`, `RoleAssignment`, `Role` | Sửa thông tin; vô hiệu hóa hoặc kích hoạt lại (có hộp xác nhận); đặt lại mật khẩu; thêm và thu hồi vai trò kèm phạm vi và thời hạn; xem ai đã cấp quyền gì, khi nào — đọc từ các dòng `RoleAssignment` (không xóa, thu hồi có người và thời điểm) vì nhật ký kiểm toán hoãn (F01-07) | UC-05, UC-06 · FR-06, FR-07, FR-10 | B1 |
 | MH-07 | Cây đơn vị | R1 T | Quản lý cây Trường, Khoa, Phòng | `OrgUnit` | Thêm, sửa, ngừng hoạt động đơn vị; đổi đơn vị cha | UC-02 · FR-01 | B1 |
 | MH-08 | Nhóm chuyên môn | R1 T, R2 X, R4 X | Quản lý nhóm chuyên môn, thành viên và Điều phối của từng nhóm | `SubjectGroup`, `SubjectGroupMember`, `User` | R1: thêm, sửa, ngừng sử dụng nhóm; thêm và bớt thành viên theo khoảng thời gian; chỉ định Điều phối có thời hạn. R2, R4 (từ B4): chỉ xem, và mở form đề xuất tổ chức (G-2) | UC-02, UC-03, UC-04 · FR-02, FR-03, FR-04 | B1 |
 | MH-09 | Tra cứu nhật ký hệ thống | R1 X, R2 X | Tra ai đã làm gì, lúc nào, giá trị trước và sau | `AuditLog` | Lọc theo người, loại thực thể, mã bản ghi, khoảng thời gian; xem chi tiết một dòng. Không có thao tác sửa hay xóa | UC-82 · FR-105, FR-106 | B1 |
@@ -68,7 +68,7 @@
 | MH-12 | Cấu hình đồng bộ | R1 T | Khai báo kết nối chỉ đọc tới cơ sở dữ liệu có sẵn và lịch đồng bộ | `SyncLog` | Nhập thông tin kết nối; kiểm tra kết nối; đặt lịch chạy; bật hoặc tắt đồng bộ; mở nhật ký đồng bộ. Không hiện lại mật khẩu kết nối | UC-76 · FR-98 | B6 |
 | MH-13 | Nhật ký đồng bộ | R1 T | Xem từng lần đồng bộ, lỗi và số bản ghi mâu thuẫn giữa hai nguồn | `SyncLog` | Lọc theo trạng thái và thời gian; xem thông báo lỗi; xem số mâu thuẫn; chạy lại thủ công | UC-77, UC-78 · FR-99, FR-100 | B6 |
 | MH-14 | Ủy quyền phê duyệt | R1 T, R3 P, R4 P | Người duyệt giao quyền duyệt của mình cho người khác trong một khoảng thời gian | `ApprovalDelegation`, `User` | Tạo ủy quyền với phạm vi và thời hạn; thu hồi; xem ủy quyền đã hết hạn. R1 xem và thu hồi được ủy quyền của mọi người | UC-08 · FR-09 | B6 |
-| MH-15 | Ma trận quyền | R1 X | Xem vai trò nào được làm gì: ghi thẳng hay qua đề xuất, trên mọi đối tượng hay trong phạm vi | `Role`, `Permission`, `RolePermission` | Lọc theo vai trò, theo nhóm chức năng; xem từng ô. Không có thao tác sửa: ma trận đổi theo bản phát hành (M-10) | UC-06 · FR-07 | B1 |
+| MH-15 | Ma trận quyền | R1 X | Xem vai trò nào được làm gì: ghi thẳng hay qua đề xuất, trên mọi đối tượng hay trong phạm vi | `Role`, `Permission`, `RolePermission` | Lọc theo vai trò, theo nhóm chức năng; xem từng ô. Người có permission.manage (R1) đổi một ô sang X / P / Đ / Đ(P) / không có quyền, qua hộp xác nhận; hai ô của R1 bị khóa (F02-02) | UC-06 · FR-07 | B1 |
 
 ### 2.3. Nhóm C — Học phần
 
@@ -90,7 +90,7 @@
 | MH-24 | Nhân bản chương trình | R1 T | Tạo một chương trình mới ở Nháp từ một chương trình có sẵn | `Program`, `ProgramVersion` | Nhập mã và tên chương trình mới; xác nhận. Từ B3: chép cả PLO và ma trận | UC-20 · FR-25 | B2 |
 | MH-25 | Khung chương trình | R1 T, R2 X, R3 P, R4 P, R5 P | Xem và soạn khung của một phiên bản, dạng dòng hoặc theo học kỳ | `CurriculumItem`, `CurriculumRequisite`, `ElectiveGroup`, `KnowledgeBlock`, `Course` | Chuyển giữa hai chế độ xem; lọc theo học kỳ, khối kiến thức, bắt buộc hay tự chọn; tìm; thêm, sửa, bỏ dòng; đổi thứ tự và chuyển học kỳ; xuất Excel. Từ B5: R1 và R3 chọn một sinh viên để thấy cột "Đăng ký được?" | UC-18, UC-21, UC-23, UC-60 · FR-27, FR-28, FR-30, FR-31, FR-32, FR-36 | B2 |
 | MH-26 | Nhóm tự chọn | R1 T, R2 X, R3 P, R4 X, R5 X | Quản lý nhóm tự chọn và yêu cầu tối thiểu của từng nhóm | `ElectiveGroup`, `CurriculumItem` | Tạo nhóm; đặt tối thiểu theo tín chỉ hoặc theo số học phần; gán và gỡ dòng khung | UC-22 · FR-29 | B2 |
-| MH-27 | Kết quả kiểm tra nhất quán | R1 T, R2 X, R3 P, R4 X | Liệt kê lỗi chặn và cảnh báo của một phiên bản khung | `ProgramVersion`, `CurriculumItem`, `CurriculumRequisite`, `ElectiveGroup` | Chạy kiểm tra; xem tổng tín chỉ tính được so với khai báo; chấp nhận chênh lệch kèm lý do (R1, R3); bấm một dòng để tới chỗ cần sửa | UC-54, UC-55, UC-56 · FR-77, FR-78, FR-79, FR-80, FR-81 | B2 |
+| MH-27 | Kết quả kiểm tra nhất quán | R1 T, R2 X, R3 P, R4 X, R5 X | Liệt kê lỗi chặn và cảnh báo của một phiên bản khung | `ProgramVersion`, `CurriculumItem`, `CurriculumRequisite`, `ElectiveGroup` | Chạy kiểm tra; xem tổng tín chỉ tính được so với khai báo; chấp nhận chênh lệch kèm lý do (R1, R3); bấm một dòng để tới chỗ cần sửa | UC-54, UC-55, UC-56 · FR-77, FR-78, FR-79, FR-80, FR-81 | B2 |
 | MH-28 | Bảng sức khỏe chương trình | R1 T, R2 X, R3 P | Gom mọi cảnh báo của một chương trình về một nơi | `ProgramVersion`, `CurriculumItem`, `PLO`, `Syllabus` | Xem cảnh báo theo nhóm: tín chỉ, tiên quyết, học phần thiếu đề cương, PLO chưa được đóng góp, học phần ngừng mở lớp chưa có thay thế; bấm để tới màn hình xử lý | UC-31, UC-54 · FR-82 | B6 |
 | MH-29 | Nhập liệu từ Excel | R1 T, R3 P | Nhập dữ liệu theo hai bước: chạy thử rồi xác nhận ghi | `ImportBatch` | Chọn loại dữ liệu; tải tệp mẫu; tải tệp lên; chạy thử; xem báo cáo từng dòng với LỖI và CẢNH BÁO; xác nhận ghi khi không còn LỖI. B2: danh mục học phần (R1), khung (R1, R3). Từ B5: danh sách sinh viên và kết quả học tập (chỉ R1) | UC-71, UC-72, UC-73, UC-75 · FR-33, FR-34, FR-35, FR-96, FR-97 | B2 |
 | MH-30 | Lịch sử phiên nhập | R1 X, R3 X | Xem lại các lần chạy thử và các lần đã ghi | `ImportBatch` | Lọc theo loại, trạng thái, người thực hiện; mở báo cáo lỗi của một phiên | UC-74 · FR-101 | B2 |
@@ -100,9 +100,9 @@
 | Mã | Tên | Vai trò | Mục đích | Dữ liệu chính | Thao tác | UC / FR | Bậc |
 |---|---|---|---|---|---|---|---|
 | MH-31 | Chuẩn đầu ra chương trình (PLO) | R1 T, R2 X, R3 P, R4 X, R5 X, R6 X | Xem và soạn danh sách PLO của một phiên bản | `PLO`, `ProgramVersion` | R1, R3: thêm, sửa, xóa PLO (xóa có hộp xác nhận), sắp thứ tự, nhập bản tiếng Anh. Vai trò khác: chỉ xem; R6 chỉ thấy PLO của phiên bản áp dụng cho mình (G-3) | UC-25, UC-26 · FR-38 | B3 |
-| MH-32 | Ma trận CLO–PLO của chương trình | R1 X, R2 X, R3 X, R4 X, R5 X | Tra cứu mức đóng góp của CLO vào PLO trên toàn chương trình | `CLOPLOMapping`, `CLO`, `PLO`, `CurriculumItem` | Lọc theo học kỳ và theo PLO; mở ma trận của một học phần; mở ma trận học phần–PLO; mở báo cáo độ bao phủ | UC-25 · FR-39, FR-40 | B3 |
-| MH-33 | Ma trận CLO–PLO của một học phần | R1 T, R3 P, R4 P, R5 P | Nhập mức đóng góp của từng CLO vào từng PLO cho một học phần trong một chương trình | `CLOPLOMapping`, `CLO`, `PLO`, `CurriculumItem` | Chọn mức theo thang đang cấu hình; xóa một ô; lưu. Từ B4: phiên bản đã ban hành thì dẫn sang form đề xuất | UC-28 · FR-40 | B3 |
-| MH-34 | Ma trận học phần–PLO | R1 T, R2 X, R3 P, R4 X, R5 X | Xem mức đóng góp suy diễn của từng học phần vào từng PLO và ghi đè khi cần | `CoursePLOMapping`, `CLOPLOMapping`, `PLO`, `CurriculumItem` | Xem lưới; R1, R3: ghi đè một ô, bỏ ghi đè; ô ghi đè có dấu riêng | UC-29, UC-30 · FR-41 | B3 |
+| MH-32 | Ma trận CLO–PLO của chương trình | R1 X, R2 X, R3 X, R4 X, R5 X | Tra cứu liên kết CLO–PLO trên toàn chương trình | `CLOPLOMapping`, `CLO`, `PLO`, `CurriculumItem` | Lọc theo học kỳ và theo PLO; mở ma trận của một học phần; mở ma trận học phần–PLO; mở báo cáo độ bao phủ | UC-25 · FR-39, FR-40 | B3 |
+| MH-33 | Ma trận CLO–PLO của một học phần | R1 T, R3 P, R4 P, R5 P | Gắn từng CLO với các PLO cho một học phần trong một chương trình | `CLOPLOMapping`, `CoursePLOMapping`, `CLO`, `PLO`, `CurriculumItem` | Đánh dấu ô; chỉ các cột PLO mà học phần đã gắn ở MH-34 bấm được; lưu. Từ B4: phiên bản đã ban hành thì dẫn sang form đề xuất | UC-28 · FR-40 | B3 |
+| MH-34 | Ma trận học phần–PLO | R1 T, R2 X, R3 P, R4 X, R5 X | Nhập học phần đóng góp vào PLO nào, với trọng số bao nhiêu | `CoursePLOMapping`, `PLO`, `CurriculumItem` | Xem lưới; R1, R3: nhập trọng số một ô, xóa một ô (xóa kéo theo liên kết CLO–PLO của ô đó, có hộp xác nhận) | UC-29, UC-30 · FR-41 | B3 |
 | MH-35 | Báo cáo độ bao phủ chuẩn đầu ra | R1 X, R2 X, R3 X, R4 X | Chỉ ra lỗ hổng: PLO chưa có học phần đóng góp, CLO chưa gắn PLO | `PLO`, `CLO`, `CLOPLOMapping`, `CurriculumItem` | Xem ba danh sách lỗ hổng; bấm một dòng để tới ma trận tương ứng | UC-31 · FR-42 | B3 |
 | MH-36 | Xem đề cương | R1 X, R2 X, R3 X, R4 X, R5 X, R6 X | Đọc đề cương dùng chung của một học phần: nội dung, CLO, công thức điểm, tệp đã ký | `Syllabus`, `WeeklyContent`, `CLO`, `AssessmentComponent`, `AssessmentCLOMapping`, `SyllabusAttachment` | Chuyển ngôn ngữ hiển thị; tải tệp đính kèm; mở trình soạn (người có quyền). R6 thấy bản đề cương được ghim trong phiên bản của mình, không thấy nháp, đề xuất, bình luận | UC-32 · FR-44, FR-48, FR-93 | B3 |
 | MH-37 | Trình soạn đề cương | R1 T, R3 P, R4 P, R5 P | Soạn mọi phần của đề cương trên một màn hình nhiều thẻ | `Syllabus`, `WeeklyContent`, `WeeklyContentCLO`, `CLO`, `AssessmentComponent`, `AssessmentCLOMapping`, `SyllabusAttachment` | Thẻ Nội dung: soạn văn bản có định dạng, nội dung theo tuần, bản tiếng Anh. Thẻ CLO: thêm, sửa, xóa. Thẻ Công thức điểm: thành phần, trọng số, điều kiện, ngưỡng, điểm liệt; hiện chênh lệch so với 100%. Thẻ Ánh xạ: thành phần với CLO; cảnh báo CLO chưa được đánh giá. Thẻ Đính kèm: tải lên PDF hoặc Word. Từ B4: đề cương đã ban hành thì soạn trong một đề xuất | UC-27, UC-33, UC-34, UC-35, UC-36, UC-57, UC-58 · FR-39, FR-45, FR-46, FR-47, FR-48, FR-49, FR-50, FR-51, FR-52, FR-53, FR-54 | B3 |
@@ -191,7 +191,7 @@ Sinh từ cột Vai trò của mục 2. Dấu — nghĩa là vai trò không và
 | MH-24 | Nhân bản chương trình | T | — | — | — | — | — |
 | MH-25 | Khung chương trình | T | X | P | P | P | — |
 | MH-26 | Nhóm tự chọn | T | X | P | X | X | — |
-| MH-27 | Kết quả kiểm tra nhất quán | T | X | P | X | — | — |
+| MH-27 | Kết quả kiểm tra nhất quán | T | X | P | X | X | — |
 | MH-28 | Bảng sức khỏe chương trình | T | X | P | — | — | — |
 | MH-29 | Nhập liệu từ Excel | T | — | P | — | — | — |
 | MH-30 | Lịch sử phiên nhập | X | — | X | — | — | — |
@@ -453,8 +453,9 @@ Màn hình không có mục menu riêng, vào từ màn hình khác:
 | MH-18 Form học phần | P | B1 | MH-16, MH-17 | — |
 | MH-20 Đồ thị quan hệ học phần | X | B6 | MH-17, MH-22 | — |
 | MH-22 Tổng quan chương trình | X | B2 | MH-21 | MH-20, MH-25, MH-31, MH-32, MH-46 |
-| MH-25 Khung chương trình | P | B2 | MH-22 | MH-17, MH-26, MH-33, MH-36, MH-39 |
+| MH-25 Khung chương trình | P | B2 | MH-22 | MH-17, MH-26, MH-27, MH-33, MH-36, MH-39 |
 | MH-26 Nhóm tự chọn | X | B2 | MH-25 | — |
+| MH-27 Kết quả kiểm tra nhất quán | X | B2 | MH-25 | — |
 | MH-31 Chuẩn đầu ra chương trình (PLO) | X | B3 | MH-22 | MH-32 |
 | MH-32 Ma trận CLO–PLO của chương trình | X | B3 | MH-22, MH-31 | MH-33, MH-34 |
 | MH-33 Ma trận CLO–PLO của một học phần | P | B3 | MH-32, MH-25 | MH-39 |

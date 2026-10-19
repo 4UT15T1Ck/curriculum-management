@@ -148,7 +148,7 @@ sequenceDiagram
 | Dòng trùng | Báo các dòng trùng nhau | EC-46 |
 | Cảnh báo | Mức CẢNH BÁO không chặn ghi, ví dụ tín chỉ bằng 0 | SRS mục 6.3, BR-02 |
 | Toàn vẹn | Ghi toàn bộ hoặc không ghi gì | FR-35 |
-| Kiểm tra lại khi xác nhận | Chuyển trạng thái NL-03, NL-04 | S-12 |
+| Kiểm tra lại khi xác nhận | Chuyển trạng thái NL-05 đến NL-07 | S-12 |
 | Thời gian | Tệp 1000 dòng xử lý dưới 60 giây | NFR-05 |
 | Nhập khung chương trình | Tạo hoặc thay nội dung của phiên bản Nháp; chương trình đã có phiên bản rời Nháp thì không nhập đè được | M-2, FR-55, L-2 |
 | Nhập danh sách sinh viên | Tạo `Student`, tài khoản đăng nhập và `ProgramEnrollment` theo khóa (GD-01) | H-2, E-8, mục 12 |
