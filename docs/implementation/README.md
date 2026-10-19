@@ -146,7 +146,13 @@ Thứ tự phụ thuộc đáng chú ý: F-02 cần `OrgUnit` của F-03 (CV-011
 - [F-05 Quan hệ học phần, nhóm tương đương](f-05-course-relations-equivalence-implementation-plan.md) — mã xong 2026-10-19; còn nợ đi thử bằng trình duyệt
 - [F-06 Thông tin chương trình, Giám đốc CTĐT](f-06-programs-directors-implementation-plan.md) — mã xong 2026-10-19; còn nợ đi thử bằng trình duyệt
 - [F-07 Khung chương trình, nhóm tự chọn](f-07-curriculum-elective-groups-implementation-plan.md) — mã xong 2026-10-19; còn nợ đi thử bằng trình duyệt
-- Tiếp theo F-08
+- [F-08 Kiểm tra nhất quán](f-08-consistency-check-implementation-plan.md) — mã xong 2026-10-19; còn nợ đi thử bằng trình duyệt
+- [F-10 Đề cương](f-10-syllabus-implementation-plan.md) — mã xong 2026-10-19; còn nợ đi thử bằng trình duyệt
+- [F-11 PLO, CLO, ma trận](f-11-plo-clo-matrices-implementation-plan.md) — mã xong 2026-10-19; còn nợ đi thử bằng trình duyệt
+- [F-13 Đề xuất thay đổi](f-13-change-requests-implementation-plan.md) — mã xong 2026-10-19; còn nợ đi thử bằng trình duyệt
+- [F-14 Duyệt ba cấp, thông báo](f-14-three-level-approval-notifications-implementation-plan.md) — mã xong 2026-10-19; còn nợ đi thử bằng trình duyệt
+- [F-15 Ban hành, ảnh chụp phiên bản](f-15-release-version-snapshots-implementation-plan.md) — mã xong 2026-10-19; còn nợ đi thử bằng trình duyệt
+- Mã MVP đã đủ (13 tính năng). Sau MVP: F-09 (đã có kế hoạch), F-12, F-16, F-26, rồi B5, B6.
 
 ### Completed
 - …

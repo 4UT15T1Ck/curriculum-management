@@ -45,7 +45,7 @@
 
 ## Up Next
 
-1. **Dựng F-15** — theo thứ tự trong README.
+1. **Kiểm tra chức năng xuyên tính năng bằng trình duyệt** — tài liệu kiến trúc đã đồng bộ tới F-15 (2026-10-19).
 2. **Template** — sửa bốn lỗi của `E:\claude-code-templates` đã ghi ở báo cáo khởi tạo (hook chỉ dùng jq, sai đường dẫn migration, agent dùng npm/Biome, trùng tên agent giữa hai stack); cần người dùng đồng ý.
 3. **Volta** — `volta install pnpm@10.23.0` để pnpm chạy trên Node 22; cần người dùng đồng ý.
 - F-15: người dùng chạy `pnpm prisma:seed` (học kỳ, khóa giữ chỗ), đi thử NT-B4-01/05/06/10/12 bằng trình duyệt với R1 và R3; migration `20261019131021_release_versions` đã áp lên `ctdt-dev-pg` — `docs/implement-report/f-15-release-version-snapshots-implement-report.md`.

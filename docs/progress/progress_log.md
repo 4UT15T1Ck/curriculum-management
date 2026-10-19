@@ -194,3 +194,12 @@ Format:
 - Kiểm tra: backend đơn vị 853, đầu-cuối 391; frontend 411; tsc, oxlint, Prettier, build sạch. Migration đã áp lên `ctdt-dev-pg`.
 - Còn nợ: đi thử bằng trình duyệt. Mã MVP đã đủ.
 
+
+## [DOCS] Đồng bộ tài liệu kiến trúc cuối MVP (F-07..F-15)
+**Date**: 2026-10-19
+**Files changed**: `docs/architecture/{general_architecture,features_architecture,database_and_models}.md`, `docs/technical/technical_reference.md`, `docs/implementation/README.md`, `source/backend/README.md`, `docs/progress/{progress_log,current_work}.md`
+- `database_and_models.md`: lược đồ hiện tại `20261019131021_release_versions`; bảng migration F-08..F-15 kèm phần viết tay; bảng đề cương, PLO/CLO, đề xuất/duyệt/thông báo, học kỳ/khóa; cột mới của `ProgramVersion`, `CurriculumItem`; `ProgramVersion_one_draft` nay loại bản làm việc và Nháp đính chính; enum mới.
+- `features_architecture.md`: thêm §8, §10, §11, §13, §14, §15; sửa chỗ còn tả nút "Tạo đề xuất" bị khóa.
+- `general_architecture.md`: module, thư mục `shared/` mới ở cả hai phía; quy tắc đề xuất/duyệt, ban hành, `@PassiveRequest()`; e2e dùng `global-setup.ts`.
+- `technical_reference.md`: Tiptap, `sanitize-html`, `@types/multer` (§7a), hàng đợi `release-activation`, biến `FILES_ROOT`, `ATTACHMENT_MAX_MB`, `BULLMQ_PREFIX`.
+- `implementation/README.md`: F-08..F-15 vào mục Active. `source/backend/README.md`: ghi chú e2e, lệnh `prisma:seed`.

@@ -84,7 +84,7 @@ Kế hoạch: `docs/implementation/f-02-accounts-roles-permissions-implementatio
 
 ### Backend — `src/features/permissions/`
 - `GET /api/roles` (`user.manage` hoặc `permission.view`).
-- `GET /api/permissions/matrix` (`permission.view`) — 6 vai trò × 41 quyền, mỗi ô `mode` + `scope`, kèm ô khóa.
+- `GET /api/permissions/matrix` (`permission.view`) — 6 vai trò × 43 quyền (41 lúc F-02), mỗi ô `mode` + `scope`, kèm ô khóa.
 - `PUT|DELETE /api/roles/:roleCode/permissions/:permissionCode` (`permission.manage`) — đặt hoặc bỏ ô; ghi `updatedBy` và một dòng nhật ký ứng dụng. Ô khóa (`LOCKED_CELLS`: R1 × `permission.manage`, R1 × `user.manage`) không đổi được.
 
 ### Backend — `src/features/org-units/`
@@ -199,8 +199,8 @@ Kế hoạch: `docs/implementation/f-06-programs-directors-implementation-plan.m
 - Bảng mã (liên kết MH-22), tên, trình độ, phiên bản hiện hành (`versionLabel`: số phiên bản hoặc "Nháp"), Giám đốc CTĐT, trạng thái; tìm có trễ 300 ms qua `useDebouncedValue`, lọc trình độ, lọc trạng thái (mặc định "Đang sử dụng", có "Tất cả" = không gửi `status`); phân trang phía máy chủ. "Thêm chương trình" hiện theo `useCanEditSchoolWide(programEditInfo)` (cũng hiện với R3, máy chủ trả 403).
 
 #### `ProgramOverviewPage` — MH-22 (`/programs/:programId`)
-- `ProgramInfoCard` (mô tả của bản Nháp nếu có, không thì bản hiện hành; "Nhân bản từ" liên kết chương trình nguồn), `ProgramDirectorsSection` (bảng cả lịch sử, dòng đang hiệu lực lên trước; chỉ khi `canManage`: "Phân công" qua `AssignDirectorModal` = `UserSelect` + hai `DatePicker`, "Kết thúc" qua `EndDirectorModal` chỉ cho dòng `ACTIVE`/`SCHEDULED`, "Thu hồi" kèm xác nhận "Chỉ dùng khi phân công nhập nhầm"), `ProgramSectionLinks` (ba thẻ khung, nhóm tự chọn, kiểm tra nhất quán — vô hiệu kèm chú thích đến khi F-07, F-08 thêm tuyến).
-- `ProgramEditButton` theo `editPath` (`DIRECT` → "Sửa thông tin"; `VIA_REQUEST` → "Tạo đề xuất" bị khóa kèm `CHANGE_REQUEST_PENDING_TOOLTIP`; `null` → ẩn), `CloneProgramButton` khi `canClone`, `ProgramStatusActions` ("Ngừng sử dụng"/"Dùng lại", hộp xác nhận `App.useApp().modal`) khi `canManage`.
+- `ProgramInfoCard` (mô tả của bản Nháp nếu có, không thì bản hiện hành; "Nhân bản từ" liên kết chương trình nguồn), `ProgramDirectorsSection` (bảng cả lịch sử, dòng đang hiệu lực lên trước; chỉ khi `canManage`: "Phân công" qua `AssignDirectorModal` = `UserSelect` + hai `DatePicker`, "Kết thúc" qua `EndDirectorModal` chỉ cho dòng `ACTIVE`/`SCHEDULED`, "Thu hồi" kèm xác nhận "Chỉ dùng khi phân công nhập nhầm"), `ProgramSectionLinks` (thẻ khung, nhóm tự chọn, kiểm tra nhất quán, PLO và ba ma trận — ẩn thẻ ma trận với người chỉ có R6; F-15 thêm `ReleaseCard`, `ProgramVersionsSection`).
+- `ProgramEditButton` theo `editPath` (`DIRECT` → "Sửa thông tin"; `VIA_REQUEST` → "Tạo đề xuất" (từ F-13 là liên kết tới MH-39); `null` → ẩn), `CloneProgramButton` khi `canClone`, `ProgramStatusActions` ("Ngừng sử dụng"/"Dùng lại", hộp xác nhận `App.useApp().modal`) khi `canManage`.
 
 #### `ProgramFormPage` — MH-23 (`/programs/new`, `/programs/:programId/edit`)
 - Trang với AntD `rules`; tín chỉ là ô chữ gửi nguyên chuỗi, số học kỳ là `InputNumber` 1..12; `CreditsGapHint` hiện "Chênh lệch N tín chỉ." / "Khớp tổng tín chỉ." khi gõ nhưng vẫn cho gửi — máy chủ quyết định (`Number()` chỉ để hiển thị). Sửa: điền từ bản Nháp, mã bị khóa; `editPath` khác `DIRECT` → cảnh báo và chuyển về tổng quan. Lỗi nghiệp vụ có `details.field` đặt dưới ô qua `applyFieldErrors`.
@@ -219,7 +219,7 @@ Kế hoạch: `docs/implementation/f-07-curriculum-elective-groups-implementatio
 - Thứ tự mọi lần ghi: tìm phiên bản (404) → phải là `DRAFT` (409 `VERSION_NOT_EDITABLE`) → `assertDirectEdit` với `programEditState` (sau phát hành: 409 `CHANGE_REQUEST_REQUIRED`). Đối tượng quyền của một dòng là chương trình **và** nhóm chuyên môn của học phần (R4/R5 chỉ dòng của nhóm mình); sắp xếp và nhóm tự chọn dùng đối tượng chương trình (R1, R3).
 - `GET /api/program-versions/:id/curriculum` (`program.view`) trả một `CurriculumDto`: dòng (đã có `displayOrder`, `canEdit`), tổng theo học kỳ và khối, khối kiến thức, nhóm, cảnh báo, `editPath`, `canEditStructure`, `canAddItems`. Tổng cộng mọi dòng như bảng Excel; tín chỉ cộng bằng `Prisma.Decimal`.
 - Điều kiện riêng của khung: chép từ danh mục khi thêm dòng; `PUT …/requisites` thay toàn bộ, chạy `findRequisiteCycle` trên hợp cạnh danh mục `PRIOR`/`PREREQUISITE` và cạnh của cùng phiên bản dưới `lockRequisiteGraph` (khóa này nay có hai nơi ghi).
-- `src/shared/curriculum/`: `curriculumWarnings` (hàm thuần: `EMPTY_SEMESTER` INFO, `REQUISITE_NOT_EARLIER` HIGH; F-08 mở rộng), `CurriculumFactsReader.maxPlannedSemester` (cho `ProgramsService.update`), `CurriculumSharedModule`. `VersionContentCopier.copy` chép nhóm → dòng → điều kiện, trả ánh xạ id cũ → mới cho F-11.
+- `src/shared/curriculum/`: `curriculumWarnings` (hàm thuần: `EMPTY_SEMESTER` INFO, `REQUISITE_NOT_EARLIER` HIGH; F-08 đã mở rộng chữ ký), `CurriculumFactsReader.maxPlannedSemester` (cho `ProgramsService.update`), `CurriculumSharedModule`. `VersionContentCopier.copy` chép nhóm → dòng → điều kiện, trả ánh xạ id cũ → mới cho F-11.
 - `ProgramCloneService` (tách khỏi `ProgramsService` cho gọn); `SEMESTERS_BELOW_CURRICULUM` khi giảm `semesterCount` dưới học kỳ đã xếp; `GET /api/courses` nhận `status` lặp lại.
 
 ### Frontend — `src/features/curriculum/`
@@ -227,3 +227,93 @@ Kế hoạch: `docs/implementation/f-07-curriculum-elective-groups-implementatio
 - `CurriculumPage` (MH-25): chuyển "Dạng dòng" / "Theo học kỳ", lọc phía máy khách (`applyCurriculumFilters`), cảnh báo, tổng theo học kỳ và khối (tổng chung cộng bằng `shared/decimal`), kéo thả trong học kỳ (`@dnd-kit`, tắt khi đang lọc hoặc không có quyền cấu trúc; tay cầm mang thuộc tính `role` của dnd-kit để hàng bảng giữ vai trò `row`), `CurriculumItemModal`, `RequisitesModal` (lỗi vòng hiện trong hộp thoại).
 - `ElectiveGroupsPage` (MH-26): bảng nhóm, thẻ "Ít hơn yêu cầu" (so sánh thập phân), `ElectiveGroupFormModal`, `AssignItemsModal` (`Transfer`: chỉ dòng tự chọn chưa nhóm hoặc của nhóm này).
 - Dùng chung mới: `shared/decimal`, `shared/courses/{gradePoint,courseQueryKeys}`, `shared/constants/versionLabels`, `CourseSelect` nhận `statuses`, `initialLabels`; `withQuery` nhận mảng (khóa lặp lại). `ProgramsUsingList` có liên kết, học kỳ và câu "chưa được chương trình nào sử dụng".
+
+---
+
+## 8. Kiểm tra nhất quán (F-08)
+
+Kế hoạch: `docs/implementation/f-08-consistency-check-implementation-plan.md`; báo cáo dựng: `docs/implement-report/f-08-consistency-check-implement-report.md`. Mã xong, chưa đi thử bằng trình duyệt.
+
+### Backend — `src/features/consistency/`
+- `GET /api/program-versions/:versionId/consistency`: báo cáo tín chỉ (bắt buộc, tự chọn, tổng; theo nhóm tự chọn — nhóm chỉ đặt số học phần tính theo thành viên rẻ nhất) và danh sách lỗi có mức, `itemId` để "Tới chỗ sửa".
+- `PUT …/credit-mismatch-acceptance`: R1, R3 chấp nhận chênh lệch kèm lý do; ghi năm cột `creditMismatch*` một lần (CHECK năm-hoặc-không); chênh lệch đã đổi từ lúc xem → 409 `CREDIT_GAP_CHANGED`. Sửa khung làm chênh lệch khác đi thì cảnh báo trở lại.
+- Lõi ở `src/shared/curriculum/consistency-checker.ts`: `ConsistencyChecker.check(versionId, db?)` và `assertPasses(versionId, db)` (409 `CONSISTENCY_FAILED`, `details` mỗi lỗi một `field` = mã); F-13 gọi khi gửi, F-15 khi ban hành (sau `lockRequisiteGraph(tx)`). Có `REQUISITE_CYCLE` (vòng danh mục–khung, `curriculumCycleHits`) và, từ F-15, `MISSING_SYLLABUS`. Dòng tự chọn không thuộc nhóm không tính vào tổng (cảnh báo HIGH).
+
+### Frontend — `src/features/consistency/`
+#### `ConsistencyPage` — MH-27 (`ROUTES.consistency`)
+- Thẻ tín chỉ, dòng tổng chương trình, bảng lỗi kèm "Tới chỗ sửa" (mở khung, xóa bộ lọc nếu dòng bị lọc ẩn); modal chấp nhận khóa nút và tải lại báo cáo khi gặp `CREDIT_GAP_CHANGED`. Thẻ tóm tắt ở tổng quan chương trình.
+
+---
+
+## 10. Đề cương (F-10)
+
+Kế hoạch: `docs/implementation/f-10-syllabus-implementation-plan.md`; báo cáo dựng: `docs/implement-report/f-10-syllabus-implement-report.md`. Mã xong, chưa đi thử bằng trình duyệt.
+
+### Backend — `src/features/syllabi/`
+- Một đề cương mỗi học phần, đánh bản số (`revisionNumber`); nhiều nhất một Nháp và một Đã ban hành (chỉ mục từng phần). `GET/POST /api/courses/:courseId/syllabus`, `PATCH /syllabi/:id` (sáu mục văn bản đi qua `sanitizeRichText`, ≤ 100 000 ký tự), tuần (`POST`, `PUT …/order`, `PATCH`, `DELETE`, ≤ 60 dòng), tệp đính kèm (`POST` multipart, `GET …/file`, `DELETE`; PDF, DOCX, XLSX, ảnh; ≤ `ATTACHMENT_MAX_MB`, ≤ 10 tệp).
+- `syllabus-access.ts`: `assertDraftWrite(…, permission)` — Nháp chỉ hiện với người có `program.view` phạm vi ALL (R1..R5); R3/R4/R5 sửa thẳng Nháp học phần Khoa CNTT, học phần khoa khác chỉ R1; `touchSyllabus` đổi `updatedAt` khi sửa tuần, CLO.
+- Bản đề cương đọc theo dòng khung qua `revisionForItems` (`src/shared/syllabi/`); bản đã ban hành bị khóa sửa tệp (`ATTACHMENT_LOCKED`).
+
+### Frontend — `src/features/syllabi/`
+#### `SyllabusPage` (`ROUTES.syllabus`), `SyllabusEditorPage` (`ROUTES.syllabusEdit`)
+- Vào từ học phần hoặc dòng khung, không có mục menu. Trình soạn có tab (`EDITOR_TABS`, tab có `enabled`, `disabledHint`): Nội dung (Tiptap, bật EN, "Chưa dịch"), Tuần (`WeeklyContentTable`, kéo thả qua tay nắm, cột CLO), Tệp, CLO. Lưu không remount biểu mẫu nên không mất chữ đang gõ. Banner phiên bản khi xem bản đã ban hành (F-15).
+
+---
+
+## 11. PLO, CLO, ma trận (F-11)
+
+Kế hoạch: `docs/implementation/f-11-plo-clo-matrices-implementation-plan.md`; báo cáo dựng: `docs/implement-report/f-11-plo-clo-matrices-implement-report.md`. Mã xong, chưa đi thử bằng trình duyệt.
+
+### Backend — `src/features/outcomes/`, CLO ở `src/features/syllabi/`
+- PLO theo phiên bản: `GET/POST /program-versions/:id/plos`, `PUT …/plos/order`, `PATCH/DELETE /plos/:id` (xóa trả số ô và liên kết bị mất; trùng mã không phân biệt hoa thường).
+- Ma trận học phần–PLO: `GET /program-versions/:id/course-plo-matrix`, `PUT/DELETE /curriculum-items/:itemId/plo-weights/:ploId` (trọng số trong (0, 1], hai chữ số thập phân; xóa ô xóa liên kết CLO bên dưới).
+- CLO theo bản đề cương (dùng chung mọi chương trình): `POST /syllabi/:id/clos`, `PUT …/clos/order`, `PATCH/DELETE /clos/:id`, gắn vào tuần.
+- Ma trận CLO–PLO: `GET /program-versions/:id/clo-plo-matrix`, `GET/PUT /curriculum-items/:itemId/clo-plo-matrix|clo-plo-links` (chỉ PLO có ô học phần mới mở). Kiểm tra phủ `GET /program-versions/:id/outcome-coverage` (R4, R5 lọc theo nhóm mình); `OutcomeGapsReader` ở `src/shared/outcomes/` cho F-24/F-26.
+- Ghi qua `assertOutcomeWrite` / `assertDraftWrite`; `VersionContentCopier` chép PLO và hai ma trận.
+
+### Frontend — `src/features/outcomes/`
+- `PloListPage`, `CoursePloMatrixPage` (một ô `Input` tại một lúc, nhập `0,5`), `ProgramCloPloPage` (lọc học kỳ, PLO), `ItemCloPloPage` (cột chưa gắn bị khóa), `OutcomeCoveragePage`; vào từ thẻ ở tổng quan chương trình, R6 chỉ thấy PLO. Sắp xếp dùng `useSortableReorder` chung với tuần, CLO.
+
+---
+
+## 13. Đề xuất thay đổi (F-13)
+
+Kế hoạch: `docs/implementation/f-13-change-requests-implementation-plan.md`; báo cáo dựng: `docs/implement-report/f-13-change-requests-implement-report.md`. Mã xong, chưa đi thử bằng trình duyệt.
+
+### Backend — `src/features/change-requests/`
+- Bảy loại (`ChangeRequestType`); mã đề xuất từ dãy `change_request_code_seq`. Loại có không gian làm việc (khung, đề cương, PLO, thông tin chương trình) được **bản làm việc** — `ProgramVersion`/`Syllabus` có `sourceRequestId`, chép từ bản đã ban hành mới nhất (`WorkingCopyService`, `released-base.ts`); loại học phần, quan hệ, tổ chức soạn mục trong `ChangeItem` (`AuthoredItemsService`).
+- `/api/change-requests`: danh sách, `conflicts` (cảnh báo chồng đề xuất, BR-30), `user-options`, tạo, chi tiết, `PATCH`, `DELETE` (Nháp), `rebase`, `PUT :id/items`, `diff`, `submit-preview` (thấy các cấp bị bỏ qua), `submit` (chạy `ConsistencyChecker`, ghi `ChangeItem`, `RoutingPlanner` tạo `ApprovalStep`), `withdraw`, văn bản (`POST :id/documents`, `/change-request-documents/:id[/file]`).
+- `createdByAcademicOffice` ghi lúc tạo (`isAcademicOfficeHolder`) cho F-15. `StaleChecker` báo bản gốc đã đổi.
+
+### Frontend — `src/features/change-requests/`
+- `ChangeRequestListPage` MH-38 (cột, bộ lọc "Số ngày chờ"), `ChangeRequestFormPage` MH-39, `OrganizationalRequestPage` MH-40, `ChangeRequestDetailPage` MH-41 (`StepProgress`, `DiffView`), `ChangeRequestEditPage` (mở màn hình sửa sẵn có trên bản làm việc, `RequestDraftBanner`). `CreateRequestButton` dùng ở mọi màn hình có `editPath`.
+
+---
+
+## 14. Duyệt ba cấp, thông báo (F-14)
+
+Kế hoạch: `docs/implementation/f-14-three-level-approval-notifications-implementation-plan.md`; báo cáo dựng: `docs/implement-report/f-14-three-level-approval-notifications-implement-report.md`. Mã xong, chưa đi thử bằng trình duyệt.
+
+### Backend — `src/features/change-requests/`, `src/features/notifications/`
+- `ApprovalService`: `POST /change-requests/:id/approve|return|reject|override` (Duyệt thay); ghi qua `ApprovalRecorder` (`claim`, `actionableRows`, `record`, `close`), giữ `levelEnteredAt`. Tên cấp từ hằng `APPROVAL_LEVEL_NAMES`, không đọc `ApprovalLevelConfig`. Từ chối, Rút xóa bản làm việc. Đề xuất tổ chức áp dụng khi duyệt xong (`OrganizationalApplier`, qua `membership.writer`, `director.writer` dùng chung); đề xuất dữ liệu ở cấp 3 → `FINAL_APPROVAL_REQUIRED`.
+- `GET :id/history`, `GET/POST :id/comments` (bình luận không sửa, không xóa), `GET /approval-queue` (`minDaysWaiting` theo ngày lịch giờ Việt Nam).
+- `/api/notifications`: danh sách, `unread-count` (`@PassiveRequest()`), `read-all`, `:id/read`. `RequestNotifier` (`src/shared/change-requests/`) dựng câu tiếng Việt lúc sự kiện xảy ra.
+
+### Frontend
+- `ApprovalPanel` + `RemarkModal` + `OverrideModal`, `ApprovalHistory`, `CommentsCard` trong MH-41; `ApprovalQueuePage` MH-42 (menu "Chờ tôi duyệt" cho người có `changeRequest.view`); `NotificationBell` ở Header, `NotificationsPage` MH-04 (menu "Thông báo").
+
+---
+
+## 15. Ban hành, ảnh chụp phiên bản (F-15)
+
+Kế hoạch: `docs/implementation/f-15-release-version-snapshots-implementation-plan.md`; báo cáo dựng: `docs/implement-report/f-15-release-version-snapshots-implement-report.md`. Mã xong, chưa đi thử bằng trình duyệt.
+
+### Backend — `src/features/releases/`, `src/features/semesters/`, phê duyệt cuối ở `src/features/change-requests/`
+- Ban hành khởi tạo (H-1): `GET /programs/:programId/versions/:versionId/release-check`, `POST …/release` (số quyết định, ngày ký, học kỳ hiệu lực, khóa áp dụng → `CohortVersion`).
+- Phê duyệt cuối: `GET /change-requests/:id/final-approval` (xem trước, chương trình bị ảnh hưởng — `FinalApprovalProgramDto`), `POST :id/final-approve` (`FinalApprovalService`, `FinalApprovalApplier`; `canFinalApprove` trong `RequestActionsDto`; thông báo `REQUEST_EFFECTIVE`). Đề xuất đề cương lan ra mọi chương trình đang dùng học phần (bỏ chương trình INACTIVE). Học kỳ đã bắt đầu chỉ cho đề xuất có `createdByAcademicOffice`; học kỳ hiệu lực trước bản gốc → `EFFECTIVE_BEFORE_BASE`.
+- `VersionPublisher` (số `major.minor`, ảnh chụp tên và tín chỉ chỉ ghi khi còn null, ghim `CurriculumItem.syllabusId`), `SyllabusPublisher` (chuyển bản Đã ban hành cũ sang HISTORICAL trước khi công bố), `VersionActivator` (PENDING → ACTIVE, cũ → HISTORICAL) chạy trực tiếp và qua hàng đợi `release-activation`; sửa học kỳ kích hoạt ngay bản đến hạn.
+- Lịch sử: `GET /programs/:programId/versions`, `GET …/:versionId` (bảng dòng đóng băng). Đính chính (R1): `POST …/corrections`, `POST …/corrections/:id/issue`, `DELETE …/corrections/:id`; Nháp đính chính sống cạnh Nháp thường, thừa kế `originRequestId`.
+- Học kỳ, khóa: `GET/POST/PATCH /semesters`, `/cohorts`; menu "Học kỳ và khóa tuyển sinh".
+
+### Frontend — `src/features/releases/`, `FinalApprovalPage` ở `change-requests`
+- `SemestersPage` MH-10, `FinalApprovalPage` MH-43, `InitialReleasePage` MH-45, `VersionHistoryPage` MH-46, `VersionDetailPage` MH-47 (liên kết tới màn hình chỉ đọc sẵn có), `CorrectionPage` MH-49; `ReleaseCard`, `ProgramVersionsSection` ở tổng quan chương trình; `SemesterSelect`, `CohortSelect` ở `shared/releases/`.
