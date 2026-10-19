@@ -964,6 +964,150 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/program-versions/{versionId}/plos': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['OutcomesController_listPlos'];
+    put?: never;
+    post: operations['OutcomesController_createPlo'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/program-versions/{versionId}/plos/order': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['OutcomesController_reorderPlos'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/plos/{ploId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['OutcomesController_removePlo'];
+    options?: never;
+    head?: never;
+    patch: operations['OutcomesController_updatePlo'];
+    trace?: never;
+  };
+  '/api/program-versions/{versionId}/course-plo-matrix': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['OutcomesController_coursePloMatrix'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/curriculum-items/{itemId}/plo-weights/{ploId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['OutcomesController_setWeight'];
+    post?: never;
+    delete: operations['OutcomesController_removeWeight'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/program-versions/{versionId}/clo-plo-matrix': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['OutcomesController_programCloPloMatrix'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/curriculum-items/{itemId}/clo-plo-matrix': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['OutcomesController_itemCloPloMatrix'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/curriculum-items/{itemId}/clo-plo-links': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['OutcomesController_replaceLinks'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/program-versions/{versionId}/outcome-coverage': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['OutcomesController_outcomeCoverage'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/courses/{courseId}/syllabus': {
     parameters: {
       query?: never;
@@ -1042,6 +1186,54 @@ export interface paths {
     options?: never;
     head?: never;
     patch: operations['SyllabiController_updateWeek'];
+    trace?: never;
+  };
+  '/api/syllabi/{syllabusId}/clos': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['SyllabiController_createClo'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/syllabi/{syllabusId}/clos/order': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['SyllabiController_reorderClos'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/clos/{cloId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['SyllabiController_removeClo'];
+    options?: never;
+    head?: never;
+    patch: operations['SyllabiController_updateClo'];
     trace?: never;
   };
   '/api/syllabi/{syllabusId}/attachments': {
@@ -1993,6 +2185,182 @@ export interface components {
       /** @example 0 */
       electiveGap: string;
     };
+    OutcomeVersionDto: {
+      id: string;
+      programId: string;
+      programCode: string;
+      programName: string;
+      versionNumber: string | null;
+      status: components['schemas']['ProgramVersionStatus'];
+    };
+    PloDto: {
+      id: string;
+      ploCode: string;
+      description: string;
+      englishDescription: string | null;
+      competencyGroup: string | null;
+      /** @description 1-based, contiguous */
+      sortOrder: number;
+      /** @description Course cells that carry this PLO */
+      courseCount: number;
+      /** @description CLO links that go with the PLO if deleted */
+      cloLinkCount: number;
+    };
+    PloListDto: {
+      editPath: components['schemas']['EditPath'] | null;
+      /** @description Draft version and a direct edit path */
+      canEdit: boolean;
+      version: components['schemas']['OutcomeVersionDto'];
+      plos: components['schemas']['PloDto'][];
+    };
+    CreatePloDto: {
+      /**
+       * @description Trimmed and upper-cased
+       * @example PLO1
+       */
+      ploCode: string;
+      description: string;
+      englishDescription?: string | null;
+      competencyGroup?: string | null;
+    };
+    ReorderOutcomeRowsDto: {
+      ids: string[];
+    };
+    UpdatePloDto: {
+      /**
+       * @description Trimmed and upper-cased
+       * @example PLO1
+       */
+      ploCode?: string;
+      description?: string;
+      englishDescription?: string | null;
+      competencyGroup?: string | null;
+    };
+    PloHeaderDto: {
+      id: string;
+      ploCode: string;
+      description: string;
+    };
+    CoursePloCourseDto: {
+      id: string;
+      courseCode: string;
+      courseName: string;
+      /** @example 3 */
+      credits: string;
+    };
+    CoursePloCellDto: {
+      ploId: string;
+      /** @example 0.5 */
+      weight: string;
+      /** @description CLO links that go with the cell if cleared */
+      cloLinkCount: number;
+    };
+    CoursePloRowDto: {
+      itemId: string;
+      plannedSemester: number;
+      course: components['schemas']['CoursePloCourseDto'];
+      /** @description Mapped PLOs only */
+      cells: components['schemas']['CoursePloCellDto'][];
+    };
+    CoursePloMatrixDto: {
+      editPath: components['schemas']['EditPath'] | null;
+      /** @description Draft version and a direct edit path */
+      canEdit: boolean;
+      version: components['schemas']['OutcomeVersionDto'];
+      plos: components['schemas']['PloHeaderDto'][];
+      rows: components['schemas']['CoursePloRowDto'][];
+    };
+    SetPloWeightDto: {
+      /** @example 0.5 */
+      weight: string;
+    };
+    MatrixCourseRefDto: {
+      id: string;
+      courseCode: string;
+      courseName: string;
+    };
+    CloRefDto: {
+      id: string;
+      cloCode: string;
+      description: string;
+      englishDescription: string | null;
+    };
+    CloPloLinkDto: {
+      cloId: string;
+      ploId: string;
+    };
+    ProgramCloPloRowDto: {
+      itemId: string;
+      plannedSemester: number;
+      course: components['schemas']['MatrixCourseRefDto'];
+      revisionNumber: number | null;
+      clos: components['schemas']['CloRefDto'][];
+      mappedPloIds: string[];
+      links: components['schemas']['CloPloLinkDto'][];
+    };
+    ProgramCloPloMatrixDto: {
+      version: components['schemas']['OutcomeVersionDto'];
+      plos: components['schemas']['PloHeaderDto'][];
+      rows: components['schemas']['ProgramCloPloRowDto'][];
+    };
+    ItemRefDto: {
+      id: string;
+      plannedSemester: number;
+      course: components['schemas']['MatrixCourseRefDto'];
+    };
+    /** @enum {string} */
+    SyllabusStatus: 'DRAFT' | 'PUBLISHED' | 'HISTORICAL';
+    ItemCloPloRevisionDto: {
+      id: string;
+      revisionNumber: number;
+      status: components['schemas']['SyllabusStatus'];
+    };
+    ItemPloColumnDto: {
+      id: string;
+      ploCode: string;
+      description: string;
+      /** @description null = the course does not map this PLO; the column is off */
+      weight: string | null;
+    };
+    ItemCloPloMatrixDto: {
+      editPath: components['schemas']['EditPath'] | null;
+      /** @description Draft version and a direct edit path */
+      canEdit: boolean;
+      version: components['schemas']['OutcomeVersionDto'];
+      item: components['schemas']['ItemRefDto'];
+      /** @description null = the course has no syllabus */
+      revision: components['schemas']['ItemCloPloRevisionDto'] | null;
+      clos: components['schemas']['CloRefDto'][];
+      plos: components['schemas']['ItemPloColumnDto'][];
+      links: components['schemas']['CloPloLinkDto'][];
+    };
+    ReplaceCloPloLinksDto: {
+      links: components['schemas']['CloPloLinkDto'][];
+    };
+    CloGapDto: {
+      itemId: string;
+      courseCode: string;
+      courseName: string;
+      cloId: string;
+      cloCode: string;
+      cloDescription: string;
+    };
+    CourseGapDto: {
+      itemId: string;
+      courseCode: string;
+      courseName: string;
+      plannedSemester: number;
+    };
+    OutcomeCoverageDto: {
+      version: components['schemas']['OutcomeVersionDto'];
+      plosWithoutCourse: components['schemas']['PloHeaderDto'][];
+      closWithoutPlo: components['schemas']['CloGapDto'][];
+      coursesWithoutPlo: components['schemas']['CourseGapDto'][];
+      /** @description Courses skipped from the CLO list for lack of a syllabus */
+      coursesWithoutSyllabus: number;
+      /** @description Course lists hold only the caller’s groups */
+      filteredToGroups: boolean;
+    };
     SyllabusCourseDto: {
       id: string;
       courseCode: string;
@@ -2002,8 +2370,6 @@ export interface components {
       credits: string;
       status: components['schemas']['CourseStatus'];
     };
-    /** @enum {string} */
-    SyllabusStatus: 'DRAFT' | 'PUBLISHED' | 'HISTORICAL';
     WeeklyContentDto: {
       id: string;
       weekLabel: string;
@@ -2012,6 +2378,8 @@ export interface components {
       /** @description Sanitized HTML */
       content: string;
       teachingActivities: string | null;
+      /** @description In CLO order */
+      cloIds: string[];
     };
     /** @enum {string} */
     AttachmentFileType: 'PDF' | 'DOCX' | 'XLSX' | 'IMAGE';
@@ -2024,6 +2392,17 @@ export interface components {
       uploadedBy: components['schemas']['UserRefDto'];
       recordedAt: string;
       canDelete: boolean;
+    };
+    CloDto: {
+      id: string;
+      cloCode: string;
+      description: string;
+      englishDescription: string | null;
+      cognitiveLevel: string | null;
+      /** @description 1-based, contiguous */
+      sortOrder: number;
+      /** @description Codes of the programs that link this CLO to a PLO, sorted */
+      linkedPrograms: string[];
     };
     SyllabusDto: {
       id: string;
@@ -2045,6 +2424,7 @@ export interface components {
       updatedAt: string;
       weeklyContents: components['schemas']['WeeklyContentDto'][];
       attachments: components['schemas']['SyllabusAttachmentDto'][];
+      clos: components['schemas']['CloDto'][];
     };
     AttachmentRulesDto: {
       maxBytes: number;
@@ -2056,6 +2436,8 @@ export interface components {
       published: components['schemas']['SyllabusDto'] | null;
       draft: components['schemas']['SyllabusDto'] | null;
       canCreate: boolean;
+      /** @description A Draft exists and its CLOs are directly editable */
+      canEditClos: boolean;
       editPath: components['schemas']['EditPath'] | null;
       attachmentRules: components['schemas']['AttachmentRulesDto'];
     };
@@ -2073,6 +2455,8 @@ export interface components {
       /** @description HTML; sanitized on save */
       content: string;
       teachingActivities?: string | null;
+      /** @description CLOs of the same syllabus this week covers; omitted = keep */
+      cloIds?: string[];
     };
     ReorderWeeklyContentsDto: {
       ids: string[];
@@ -2083,6 +2467,31 @@ export interface components {
       /** @description HTML; sanitized on save */
       content?: string;
       teachingActivities?: string | null;
+      /** @description CLOs of the same syllabus this week covers; omitted = keep */
+      cloIds?: string[];
+    };
+    CreateCloDto: {
+      /**
+       * @description Trimmed and upper-cased
+       * @example CLO1
+       */
+      cloCode: string;
+      description: string;
+      englishDescription?: string | null;
+      cognitiveLevel?: string | null;
+    };
+    ReorderClosDto: {
+      ids: string[];
+    };
+    UpdateCloDto: {
+      /**
+       * @description Trimmed and upper-cased
+       * @example CLO1
+       */
+      cloCode?: string;
+      description?: string;
+      englishDescription?: string | null;
+      cognitiveLevel?: string | null;
     };
     UploadAttachmentFormDto: {
       /** Format: binary */
@@ -3889,6 +4298,276 @@ export interface operations {
       };
     };
   };
+  OutcomesController_listPlos: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        versionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PloListDto'];
+        };
+      };
+    };
+  };
+  OutcomesController_createPlo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        versionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreatePloDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PloDto'];
+        };
+      };
+    };
+  };
+  OutcomesController_reorderPlos: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        versionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReorderOutcomeRowsDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PloDto'][];
+        };
+      };
+    };
+  };
+  OutcomesController_removePlo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        ploId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  OutcomesController_updatePlo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        ploId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdatePloDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PloDto'];
+        };
+      };
+    };
+  };
+  OutcomesController_coursePloMatrix: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        versionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CoursePloMatrixDto'];
+        };
+      };
+    };
+  };
+  OutcomesController_setWeight: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        itemId: string;
+        ploId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SetPloWeightDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CoursePloCellDto'];
+        };
+      };
+    };
+  };
+  OutcomesController_removeWeight: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        itemId: string;
+        ploId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  OutcomesController_programCloPloMatrix: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        versionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProgramCloPloMatrixDto'];
+        };
+      };
+    };
+  };
+  OutcomesController_itemCloPloMatrix: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        itemId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ItemCloPloMatrixDto'];
+        };
+      };
+    };
+  };
+  OutcomesController_replaceLinks: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        itemId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReplaceCloPloLinksDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ItemCloPloMatrixDto'];
+        };
+      };
+    };
+  };
+  OutcomesController_outcomeCoverage: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        versionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OutcomeCoverageDto'];
+        };
+      };
+    };
+  };
   SyllabiController_forCourse: {
     parameters: {
       query?: never;
@@ -4046,6 +4725,100 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['WeeklyContentDto'];
+        };
+      };
+    };
+  };
+  SyllabiController_createClo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        syllabusId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateCloDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CloDto'];
+        };
+      };
+    };
+  };
+  SyllabiController_reorderClos: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        syllabusId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReorderClosDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CloDto'][];
+        };
+      };
+    };
+  };
+  SyllabiController_removeClo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cloId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SyllabiController_updateClo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        cloId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateCloDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CloDto'];
         };
       };
     };

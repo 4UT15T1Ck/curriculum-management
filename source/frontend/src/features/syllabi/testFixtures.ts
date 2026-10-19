@@ -1,6 +1,7 @@
 import type {
   CourseSyllabus,
   Syllabus,
+  Clo,
   SyllabusAttachment,
   WeeklyContent,
 } from './api/syllabi';
@@ -26,6 +27,24 @@ export function week(
     sortOrder,
     content: `<p>Nội dung ${id}</p>`,
     teachingActivities: null,
+    cloIds: [],
+    ...patch,
+  };
+}
+
+export function clo(
+  id: string,
+  sortOrder: number,
+  patch: Partial<Clo> = {},
+): Clo {
+  return {
+    id,
+    cloCode: `CLO${sortOrder}`,
+    description: `Mô tả ${id}`,
+    englishDescription: null,
+    cognitiveLevel: null,
+    sortOrder,
+    linkedPrograms: [],
     ...patch,
   };
 }
@@ -60,6 +79,7 @@ export function syllabus(patch: Partial<Syllabus> = {}): Syllabus {
     updatedAt: '2026-10-19T03:00:00.000Z',
     weeklyContents: [],
     attachments: [],
+    clos: [],
     ...patch,
   };
 }
@@ -95,6 +115,7 @@ export function courseSyllabus(
     published: null,
     draft: syllabus(),
     canCreate: false,
+    canEditClos: true,
     editPath: 'DIRECT',
     attachmentRules: RULES,
     ...patch,

@@ -1,6 +1,7 @@
 import { App, Button, Popconfirm, Space } from 'antd';
 import { errorMessage } from '../../../shared/forms/applyFieldErrors';
 import type { CurriculumItem } from '../api/curriculum';
+import { ITEM_DELETE_CONFIRM } from '../constants/curriculumLabels';
 import { useDeleteItem } from '../hooks/useCurriculum';
 
 interface CurriculumItemActionsProps {
@@ -30,7 +31,7 @@ export function CurriculumItemActions({
       </Button>
       <Popconfirm
         title={`Xóa ${item.course.courseCode} khỏi khung?`}
-        description="Các điều kiện riêng của dòng này cũng bị xóa."
+        description={ITEM_DELETE_CONFIRM}
         okText="Xóa"
         cancelText="Hủy"
         okButtonProps={{ danger: true }}

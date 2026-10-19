@@ -17,6 +17,9 @@ export type CreateWeeklyContentRequest =
   components['schemas']['CreateWeeklyContentDto'];
 export type UpdateWeeklyContentRequest =
   components['schemas']['UpdateWeeklyContentDto'];
+export type Clo = components['schemas']['CloDto'];
+export type CreateCloRequest = components['schemas']['CreateCloDto'];
+export type UpdateCloRequest = components['schemas']['UpdateCloDto'];
 export type SyllabusSectionField = keyof UpdateSyllabusRequest;
 
 const coursePath = (courseId: string) =>
@@ -25,6 +28,7 @@ const syllabusPath = (syllabusId: string) =>
   `/syllabi/${encodeURIComponent(syllabusId)}`;
 const weekPath = (weeklyContentId: string) =>
   `/weekly-contents/${encodeURIComponent(weeklyContentId)}`;
+const cloPath = (cloId: string) => `/clos/${encodeURIComponent(cloId)}`;
 const attachmentPath = (attachmentId: string) =>
   `/syllabus-attachments/${encodeURIComponent(attachmentId)}`;
 const ATTACHMENT_FIELD = 'file';
@@ -58,6 +62,14 @@ export const reorderWeeks = (syllabusId: string, ids: string[]) =>
     `${syllabusPath(syllabusId)}/weekly-contents/order`,
     { ids },
   );
+export const createClo = (syllabusId: string, body: CreateCloRequest) =>
+  sendJson<Clo>('POST', `${syllabusPath(syllabusId)}/clos`, body);
+export const updateClo = (cloId: string, body: UpdateCloRequest) =>
+  sendJson<Clo>('PATCH', cloPath(cloId), body);
+export const deleteClo = (cloId: string) =>
+  sendJson<void>('DELETE', cloPath(cloId));
+export const reorderClos = (syllabusId: string, ids: string[]) =>
+  sendJson<Clo[]>('PUT', `${syllabusPath(syllabusId)}/clos/order`, { ids });
 export function uploadAttachment(
   syllabusId: string,
   file: File,

@@ -3,6 +3,7 @@ import { RichTextView } from '../../../shared/components/rich-text/RichTextView'
 import type { Syllabus, SyllabusSectionField } from '../api/syllabi';
 import {
   ATTACHMENTS_SECTION_LABEL,
+  CLO_SECTION_LABEL,
   EMPTY_SECTION,
   NOT_TRANSLATED,
   SECTION_LABELS,
@@ -12,6 +13,7 @@ import {
 import { formatDate, formatDateTime } from '../utils/formatDateTime';
 import { translated } from '../utils/syllabusLanguage';
 import { AttachmentList } from './AttachmentList';
+import { CloView } from './CloView';
 import { WeeklyContentView } from './WeeklyContentView';
 
 interface SyllabusSectionsProps {
@@ -37,7 +39,7 @@ function Section({ title, children, untranslated = false }: SectionProps) {
   );
 }
 
-// Only the course name and the description have an English field (FR-48); the other sections show Vietnamese in both modes.
+// The course name, the description and each CLO have an English field (FR-48); the other sections show Vietnamese in both modes.
 export function SyllabusSections({
   syllabus,
   language,
@@ -66,8 +68,14 @@ export function SyllabusSections({
         <RichTextView html={description.text} emptyText={EMPTY_SECTION} />
       </Section>
       {plain('objectives')}
+      <Section title={CLO_SECTION_LABEL}>
+        <CloView clos={syllabus.clos} language={language} />
+      </Section>
       <Section title={WEEKLY_SECTION_LABEL}>
-        <WeeklyContentView weeks={syllabus.weeklyContents} />
+        <WeeklyContentView
+          weeks={syllabus.weeklyContents}
+          clos={syllabus.clos}
+        />
       </Section>
       {plain('teachingMethods')}
       {plain('assessmentMethods')}

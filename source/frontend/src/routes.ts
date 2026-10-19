@@ -23,6 +23,11 @@ export const ROUTES = {
   curriculum: '/programs/:programId/versions/:versionId/curriculum',
   electiveGroups: '/programs/:programId/versions/:versionId/elective-groups',
   consistency: '/programs/:programId/versions/:versionId/consistency',
+  plos: '/programs/:programId/versions/:versionId/plos',
+  coursePloMatrix: '/programs/:programId/versions/:versionId/course-plo-matrix',
+  cloPloMatrix: '/programs/:programId/versions/:versionId/clo-plo-matrix',
+  itemCloPlo: '/programs/:programId/versions/:versionId/items/:itemId/clo-plo',
+  outcomeCoverage: '/programs/:programId/versions/:versionId/outcome-coverage',
 } as const;
 
 // Row or group to scroll to and highlight on arrival; set by the consistency result list.

@@ -14,10 +14,15 @@ import {
 import { RichTextView } from '../../../shared/components/rich-text/RichTextView';
 import { errorMessage } from '../../../shared/forms/applyFieldErrors';
 import type { WeeklyContent } from '../api/syllabi';
-import { ADD_WEEK, EMPTY_SECTION } from '../constants/syllabusLabels';
+import {
+  ADD_WEEK,
+  EMPTY_SECTION,
+  WEEKLY_CLO_COLUMN,
+} from '../constants/syllabusLabels';
 import { useDeleteWeek } from '../hooks/useSyllabus';
 import { useWeeklyReorder } from '../hooks/useWeeklyReorder';
 import type { EditorTabProps } from '../types';
+import { CloCodes } from './CloCodes';
 import { WeeklyContentModal } from './WeeklyContentModal';
 
 export function WeeklyContentTable({ courseId, syllabus }: EditorTabProps) {
@@ -36,6 +41,13 @@ export function WeeklyContentTable({ courseId, syllabus }: EditorTabProps) {
       title: 'Nội dung',
       render: (_value, week) => (
         <RichTextView html={week.content} emptyText={EMPTY_SECTION} />
+      ),
+    },
+    {
+      title: WEEKLY_CLO_COLUMN,
+      width: 110,
+      render: (_value, week) => (
+        <CloCodes cloIds={week.cloIds} clos={syllabus.clos} />
       ),
     },
     {
@@ -104,6 +116,7 @@ export function WeeklyContentTable({ courseId, syllabus }: EditorTabProps) {
         <WeeklyContentModal
           courseId={courseId}
           syllabusId={syllabus.id}
+          clos={syllabus.clos}
           week={editing === 'new' ? null : editing}
           onClose={() => setEditing(null)}
         />

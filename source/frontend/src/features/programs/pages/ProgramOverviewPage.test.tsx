@@ -58,9 +58,22 @@ const director = (patch: Record<string, unknown> = {}) => ({
   ...patch,
 });
 
+const ME = {
+  id: 'u1',
+  username: 'u',
+  userCode: 'U',
+  fullName: 'U',
+  email: null,
+  mustChangePassword: false,
+  orgUnit: null,
+  roles: [{ roleCode: 'R3' }],
+  permissions: ['outcome.view', 'program.view'],
+};
+
 function renderPage(
   program: Record<string, unknown> = PROGRAM,
   directors: unknown[] = [],
+  me: Record<string, unknown> | null = null,
 ) {
   const writes: { url: string; method: string }[] = [];
   vi.stubGlobal(
@@ -71,6 +84,7 @@ function renderPage(
         writes.push({ url, method: 'POST' });
         return Promise.resolve(json({ ...program, status: 'INACTIVE' }));
       }
+      if (url === '/api/auth/me' && me) return Promise.resolve(json(me));
       if (url === '/api/programs/p1/directors')
         return Promise.resolve(json(directors));
       if (url === '/api/programs/p1') return Promise.resolve(json(program));
@@ -136,6 +150,33 @@ describe('ProgramOverviewPage', () => {
     expect(
       screen.getByRole('link', { name: 'Kiểm tra nhất quán' }),
     ).toHaveAttribute('href', '/programs/p1/versions/v1/consistency');
+  });
+
+  it('links the outcome screens of the working version to staff and only the PLO list to a student (F-11)', async () => {
+    renderPage(PROGRAM, [], ME);
+    expect(await screen.findByRole('link', { name: 'PLO' })).toHaveAttribute(
+      'href',
+      '/programs/p1/versions/v1/plos',
+    );
+    expect(
+      screen.getByRole('link', { name: 'Ma trận học phần–PLO' }),
+    ).toHaveAttribute('href', '/programs/p1/versions/v1/course-plo-matrix');
+    expect(
+      screen.getByRole('link', { name: 'Ma trận CLO–PLO' }),
+    ).toHaveAttribute('href', '/programs/p1/versions/v1/clo-plo-matrix');
+    expect(
+      screen.getByRole('link', { name: 'Kiểm tra phủ chuẩn đầu ra' }),
+    ).toHaveAttribute('href', '/programs/p1/versions/v1/outcome-coverage');
+  });
+
+  it('shows a student the PLO card only', async () => {
+    renderPage(PROGRAM, [], { ...ME, roles: [{ roleCode: 'R6' }] });
+    expect(
+      await screen.findByRole('link', { name: 'PLO' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Ma trận học phần–PLO' }),
+    ).not.toBeInTheDocument();
   });
 
   it('opens the current version when the program has no Draft', async () => {

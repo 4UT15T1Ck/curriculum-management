@@ -32,6 +32,7 @@ function renderPanel(
           courseId="c1"
           syllabus={current}
           attachmentRules={RULES}
+          canEditClos
         />
       </App>
     </QueryClientProvider>,

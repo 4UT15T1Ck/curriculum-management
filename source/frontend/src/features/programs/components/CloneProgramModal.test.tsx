@@ -71,7 +71,7 @@ describe('CloneProgramModal', () => {
   it('posts the picked source version with the new code and name, then opens the clone', async () => {
     const { posts } = renderModal(() => json({ id: 'p9' }, 201));
     expect(
-      await screen.findByText(/chưa chép PLO và ma trận/),
+      await screen.findByText(/PLO và hai ma trận chuẩn đầu ra/),
     ).toBeInTheDocument();
     fireEvent.mouseDown(screen.getAllByRole('combobox')[0]);
     fireEvent.click(await screen.findByText('Nháp — Nháp'));

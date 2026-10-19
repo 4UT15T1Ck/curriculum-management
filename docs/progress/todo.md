@@ -44,7 +44,7 @@ Một dòng cho mỗi tính năng; việc chi tiết (CV-xxx) ở `docs/planning
 | # | Item | Status | Notes |
 |---|---|---|---|
 | F-10 | Đề cương | 🔄 | Mã xong 2026-10-19; còn nợ: đi thử bằng trình duyệt (kế hoạch §7) và áp migration `20261019095730_syllabi` |
-| F-11 | PLO, CLO, ma trận | ❌ | CLO–PLO theo chương trình, chỉ tới PLO học phần đã gắn; Học phần–PLO nhập trực tiếp kèm trọng số |
+| F-11 | PLO, CLO, ma trận | 🔄 | Mã xong 2026-10-19; còn nợ: đi thử bằng trình duyệt (báo cáo dựng) và áp migration `20261019102707_outcomes` lên cơ sở dữ liệu phát triển |
 | F-12 | Công thức điểm, đánh giá–CLO | ❌ | Sau MVP |
 
 ## B4 — Đề xuất thay đổi và phiên bản

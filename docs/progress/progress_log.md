@@ -159,3 +159,12 @@ Format:
 - Giao diện MH-36 (xem, bật VI/EN, "Chưa dịch"), MH-37 (ba tab: Nội dung, Nội dung theo tuần, Đính kèm), liên kết "Đề cương" từ học phần và từng dòng khung kèm thẻ "Chưa có đề cương".
 - Kiểm tra: backend đơn vị 465, đầu-cuối 238; frontend 240; tsc, oxlint, Prettier, build sạch.
 - Còn nợ: đi thử bằng trình duyệt, áp migration lên cơ sở dữ liệu phát triển. Điểm lệch kế hoạch ở báo cáo dựng.
+
+## [F-11] PLO, CLO và ma trận chuẩn đầu ra — dựng mã
+**Date**: 2026-10-19
+**Files changed**: `source/backend/prisma/{schema.prisma,migrations/20261019102707_outcomes}`, `source/backend/src/features/{outcomes,syllabi,curriculum}/*`, `source/backend/src/shared/{outcomes,syllabi,curriculum,programs,collections,prisma}/*`, `source/backend/test/*`, `source/frontend/src/features/{outcomes,syllabi,programs,curriculum}/*`, `source/frontend/src/shared/{outcomes,hooks,api}/*`
+- Bảng `PLO`, `CLO`, `WeeklyContentCLO`, `CoursePLOMapping`, `CLOPLOMapping` (khóa ngoại ghép từ liên kết CLO–PLO tới ô học phần–PLO, `CHECK` trọng số 0 < w ≤ 1); feature `outcomes` (PLO, ma trận học phần–PLO có trọng số, liên kết CLO–PLO theo học phần và theo chương trình, báo cáo phủ), CLO và liên kết tuần–CLO trong feature `syllabi`.
+- Dùng chung: `itemTarget`, `currentRevisionByCourse`, `outcomeGaps` + `OutcomeGapsReader`, `groupBy`, `isForeignKeyViolation`, `useSortableReorder`, `useSeesMatrices`; `VersionContentCopier` chép PLO và hai ma trận khi nhân bản.
+- Giao diện MH-31..MH-35, tab CLO, cột CLO ở dòng tuần, mục CLO có bật VI/EN, thẻ ở tổng quan chương trình.
+- Kiểm tra: backend đơn vị 543, đầu-cuối 267; frontend 291; tsc, oxlint, Prettier, build sạch.
+- Còn nợ: đi thử bằng trình duyệt, áp migration lên cơ sở dữ liệu phát triển.

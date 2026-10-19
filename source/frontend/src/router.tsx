@@ -82,6 +82,31 @@ const ConsistencyPage = lazy(() =>
     default: module.ConsistencyPage,
   })),
 );
+const PloListPage = lazy(() =>
+  import('./features/outcomes/pages/PloListPage').then((module) => ({
+    default: module.PloListPage,
+  })),
+);
+const CoursePloMatrixPage = lazy(() =>
+  import('./features/outcomes/pages/CoursePloMatrixPage').then((module) => ({
+    default: module.CoursePloMatrixPage,
+  })),
+);
+const ProgramCloPloPage = lazy(() =>
+  import('./features/outcomes/pages/ProgramCloPloPage').then((module) => ({
+    default: module.ProgramCloPloPage,
+  })),
+);
+const ItemCloPloPage = lazy(() =>
+  import('./features/outcomes/pages/ItemCloPloPage').then((module) => ({
+    default: module.ItemCloPloPage,
+  })),
+);
+const OutcomeCoveragePage = lazy(() =>
+  import('./features/outcomes/pages/OutcomeCoveragePage').then((module) => ({
+    default: module.OutcomeCoveragePage,
+  })),
+);
 const SyllabusPage = lazy(() =>
   import('./features/syllabi/pages/SyllabusPage').then((module) => ({
     default: module.SyllabusPage,
@@ -283,6 +308,46 @@ export const router = createBrowserRouter([
             element: (
               <RequirePermission code={PERMISSIONS.programView}>
                 <ConsistencyPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.plos,
+            element: (
+              <RequirePermission code={PERMISSIONS.outcomeView}>
+                <PloListPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.coursePloMatrix,
+            element: (
+              <RequirePermission code={PERMISSIONS.outcomeView}>
+                <CoursePloMatrixPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.cloPloMatrix,
+            element: (
+              <RequirePermission code={PERMISSIONS.outcomeView}>
+                <ProgramCloPloPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.itemCloPlo,
+            element: (
+              <RequirePermission code={PERMISSIONS.outcomeView}>
+                <ItemCloPloPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.outcomeCoverage,
+            element: (
+              <RequirePermission code={PERMISSIONS.outcomeView}>
+                <OutcomeCoveragePage />
               </RequirePermission>
             ),
           },

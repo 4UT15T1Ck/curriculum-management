@@ -1,10 +1,16 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import { App } from 'antd';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { CourseSyllabus } from '../api/syllabi';
-import { attachment, courseSyllabus, ME, syllabus } from '../testFixtures';
+import { attachment, clo, courseSyllabus, ME, syllabus } from '../testFixtures';
 import { SyllabusPage } from './SyllabusPage';
 
 const json = (body: unknown, status = 200) =>
@@ -135,6 +141,7 @@ describe('SyllabusPage', () => {
               sortOrder: 1,
               content: '<p>Giới thiệu</p>',
               teachingActivities: '<p>Thuyết giảng</p>',
+              cloIds: [],
             },
           ],
           attachments: [attachment()],
@@ -184,6 +191,28 @@ describe('SyllabusPage', () => {
       }),
     ).toBeInTheDocument();
     expect(screen.queryByText('Chưa dịch')).not.toBeInTheDocument();
+  });
+
+  it('switches the CLO description with the language toggle and flags a missing translation (FR-48)', async () => {
+    renderPage(
+      courseSyllabus({
+        draft: syllabus({
+          clos: [
+            clo('a', 1, {
+              description: 'Giải thích được',
+              englishDescription: 'Explain',
+            }),
+            clo('b', 2, { description: 'Áp dụng được' }),
+          ],
+        }),
+      }),
+    );
+    expect(await screen.findByText('Giải thích được')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('English'));
+    expect(await screen.findByText('Explain')).toBeInTheDocument();
+    expect(screen.queryByText('Giải thích được')).not.toBeInTheDocument();
+    const fallback = screen.getByText('Áp dụng được').closest('tr')!;
+    expect(within(fallback).getByText('Chưa dịch')).toBeInTheDocument();
   });
 
   it('falls back to Vietnamese and tags "Chưa dịch" when English is empty', async () => {

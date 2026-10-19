@@ -19,6 +19,9 @@ export const PERMISSIONS = {
   directorAssign: 'director.assign',
   syllabusView: 'syllabus.view',
   syllabusEdit: 'syllabus.edit',
+  outcomeView: 'outcome.view',
+  ploEdit: 'plo.edit',
+  cloEdit: 'clo.edit',
 } as const satisfies Record<string, PermissionCode>;
 
 export function hasPermission(

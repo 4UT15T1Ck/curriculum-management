@@ -28,6 +28,8 @@ export const REQUISITE_LATER_TOOLTIP = (semester: number) =>
 export const REQUISITES_INTRO =
   'Điều kiện ở đây chỉ áp dụng cho khung này; danh mục học phần không đổi.';
 export const GROUP_BELOW_MINIMUM_LABEL = 'Ít hơn yêu cầu';
+export const ITEM_DELETE_CONFIRM =
+  'Các điều kiện riêng của dòng này và các ô của học phần trong ma trận học phần–PLO, CLO–PLO cũng bị xóa.';
 export const GROUP_DELETE_CONFIRM = 'Các học phần trong nhóm vẫn là tự chọn.';
 export const MINIMUM_REQUIRED_MESSAGE = 'Nhập ít nhất một yêu cầu tối thiểu.';
 // Repeated in the syllabi feature's labels: features do not import each other.

@@ -10,7 +10,7 @@ import { App } from 'antd';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { CourseSyllabus } from '../api/syllabi';
-import { courseSyllabus, ME, syllabus, week } from '../testFixtures';
+import { clo, courseSyllabus, ME, syllabus, week } from '../testFixtures';
 import { SyllabusEditorPage } from './SyllabusEditorPage';
 
 // TipTap needs a real layout engine to type into; the form wiring is what these tests cover (the editor has its own test).
@@ -106,7 +106,7 @@ describe('SyllabusEditorPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('lists the programs using the course before editing and offers three tabs (US-039 AC3)', async () => {
+  it('lists the programs using the course before editing and offers four tabs (US-039 AC3, F-11)', async () => {
     renderPage(courseSyllabus());
     expect(
       await screen.findByText(/dùng chung cho các chương trình sau/),
@@ -117,6 +117,7 @@ describe('SyllabusEditorPage', () => {
       'Nội dung',
       'Nội dung theo tuần',
       'Tệp đính kèm',
+      'CLO',
     ]);
   });
 
@@ -188,6 +189,7 @@ describe('SyllabusEditorPage', () => {
       weekLabel: 'Tuần 1',
       content: '<p>Giới thiệu</p>',
       teachingActivities: null,
+      cloIds: [],
     });
   });
 
@@ -202,5 +204,92 @@ describe('SyllabusEditorPage', () => {
     );
     expect(await screen.findByText('Nội dung w1')).toBeInTheDocument();
     expect(screen.getByText('Nội dung w2')).toBeInTheDocument();
+  });
+
+  it('shows each weekly row with the CLOs it covers and saves the CLOs picked', async () => {
+    const clos = [clo('a', 1), clo('b', 2), clo('c', 3)];
+    const fetchMock = renderPage(
+      courseSyllabus({
+        draft: syllabus({
+          clos,
+          weeklyContents: [week('w1', 1, { cloIds: ['a', 'c'] })],
+        }),
+      }),
+    );
+    fireEvent.click(
+      await screen.findByRole('tab', { name: 'Nội dung theo tuần' }),
+    );
+    expect(await screen.findByText('CLO1, CLO3')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Thêm tuần/ }));
+    const dialog = await screen.findByRole('dialog');
+    fireEvent.change(within(dialog).getByRole('textbox', { name: 'Tuần' }), {
+      target: { value: 'Tuần 2' },
+    });
+    fireEvent.change(
+      within(dialog).getByRole('textbox', { name: 'Nội dung' }),
+      { target: { value: '<p>x</p>' } },
+    );
+    fireEvent.mouseDown(within(dialog).getByLabelText('CLO đạt được'));
+    fireEvent.click(await screen.findByTitle('Mô tả b'));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Lưu' }));
+    await waitFor(() => expect(writes(fetchMock, 'POST')).toHaveLength(1));
+    const [, init] = writes(fetchMock, 'POST')[0] as [string, RequestInit];
+    expect(JSON.parse(String(init.body))).toMatchObject({ cloIds: ['b'] });
+  });
+
+  describe('CLO tab', () => {
+    it('is off for a caller who cannot edit CLOs', async () => {
+      renderPage(courseSyllabus({ canEditClos: false }));
+      expect(await screen.findByRole('tab', { name: 'CLO' })).toHaveAttribute(
+        'aria-disabled',
+        'true',
+      );
+    });
+
+    it('lists the CLOs and names the programs a delete would unlink', async () => {
+      renderPage(
+        courseSyllabus({
+          draft: syllabus({
+            clos: [
+              clo('a', 1, { linkedPrograms: ['CNTT', 'KTPM'] }),
+              clo('b', 2),
+            ],
+          }),
+        }),
+      );
+      fireEvent.click(await screen.findByRole('tab', { name: 'CLO' }));
+      expect(await screen.findByText('Mô tả a')).toBeInTheDocument();
+      const row = screen.getByText('CLO1').closest('tr')!;
+      fireEvent.click(within(row).getByRole('button', { name: 'Xóa' }));
+      expect(
+        await screen.findByText(
+          'CLO này đang gắn PLO ở chương trình CNTT, KTPM; xóa sẽ xóa các liên kết đó.',
+        ),
+      ).toBeInTheDocument();
+    });
+
+    it('adds a CLO with its code and Vietnamese description', async () => {
+      const fetchMock = renderPage(courseSyllabus());
+      fireEvent.click(await screen.findByRole('tab', { name: 'CLO' }));
+      fireEvent.click(await screen.findByRole('button', { name: /Thêm CLO/ }));
+      const dialog = await screen.findByRole('dialog');
+      fireEvent.change(within(dialog).getByLabelText('Mã CLO'), {
+        target: { value: 'clo1' },
+      });
+      fireEvent.change(within(dialog).getByLabelText('Mô tả (tiếng Việt)'), {
+        target: { value: 'Giải thích được' },
+      });
+      fireEvent.click(within(dialog).getByRole('button', { name: 'Lưu' }));
+      await waitFor(() => expect(writes(fetchMock, 'POST')).toHaveLength(1));
+      const [url, init] = writes(fetchMock, 'POST')[0] as [string, RequestInit];
+      expect(url).toBe('/api/syllabi/s1/clos');
+      expect(JSON.parse(String(init.body))).toEqual({
+        cloCode: 'clo1',
+        description: 'Giải thích được',
+        englishDescription: null,
+        cognitiveLevel: null,
+      });
+    });
   });
 });

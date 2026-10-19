@@ -1,13 +1,15 @@
-import { Alert, Flex, Result, Skeleton, Tabs, Typography } from 'antd';
+import { Alert, Flex, Result, Skeleton, Tabs, Tooltip, Typography } from 'antd';
 import { generatePath, Link, useParams } from 'react-router';
 import { ROUTES } from '../../../routes';
 import { ApiError } from '../../../shared/api/client';
 import { ProgramsUsingList } from '../../../shared/courses/ProgramsUsingList';
 import { AttachmentPanel } from '../components/AttachmentPanel';
+import { CloTab } from '../components/CloTab';
 import { SyllabusContentForm } from '../components/SyllabusContentForm';
 import { WeeklyContentTable } from '../components/WeeklyContentTable';
 import {
   BACK_TO_SYLLABUS,
+  CLO_TAB_DISABLED_TOOLTIP,
   EDITOR_TAB_LABELS,
   NOT_DIRECTLY_EDITABLE,
   PROGRAMS_USING_NOTICE,
@@ -15,7 +17,7 @@ import {
 import { useCourseSyllabus } from '../hooks/useSyllabus';
 import type { EditorTabProps } from '../types';
 
-// The order users see; F-11 and F-12 append the CLO, grading formula and mapping tabs here.
+// The order users see; F-12 appends the grading formula and mapping tabs after the CLO tab.
 const EDITOR_TABS = [
   {
     key: 'content',
@@ -32,7 +34,23 @@ const EDITOR_TABS = [
     label: EDITOR_TAB_LABELS.attachments,
     render: (props: EditorTabProps) => <AttachmentPanel {...props} />,
   },
-] as const;
+  {
+    key: 'clos',
+    label: EDITOR_TAB_LABELS.clos,
+    render: (props: EditorTabProps) => <CloTab {...props} />,
+    // CLOs are written with clo.edit, not syllabus.edit; the tab stays visible but off without it.
+    enabled: (props: EditorTabProps) => props.canEditClos,
+    disabledHint: CLO_TAB_DISABLED_TOOLTIP,
+  },
+] satisfies readonly EditorTab[];
+
+interface EditorTab {
+  key: string;
+  label: string;
+  render: (props: EditorTabProps) => React.ReactNode;
+  enabled?: (props: EditorTabProps) => boolean;
+  disabledHint?: string;
+}
 
 export function SyllabusEditorPage() {
   const { courseId = '' } = useParams();
@@ -45,7 +63,14 @@ export function SyllabusEditorPage() {
       );
     return <Result status="404" title="Không tìm thấy học phần" />;
   }
-  const { course, draft, editPath, programsUsing, attachmentRules } = data;
+  const {
+    course,
+    draft,
+    editPath,
+    programsUsing,
+    attachmentRules,
+    canEditClos,
+  } = data;
   const backLink = generatePath(ROUTES.syllabus, { courseId });
   if (!draft || editPath !== 'DIRECT')
     return (
@@ -59,6 +84,7 @@ export function SyllabusEditorPage() {
     courseId,
     syllabus: draft,
     attachmentRules,
+    canEditClos,
   };
   return (
     <Flex vertical gap="middle">
@@ -75,11 +101,19 @@ export function SyllabusEditorPage() {
         description={<ProgramsUsingList programs={programsUsing} />}
       />
       <Tabs
-        items={EDITOR_TABS.map((tab) => ({
-          key: tab.key,
-          label: tab.label,
-          children: tab.render(tabProps),
-        }))}
+        items={EDITOR_TABS.map((tab: EditorTab) => {
+          const disabled = tab.enabled ? !tab.enabled(tabProps) : false;
+          return {
+            key: tab.key,
+            label: disabled ? (
+              <Tooltip title={tab.disabledHint}>{tab.label}</Tooltip>
+            ) : (
+              tab.label
+            ),
+            disabled,
+            children: disabled ? null : tab.render(tabProps),
+          };
+        })}
       />
     </Flex>
   );

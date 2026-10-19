@@ -31,6 +31,6 @@ export { DRAFT_VERSION_LABEL, versionLabel };
 
 export const ALL_STATUSES_LABEL = 'Tất cả';
 export const CLONE_SCOPE_NOTE =
-  'Bản mới ở trạng thái Nháp, chép thông tin chương trình và khung; chưa chép PLO và ma trận. Giám đốc CTĐT phân công lại sau.';
+  'Bản mới ở trạng thái Nháp, chép thông tin chương trình, khung, PLO và hai ma trận chuẩn đầu ra. Đề cương học phần dùng chung nên không sao chép. Giám đốc CTĐT phân công lại sau.';
 export const REVOKE_DIRECTOR_CONFIRM =
   'Chỉ dùng khi phân công nhập nhầm. Lịch sử vẫn giữ dòng đã thu hồi.';

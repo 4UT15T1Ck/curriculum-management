@@ -16,6 +16,7 @@ const initial: Syllabus = {
   updatedAt: '2026-10-19T00:00:00.000Z',
   weeklyContents: [],
   attachments: [],
+  clos: [],
 };
 
 describe('changedSections', () => {

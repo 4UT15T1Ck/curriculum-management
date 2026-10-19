@@ -1,17 +1,24 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { OUTCOME_QUERY_ROOT } from '../../../shared/outcomes/outcomeQueryRoot';
 import { CURRICULUM_QUERY_ROOT } from '../../../shared/curriculum/curriculumQueryRoot';
 import {
+  createClo,
   createSyllabus,
   createWeek,
   deleteAttachment,
+  deleteClo,
   deleteWeek,
   downloadAttachment,
   fetchCourseSyllabus,
+  reorderClos,
   reorderWeeks,
+  updateClo,
   updateSyllabus,
   updateWeek,
   uploadAttachment,
+  type CreateCloRequest,
   type CreateWeeklyContentRequest,
+  type UpdateCloRequest,
   type UpdateSyllabusRequest,
   type UpdateWeeklyContentRequest,
 } from '../api/syllabi';
@@ -102,6 +109,46 @@ export const useReorderWeeks = (courseId: string) =>
     courseId,
     ({ syllabusId, ids }: { syllabusId: string; ids: string[] }) =>
       reorderWeeks(syllabusId, ids),
+  );
+
+// A CLO is shared with the PLO matrices (links, gaps), so a CLO write refreshes those too.
+function useCloMutation<TVars, TResult>(
+  courseId: string,
+  mutationFn: (vars: TVars) => Promise<TResult>,
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: SYLLABUS_QUERY_KEYS.course(courseId),
+        }),
+        queryClient.invalidateQueries({ queryKey: OUTCOME_QUERY_ROOT }),
+      ]),
+  });
+}
+
+export const useCreateClo = (courseId: string, syllabusId: string) =>
+  useCloMutation(courseId, (body: CreateCloRequest) =>
+    createClo(syllabusId, body),
+  );
+
+export const useUpdateClo = (courseId: string) =>
+  useCloMutation(
+    courseId,
+    ({ cloId, body }: { cloId: string; body: UpdateCloRequest }) =>
+      updateClo(cloId, body),
+  );
+
+export const useDeleteClo = (courseId: string) =>
+  useCloMutation(courseId, deleteClo);
+
+export const useReorderClos = (courseId: string) =>
+  useCloMutation(
+    courseId,
+    ({ syllabusId, ids }: { syllabusId: string; ids: string[] }) =>
+      reorderClos(syllabusId, ids),
   );
 
 export const useUploadAttachment = (courseId: string, syllabusId: string) =>

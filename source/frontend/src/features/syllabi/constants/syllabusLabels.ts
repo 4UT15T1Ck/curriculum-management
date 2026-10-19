@@ -65,8 +65,33 @@ export const ADD_WEEK = 'Thêm tuần';
 export const CONTENT_REQUIRED = 'Nội dung tuần không được để trống.';
 export const WEEK_LABEL_REQUIRED = 'Nhập nhãn tuần.';
 export const WEEK_LABEL_MAX = 50;
+export const CLO_SECTION_LABEL = 'Chuẩn đầu ra học phần (CLO)';
+export const NO_CLOS = 'Chưa có CLO';
+export const ADD_CLO = 'Thêm CLO';
+export const CLO_CODE_REQUIRED = 'Nhập mã CLO.';
+export const CLO_DESCRIPTION_REQUIRED = 'Nhập mô tả CLO.';
+export const CLO_CODE_MAX = 20;
+export const CLO_TEXT_MAX = 2000;
+export const COGNITIVE_LEVEL_MAX = 50;
+// Suggestions only (Bloom's levels); the field is free text.
+export const COGNITIVE_LEVEL_SUGGESTIONS = [
+  'Nhớ',
+  'Hiểu',
+  'Áp dụng',
+  'Phân tích',
+  'Đánh giá',
+  'Sáng tạo',
+] as const;
+export const CLO_TAB_DISABLED_TOOLTIP =
+  'Bạn không có quyền sửa CLO của bản đề cương này.';
+export const WEEKLY_CLO_COLUMN = 'CLO';
+export const cloDeleteConfirm = (programs: readonly string[]) =>
+  programs.length === 0
+    ? 'Xóa CLO này khỏi đề cương?'
+    : `CLO này đang gắn PLO ở chương trình ${programs.join(', ')}; xóa sẽ xóa các liên kết đó.`;
 export const EDITOR_TAB_LABELS = {
   content: 'Nội dung',
   weekly: WEEKLY_SECTION_LABEL,
   attachments: ATTACHMENTS_SECTION_LABEL,
+  clos: 'CLO',
 } as const;
