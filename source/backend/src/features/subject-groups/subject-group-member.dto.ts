@@ -4,14 +4,13 @@ import {
   UserStatus,
   type Prisma,
 } from '../../generated/prisma/client.js';
-import { UserRefDto } from '../../shared/dtos/ref.dto.js';
+import { SubjectGroupRefDto, UserRefDto } from '../../shared/dtos/ref.dto.js';
 import { toIsoDay } from '../../shared/time/today.js';
 import {
   VALIDITY_STATES,
   validityState,
   type ValidityState,
 } from '../../shared/time/validity.js';
-import { SubjectGroupRefDto } from './subject-group.dto.js';
 
 export class MemberUserDto {
   @ApiProperty() id!: string;

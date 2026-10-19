@@ -1,8 +1,9 @@
 import { OrgUnitType } from '../../src/generated/prisma/client.js';
+import { HOME_FACULTY_CODE } from '../../src/shared/org-units/home-faculty.js';
 
 export const ORG_UNIT_CODES = {
   UNIVERSITY: 'DHBK',
-  FACULTY_IT: 'KHOA_CNTT',
+  FACULTY_IT: HOME_FACULTY_CODE,
   ACADEMIC_OFFICE: 'PDT',
 } as const;
 

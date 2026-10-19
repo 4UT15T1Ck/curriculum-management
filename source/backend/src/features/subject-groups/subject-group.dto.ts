@@ -4,17 +4,14 @@ import {
   SubjectGroupStatus,
   type Prisma,
 } from '../../generated/prisma/client.js';
-import { OrgUnitRefDto, UserRefDto } from '../../shared/dtos/ref.dto.js';
+import {
+  CourseRefDto,
+  OrgUnitRefDto,
+  SubjectGroupRefDto,
+  UserRefDto,
+} from '../../shared/dtos/ref.dto.js';
 import { activeMemberRowWhere } from '../../shared/subject-groups/active-membership.js';
 import { SubjectGroupMemberDto } from './subject-group-member.dto.js';
-
-export class SubjectGroupRefDto {
-  @ApiProperty() id!: string;
-  @ApiProperty() groupCode!: string;
-  @ApiProperty() groupName!: string;
-  @ApiProperty({ enum: SubjectGroupStatus, enumName: 'SubjectGroupStatus' })
-  status!: SubjectGroupStatus;
-}
 
 export class SubjectGroupSummaryDto extends SubjectGroupRefDto {
   @ApiProperty({ type: OrgUnitRefDto }) faculty!: OrgUnitRefDto;
@@ -30,17 +27,11 @@ export class SubjectGroupDetailDto extends SubjectGroupSummaryDto {
   @ApiProperty() updatedAt!: string;
 }
 
-export class SubjectGroupCourseRefDto {
-  @ApiProperty() id!: string;
-  @ApiProperty() courseCode!: string;
-  @ApiProperty() courseName!: string;
-}
-
 export class SubjectGroupDeactivationImpactDto {
   @ApiProperty() activeMemberCount!: number;
   @ApiProperty({ type: [UserRefDto] }) activeCoordinators!: UserRefDto[];
-  @ApiProperty({ type: [SubjectGroupCourseRefDto] })
-  courses!: SubjectGroupCourseRefDto[];
+  @ApiProperty({ type: [CourseRefDto] })
+  courses!: CourseRefDto[];
 }
 
 export function summaryInclude(today: Date) {

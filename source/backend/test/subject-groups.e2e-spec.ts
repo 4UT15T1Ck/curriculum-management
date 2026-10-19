@@ -3,6 +3,7 @@ import type { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import type { StartedRedisContainer } from '@testcontainers/redis';
 import request from 'supertest';
 import {
+  CourseStatus,
   OrgUnitType,
   ScopeType,
   SubjectGroupMemberRole,
@@ -15,6 +16,7 @@ import { ScopeService } from '../src/shared/authz/scope.service.js';
 import { PrismaService } from '../src/shared/prisma/prisma.service.js';
 import { toIsoDay } from '../src/shared/time/today.js';
 import { createAccount, loginAgent } from './fixtures/accounts.js';
+import { createCourse } from './fixtures/courses.js';
 import {
   addMembership,
   createSubjectGroup,
@@ -228,6 +230,29 @@ describe('subject groups and memberships', () => {
         expect(body.hasActiveCoordinator).toBe(false);
         expect(body.activeMemberCount).toBe(1);
       });
+  });
+
+  it('lists the group courses that are not cancelled in the deactivation impact', async () => {
+    const group = await createSubjectGroup(app, 'IMPACT_COURSES');
+    await createCourse(app, { courseCode: 'IMP002', groupId: group.id });
+    await createCourse(app, {
+      courseCode: 'IMP001',
+      groupId: group.id,
+      status: CourseStatus.DISCONTINUED,
+    });
+    await createCourse(app, {
+      courseCode: 'IMP003',
+      groupId: group.id,
+      status: CourseStatus.CANCELLED,
+    });
+    const impact = await admin
+      .get(`/api/subject-groups/${group.id}/deactivation-impact`)
+      .expect(200);
+    expect(
+      impact.body.courses.map(
+        (course: { courseCode: string }) => course.courseCode,
+      ),
+    ).toEqual(['IMP001', 'IMP002']);
   });
 
   it('lists several coordinators without counting anyone twice', async () => {

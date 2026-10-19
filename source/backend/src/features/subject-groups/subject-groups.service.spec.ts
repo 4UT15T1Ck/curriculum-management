@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  CourseStatus,
   OrgUnitStatus,
   OrgUnitType,
   Prisma,
@@ -44,6 +45,7 @@ describe('SubjectGroupsService', () => {
   let create: ReturnType<typeof vi.fn>;
   let update: ReturnType<typeof vi.fn>;
   let faculty: ReturnType<typeof vi.fn>;
+  let courseFindMany: ReturnType<typeof vi.fn>;
   let service: SubjectGroupsService;
 
   beforeEach(() => {
@@ -55,9 +57,11 @@ describe('SubjectGroupsService', () => {
       unitType: OrgUnitType.FACULTY,
       status: OrgUnitStatus.ACTIVE,
     });
+    courseFindMany = vi.fn().mockResolvedValue([]);
     service = new SubjectGroupsService({
       subjectGroup: { findMany, findUnique, create, update },
       orgUnit: { findUnique: faculty },
+      course: { findMany: courseFindMany },
       subjectGroupMember: { findMany: vi.fn().mockResolvedValue([]) },
     } as unknown as PrismaService);
   });
@@ -179,6 +183,24 @@ describe('SubjectGroupsService', () => {
       activeMemberCount: 0,
       activeCoordinators: [],
       courses: [],
+    });
+  });
+
+  it('lists the group courses that are not cancelled, ordered by code', async () => {
+    const courses = [
+      { id: 'c1', courseCode: 'IT001', courseName: 'Active' },
+      { id: 'c2', courseCode: 'IT002', courseName: 'Discontinued' },
+    ];
+    courseFindMany.mockResolvedValue(courses);
+    const impact = await service.deactivationImpact(GROUP.id);
+    expect(impact.courses).toEqual(courses);
+    expect(courseFindMany).toHaveBeenCalledWith({
+      where: {
+        ownerGroupId: GROUP.id,
+        status: { not: CourseStatus.CANCELLED },
+      },
+      select: { id: true, courseCode: true, courseName: true },
+      orderBy: { courseCode: 'asc' },
     });
   });
 });

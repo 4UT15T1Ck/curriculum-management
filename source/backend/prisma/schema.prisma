@@ -34,6 +34,22 @@ enum SubjectGroupMemberRole {
   COORDINATOR
 }
 
+enum CourseType {
+  THEORY
+  PRACTICE
+  LAB
+  PROJECT
+  CAPSTONE
+  INTERNSHIP
+  CONDITIONAL
+}
+
+enum CourseStatus {
+  ACTIVE
+  DISCONTINUED
+  CANCELLED
+}
+
 enum ScopeSource {
   NONE
   PROGRAM_DIRECTOR
@@ -82,6 +98,7 @@ model OrgUnit {
   users           User[]
   roleAssignments RoleAssignment[]
   subjectGroups   SubjectGroup[]
+  ownedCourses    Course[]         @relation("CourseOwnerFaculty")
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 
@@ -113,17 +130,38 @@ model User {
 }
 
 model SubjectGroup {
-  id        String               @id @default(cuid(2))
-  groupCode String               @unique
-  groupName String
-  facultyId String
-  faculty   OrgUnit              @relation(fields: [facultyId], references: [id], onDelete: Restrict)
-  status    SubjectGroupStatus   @default(ACTIVE)
-  members   SubjectGroupMember[]
-  createdAt DateTime             @default(now())
-  updatedAt DateTime             @updatedAt
+  id           String               @id @default(cuid(2))
+  groupCode    String               @unique
+  groupName    String
+  facultyId    String
+  faculty      OrgUnit              @relation(fields: [facultyId], references: [id], onDelete: Restrict)
+  status       SubjectGroupStatus   @default(ACTIVE)
+  members      SubjectGroupMember[]
+  ownedCourses Course[]             @relation("CourseOwnerGroup")
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
 
   @@index([facultyId])
+}
+
+model Course {
+  id             String        @id @default(cuid(2))
+  courseCode     String        @unique
+  courseName     String
+  englishName    String?
+  credits        Decimal       @db.Decimal(5, 2)
+  courseType     CourseType
+  status         CourseStatus  @default(ACTIVE)
+  ownerFacultyId String
+  ownerFaculty   OrgUnit       @relation("CourseOwnerFaculty", fields: [ownerFacultyId], references: [id], onDelete: Restrict)
+  ownerGroupId   String?
+  ownerGroup     SubjectGroup? @relation("CourseOwnerGroup", fields: [ownerGroupId], references: [id], onDelete: Restrict)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([ownerFacultyId])
+  @@index([ownerGroupId])
+  @@index([courseName])
 }
 
 model SubjectGroupMember {

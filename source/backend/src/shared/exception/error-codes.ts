@@ -33,6 +33,11 @@ export const COMMON_ERRORS = {
     code: 'OUT_OF_SCOPE',
     message: 'Đối tượng này nằm ngoài phạm vi được phân công của bạn.',
   },
+  CHANGE_REQUEST_REQUIRED: {
+    status: HttpStatus.CONFLICT,
+    code: 'CHANGE_REQUEST_REQUIRED',
+    message: 'Dữ liệu này chỉ thay đổi được qua đề xuất thay đổi.',
+  },
   CSRF_HEADER_MISSING: {
     status: HttpStatus.FORBIDDEN,
     code: 'CSRF_HEADER_MISSING',

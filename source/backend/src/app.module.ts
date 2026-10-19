@@ -16,6 +16,7 @@ import { UsersModule } from './features/users/users.module.js';
 import { PermissionsModule } from './features/permissions/permissions.module.js';
 import { OrgUnitsModule } from './features/org-units/org-units.module.js';
 import { SubjectGroupsModule } from './features/subject-groups/subject-groups.module.js';
+import { CoursesModule } from './features/courses/courses.module.js';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { SubjectGroupsModule } from './features/subject-groups/subject-groups.mo
     PermissionsModule,
     OrgUnitsModule,
     SubjectGroupsModule,
+    CoursesModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: CsrfGuard },
