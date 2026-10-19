@@ -23,7 +23,7 @@ Một chỗ để bắt đầu: dựng hệ thống trên máy, chạy kiểm th
 3. Tạo `.env` cạnh `package.json` (mẫu đầy đủ ở §1.3). Tối thiểu cần `DATABASE_URL`, `SESSION_SECRET` và `SEED_ADMIN_PASSWORD`.
 4. `pnpm prisma:migrate` — áp 13 migration (`auth_session` … `release_versions`).
 5. `SEED_ADMIN_PASSWORD=<≥ 8 ký tự, có chữ và số> pnpm prisma:seed` — chạy lại nhiều lần không sinh trùng.
-6. `pnpm dev` → API `http://localhost:3000/api`, tài liệu API `http://localhost:3000/api/docs`.
+6. `pnpm dev` → API `http://localhost:3000/api`, tài liệu API `http://localhost:3000/api/docs`. Biên dịch bằng SWC nên lên trong vài giây nhưng không kiểm kiểu; kiểm kiểu bằng `pnpm typecheck`. Nếu dừng ở `Watching for file changes` mà không thấy `Nest application successfully started`: kiểm tra PostgreSQL/Redis đã chạy và `DATABASE_URL`, `REDIS_PORT` đúng.
 7. Kiểm tra: `GET /api/health` trả `{"status":"ok","database":"up","redis":"up"}`.
 
 ### 1.2. Frontend — `source/frontend`
