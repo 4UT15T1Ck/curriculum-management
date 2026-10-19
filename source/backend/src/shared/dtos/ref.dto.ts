@@ -31,3 +31,12 @@ export class CourseRefDto {
   @ApiProperty() courseCode!: string;
   @ApiProperty() courseName!: string;
 }
+
+// Selects that produce the ref DTOs above, so list and detail mappers do not each re-spell them.
+export const ORG_UNIT_REF_SELECT = {
+  id: true,
+  unitCode: true,
+  unitName: true,
+} as const;
+
+export const USER_REF_SELECT = { id: true, fullName: true } as const;

@@ -10,6 +10,7 @@ import { PasswordService } from '../src/shared/password/password.service.js';
 import { ScopeType } from '../src/generated/prisma/client.js';
 import { todayDate } from '../src/shared/time/today.js';
 import { ORG_UNIT_CODES } from './seed-data/org-units.js';
+import { seedPrograms } from './seed-data/programs.js';
 import { seedAccessControl } from './seed-data/seed-access-control.js';
 import { ROLE_CODES } from './seed-data/roles.js';
 
@@ -48,6 +49,7 @@ try {
     update: {},
   });
   await seedAccessControl(prisma);
+  await seedPrograms(prisma);
   const academicOffice = await prisma.orgUnit.findUniqueOrThrow({
     where: { unitCode: ORG_UNIT_CODES.ACADEMIC_OFFICE },
   });

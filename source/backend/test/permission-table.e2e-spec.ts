@@ -101,6 +101,11 @@ describe('permission table', () => {
     if (path.startsWith('/api/equivalence-groups')) {
       return prisma.equivalentCourseGroup.count();
     }
+    if (path.startsWith('/api/programs')) {
+      return path.includes('/directors')
+        ? prisma.programDirectorAssignment.count()
+        : prisma.program.count();
+    }
     if (path.startsWith('/api/subject-groups')) {
       return path.includes('/members')
         ? prisma.subjectGroupMember.count()

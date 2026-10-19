@@ -50,6 +50,23 @@ enum CourseStatus {
   CANCELLED
 }
 
+enum DegreeLevel {
+  ENGINEER
+  BACHELOR
+}
+
+enum ProgramStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum ProgramVersionStatus {
+  DRAFT
+  PENDING
+  ACTIVE
+  HISTORICAL
+}
+
 enum ScopeSource {
   NONE
   PROGRAM_DIRECTOR
@@ -99,6 +116,7 @@ model OrgUnit {
   roleAssignments RoleAssignment[]
   subjectGroups   SubjectGroup[]
   ownedCourses    Course[]         @relation("CourseOwnerFaculty")
+  programs        Program[]        @relation("ProgramFaculty")
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 
@@ -106,25 +124,28 @@ model OrgUnit {
 }
 
 model User {
-  id                      String               @id @default(cuid(2))
-  userCode                String               @unique
+  id                      String                      @id @default(cuid(2))
+  userCode                String                      @unique
   fullName                String
   email                   String?
-  status                  UserStatus           @default(ACTIVE)
-  username                String               @unique
+  status                  UserStatus                  @default(ACTIVE)
+  username                String                      @unique
   passwordHash            String
-  mustChangePassword      Boolean              @default(false)
+  mustChangePassword      Boolean                     @default(false)
   orgUnitId               String?
-  orgUnit                 OrgUnit?             @relation(fields: [orgUnitId], references: [id], onDelete: Restrict)
-  roleAssignments         RoleAssignment[]     @relation("AssignmentHolder")
-  grantedAssignments      RoleAssignment[]     @relation("AssignmentGrantor")
-  revokedAssignments      RoleAssignment[]     @relation("AssignmentRevoker")
-  subjectGroupMemberships SubjectGroupMember[] @relation("MembershipHolder")
-  grantedMemberships      SubjectGroupMember[] @relation("MembershipGrantor")
-  revokedMemberships      SubjectGroupMember[] @relation("MembershipRevoker")
+  orgUnit                 OrgUnit?                    @relation(fields: [orgUnitId], references: [id], onDelete: Restrict)
+  roleAssignments         RoleAssignment[]            @relation("AssignmentHolder")
+  grantedAssignments      RoleAssignment[]            @relation("AssignmentGrantor")
+  revokedAssignments      RoleAssignment[]            @relation("AssignmentRevoker")
+  subjectGroupMemberships SubjectGroupMember[]        @relation("MembershipHolder")
+  grantedMemberships      SubjectGroupMember[]        @relation("MembershipGrantor")
+  revokedMemberships      SubjectGroupMember[]        @relation("MembershipRevoker")
   updatedRolePermissions  RolePermission[]
-  createdAt               DateTime             @default(now())
-  updatedAt               DateTime             @updatedAt
+  programDirectorships    ProgramDirectorAssignment[] @relation("ProgramDirector")
+  grantedDirectorships    ProgramDirectorAssignment[] @relation("ProgramDirectorAssignedBy")
+  revokedDirectorships    ProgramDirectorAssignment[] @relation("ProgramDirectorRevokedBy")
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
 
   @@index([orgUnitId])
 }
@@ -221,6 +242,65 @@ model SubjectGroupMember {
 
   @@index([lecturerId])
   @@index([subjectGroupId])
+}
+
+model Program {
+  id           String                      @id @default(cuid(2))
+  programCode  String                      @unique
+  facultyId    String
+  faculty      OrgUnit                     @relation("ProgramFaculty", fields: [facultyId], references: [id], onDelete: Restrict)
+  degreeLevel  DegreeLevel
+  status       ProgramStatus               @default(ACTIVE)
+  clonedFromId String?
+  clonedFrom   ProgramVersion?             @relation("ProgramClonedFrom", fields: [clonedFromId], references: [id], onDelete: Restrict)
+  versions     ProgramVersion[]            @relation("ProgramVersions")
+  directors    ProgramDirectorAssignment[]
+  createdAt    DateTime                    @default(now())
+  updatedAt    DateTime                    @updatedAt
+
+  @@index([facultyId])
+}
+
+// Identity lives in Program; the description (name, major, semesters, credits) lives here so a released version keeps its own (M-3).
+// Two partial unique indexes are added by hand in the migration (not modelled by Prisma): see database_and_models.md.
+model ProgramVersion {
+  id                String               @id @default(cuid(2))
+  programId         String
+  program           Program              @relation("ProgramVersions", fields: [programId], references: [id], onDelete: Restrict)
+  versionNumber     String?
+  status            ProgramVersionStatus @default(DRAFT)
+  programName       String
+  majorCode         String
+  majorName         String
+  semesterCount     Int
+  totalCredits      Decimal              @db.Decimal(5, 2)
+  compulsoryCredits Decimal              @db.Decimal(5, 2)
+  electiveCredits   Decimal              @db.Decimal(5, 2)
+  clones            Program[]            @relation("ProgramClonedFrom")
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  @@unique([programId, versionNumber])
+  @@index([programId, status])
+}
+
+model ProgramDirectorAssignment {
+  id           String    @id @default(cuid(2))
+  programId    String
+  program      Program   @relation(fields: [programId], references: [id], onDelete: Restrict)
+  directorId   String
+  director     User      @relation("ProgramDirector", fields: [directorId], references: [id], onDelete: Restrict)
+  validFrom    DateTime  @db.Date
+  validTo      DateTime? @db.Date
+  assignedById String?
+  assignedBy   User?     @relation("ProgramDirectorAssignedBy", fields: [assignedById], references: [id], onDelete: Restrict)
+  revokedAt    DateTime?
+  revokedById  String?
+  revokedBy    User?     @relation("ProgramDirectorRevokedBy", fields: [revokedById], references: [id], onDelete: Restrict)
+  createdAt    DateTime  @default(now())
+
+  @@index([directorId])
+  @@index([programId])
 }
 
 model Role {

@@ -4,6 +4,7 @@ import {
   SubjectGroupMemberRole,
 } from '../../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { activeDirectorWhere } from '../programs/active-director.js';
 import { activeMembershipWhere } from '../subject-groups/active-membership.js';
 import type { ScopeTarget } from './access-context.js';
 
@@ -18,6 +19,7 @@ export class ScopeSourceReader {
   ): Promise<ScopeTarget> {
     switch (source) {
       case ScopeSource.PROGRAM_DIRECTOR:
+        return { programIds: await this.directedProgramIds(userId, today) };
       case ScopeSource.OWN_ENROLLMENT:
         return {};
       case ScopeSource.SUBJECT_GROUP_COORDINATOR:
@@ -31,6 +33,18 @@ export class ScopeSourceReader {
       case ScopeSource.SUBJECT_GROUP_MEMBER:
         return { subjectGroupIds: await this.activeGroupIds(userId, today) };
     }
+  }
+
+  private async directedProgramIds(
+    directorId: string,
+    today: Date,
+  ): Promise<string[]> {
+    const rows = await this.prisma.programDirectorAssignment.findMany({
+      where: { directorId, ...activeDirectorWhere(today) },
+      select: { programId: true },
+      distinct: ['programId'],
+    });
+    return rows.map((row) => row.programId);
   }
 
   private async activeGroupIds(
