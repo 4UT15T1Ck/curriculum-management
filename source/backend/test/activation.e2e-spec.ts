@@ -156,14 +156,14 @@ describe('scheduled activation on BullMQ (US-073, PB-06, PB-07, KB-057)', () => 
 
   it('catches up at every start-up: the boot job runs even when an earlier boot job already completed', async () => {
     const first = await pendingVersions(1);
-    await app.get(ReleaseActivationScheduler).onApplicationBootstrap();
+    await app.get(ReleaseActivationScheduler).schedule();
     await until(
       async () =>
         (await statuses(first.programId)).join() === 'HISTORICAL,ACTIVE',
     );
 
     const second = await pendingVersions(1);
-    await app.get(ReleaseActivationScheduler).onApplicationBootstrap();
+    await app.get(ReleaseActivationScheduler).schedule();
     await until(
       async () =>
         (await statuses(second.programId)).join() === 'HISTORICAL,ACTIVE',

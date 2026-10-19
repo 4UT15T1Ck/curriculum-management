@@ -31,7 +31,13 @@ export class ReleaseActivationScheduler
     @InjectQueue(RELEASE_ACTIVATION_QUEUE) private readonly queue: Queue,
   ) {}
 
-  async onApplicationBootstrap(): Promise<void> {
+  // Not awaited: BullMQ queues commands until Redis answers, so awaiting here would hold the
+  // whole API at start-up for as long as Redis is down. The jobs are sent once it connects.
+  onApplicationBootstrap(): void {
+    void this.schedule();
+  }
+
+  async schedule(): Promise<void> {
     const options = {
       attempts: ACTIVATION_ATTEMPTS,
       backoff: { type: 'exponential', delay: ACTIVATION_BACKOFF_MS },
