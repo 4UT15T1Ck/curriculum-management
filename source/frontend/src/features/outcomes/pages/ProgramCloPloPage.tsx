@@ -3,6 +3,7 @@ import type { TableColumnsType } from 'antd';
 import { generatePath, Link, useParams } from 'react-router';
 import { ROUTES } from '../../../routes';
 import { ApiError } from '../../../shared/api/client';
+import { RequestDraftBanner } from '../../../shared/change-requests/RequestDraftBanner';
 import { versionLabel } from '../../../shared/constants/versionLabels';
 import type { CloRef, ProgramCloPloMatrix } from '../api/outcomes';
 import { OutcomeNav } from '../components/OutcomeNav';
@@ -117,6 +118,7 @@ export function ProgramCloPloPage() {
         Dấu ✓ là CLO đã gắn PLO; dấu chấm là PLO mà học phần chưa đóng góp. Bấm
         “Xem / sửa” để đổi liên kết của một học phần.
       </Typography.Text>
+      <RequestDraftBanner request={version.sourceRequest} />
       <ProgramCloPloView matrix={data} programId={programId} />
     </Flex>
   );

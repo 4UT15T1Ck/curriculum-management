@@ -1,5 +1,5 @@
-import { Button, Tooltip } from 'antd';
-import { CHANGE_REQUEST_PENDING_TOOLTIP } from '../../../shared/constants/editPath';
+import { Button } from 'antd';
+import { CreateRequestButton } from '../../../shared/change-requests/CreateRequestButton';
 import type { Curriculum } from '../api/curriculum';
 
 interface CurriculumAddButtonProps {
@@ -8,7 +8,7 @@ interface CurriculumAddButtonProps {
 }
 
 // The server decides (canAddItems, editPath); the client never derives it from roles.
-// F-13 turns the disabled button into "Tạo đề xuất".
+// Where the framework is released the edit goes through a request (FR-55).
 export function CurriculumAddButton({
   curriculum,
   onAdd,
@@ -21,9 +21,13 @@ export function CurriculumAddButton({
     );
   if (curriculum.editPath === 'VIA_REQUEST')
     return (
-      <Tooltip title={CHANGE_REQUEST_PENDING_TOOLTIP}>
-        <Button disabled>Tạo đề xuất</Button>
-      </Tooltip>
+      <CreateRequestButton
+        prefill={{
+          type: 'CURRICULUM',
+          targetType: 'PROGRAM',
+          targetId: curriculum.version.programId,
+        }}
+      />
     );
   return null;
 }

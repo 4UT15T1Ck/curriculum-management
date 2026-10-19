@@ -1,7 +1,7 @@
-import { Button, Tooltip } from 'antd';
+import { Button } from 'antd';
 import { generatePath, useNavigate } from 'react-router';
 import { ROUTES } from '../../../routes';
-import { CHANGE_REQUEST_PENDING_TOOLTIP } from '../../../shared/constants/editPath';
+import { CreateRequestButton } from '../../../shared/change-requests/CreateRequestButton';
 import type { ProgramDetail } from '../api/programs';
 
 interface ProgramEditButtonProps {
@@ -14,9 +14,13 @@ export function ProgramEditButton({ program }: ProgramEditButtonProps) {
   if (program.editPath === null) return null;
   if (program.editPath === 'VIA_REQUEST')
     return (
-      <Tooltip title={CHANGE_REQUEST_PENDING_TOOLTIP}>
-        <Button disabled>Tạo đề xuất</Button>
-      </Tooltip>
+      <CreateRequestButton
+        prefill={{
+          type: 'PROGRAM_INFO',
+          targetType: 'PROGRAM',
+          targetId: program.id,
+        }}
+      />
     );
   return (
     <Button

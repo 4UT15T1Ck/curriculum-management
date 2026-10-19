@@ -168,3 +168,11 @@ Format:
 - Giao diện MH-31..MH-35, tab CLO, cột CLO ở dòng tuần, mục CLO có bật VI/EN, thẻ ở tổng quan chương trình.
 - Kiểm tra: backend đơn vị 543, đầu-cuối 267; frontend 291; tsc, oxlint, Prettier, build sạch.
 - Còn nợ: đi thử bằng trình duyệt, áp migration lên cơ sở dữ liệu phát triển.
+
+## [F-13] Đề xuất thay đổi — dựng mã
+**Date**: 2026-10-19
+**Files changed**: `source/backend/prisma/{schema.prisma,seed.ts,seed-data,migrations/20261019110535_change_requests}`, `source/backend/src/features/{change-requests,programs,curriculum,outcomes,syllabi,consistency}/*`, `source/backend/src/shared/{change-requests,syllabi,rich-text,curriculum}/*`, `source/backend/test/*`, `source/frontend/src/features/{change-requests,programs,courses,curriculum,outcomes,syllabi}/*`, `source/frontend/src/shared/*`, `docs/{implement-report,progress,implementation}/*`
+- Bảng `ChangeRequest`, `ChangeItem`, `ApprovalStep`, `ApprovalLevelConfig`, `ChangeRequestDocument`; bản làm việc (`ProgramVersion` / `Syllabus` Nháp có `sourceRequestId`) sửa qua cùng các màn hình cũ nhờ `assertEditPath`; so sánh theo khóa tự nhiên; định tuyến ba cấp, bỏ qua dòng của người tạo; gửi duyệt trong một giao dịch (khóa đồ thị, `ConsistencyChecker`, kiểm tra bản gốc cũ); rút, xóa Nháp, hồ sơ đính kèm, cảnh báo chồng đề xuất.
+- Giao diện MH-38..MH-41, banner bản nháp, `CreateRequestButton` thay cho nút "Tạo đề xuất" bị khóa.
+- Kiểm tra: backend đơn vị 638, đầu-cuối 304; frontend 344; tsc, oxlint, Prettier, build sạch.
+- Còn nợ: đi thử bằng trình duyệt, áp migration. Chi tiết ở báo cáo dựng.

@@ -3,6 +3,7 @@ import {
   getJson,
   sendForm,
   sendJson,
+  withQuery,
 } from '../../../shared/api/client';
 import type { components } from '../../../shared/api/schema';
 
@@ -33,8 +34,9 @@ const attachmentPath = (attachmentId: string) =>
   `/syllabus-attachments/${encodeURIComponent(attachmentId)}`;
 const ATTACHMENT_FIELD = 'file';
 
-export const fetchCourseSyllabus = (courseId: string) =>
-  getJson<CourseSyllabus>(coursePath(courseId));
+// With a request id the Draft is that request's working copy (F-13); the published revision is unchanged.
+export const fetchCourseSyllabus = (courseId: string, requestId?: string) =>
+  getJson<CourseSyllabus>(withQuery(coursePath(courseId), { requestId }));
 export const createSyllabus = (courseId: string) =>
   sendJson<CourseSyllabus>('POST', coursePath(courseId));
 export const updateSyllabus = (

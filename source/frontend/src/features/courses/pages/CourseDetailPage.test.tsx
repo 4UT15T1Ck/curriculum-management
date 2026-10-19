@@ -40,7 +40,12 @@ const ME = {
   mustChangePassword: false,
   orgUnit: null,
   roles: [],
-  permissions: ['course.view', 'course.edit', 'courseRelation.edit'],
+  permissions: [
+    'course.view',
+    'course.edit',
+    'courseRelation.edit',
+    'changeRequest.create',
+  ],
 };
 
 const relation = (patch: Record<string, unknown> = {}) => ({
@@ -120,12 +125,15 @@ describe('CourseDetailPage', () => {
     expect(screen.getByRole('button', { name: 'Sửa' })).toBeEnabled();
   });
 
-  it('shows a disabled change-request button when the edit path is via request', async () => {
+  it('links to the request form with the course chosen when the edit path is via request', async () => {
     renderPage(() =>
       json({ ...course, editPath: 'VIA_REQUEST', canChangeStatus: false }),
     );
     const button = await screen.findByRole('button', { name: 'Tạo đề xuất' });
-    expect(button).toBeDisabled();
+    expect(button.closest('a')).toHaveAttribute(
+      'href',
+      '/change-requests/new?type=COURSE_RELATION&targetType=COURSE&targetId=c1',
+    );
     expect(
       screen.queryByRole('button', { name: 'Sửa' }),
     ).not.toBeInTheDocument();
@@ -289,7 +297,12 @@ describe('CourseDetailPage', () => {
     expect(screen.getAllByText(/IT002 — Toán rời rạc/)).toHaveLength(3);
     expect(screen.getByText('2')).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: 'Xóa' })).toHaveLength(2);
-    expect(screen.getByRole('button', { name: 'Tạo đề xuất' })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Tạo đề xuất' }).closest('a'),
+    ).toHaveAttribute(
+      'href',
+      '/change-requests/new?type=COURSE_RELATION&targetType=COURSE&targetId=c1',
+    );
   });
 
   it('edits a threshold in place, refusing a value above 4 on the client', async () => {

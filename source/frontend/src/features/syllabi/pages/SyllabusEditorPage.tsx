@@ -1,7 +1,13 @@
 import { Alert, Flex, Result, Skeleton, Tabs, Tooltip, Typography } from 'antd';
-import { generatePath, Link, useParams } from 'react-router';
+import { useState } from 'react';
+import { generatePath, Link, useParams, useSearchParams } from 'react-router';
 import { ROUTES } from '../../../routes';
 import { ApiError } from '../../../shared/api/client';
+import {
+  REQUEST_ID_PARAM,
+  TAB_PARAM,
+} from '../../../shared/change-requests/requestParams';
+import { RequestDraftBanner } from '../../../shared/change-requests/RequestDraftBanner';
 import { ProgramsUsingList } from '../../../shared/courses/ProgramsUsingList';
 import { AttachmentPanel } from '../components/AttachmentPanel';
 import { CloTab } from '../components/CloTab';
@@ -54,7 +60,11 @@ interface EditorTab {
 
 export function SyllabusEditorPage() {
   const { courseId = '' } = useParams();
-  const { data, isPending, error } = useCourseSyllabus(courseId);
+  const [searchParams] = useSearchParams();
+  const requestId = searchParams.get(REQUEST_ID_PARAM) ?? undefined;
+  const initialTab = searchParams.get(TAB_PARAM) ?? EDITOR_TABS[0].key;
+  const [activeTab, setActiveTab] = useState(initialTab);
+  const { data, isPending, error } = useCourseSyllabus(courseId, requestId);
   if (isPending) return <Skeleton active />;
   if (!data) {
     if (error instanceof ApiError && error.status === 403)
@@ -71,7 +81,10 @@ export function SyllabusEditorPage() {
     attachmentRules,
     canEditClos,
   } = data;
-  const backLink = generatePath(ROUTES.syllabus, { courseId });
+  const backBase = generatePath(ROUTES.syllabus, { courseId });
+  const backLink = requestId
+    ? `${backBase}?${REQUEST_ID_PARAM}=${encodeURIComponent(requestId)}`
+    : backBase;
   if (!draft || editPath !== 'DIRECT')
     return (
       <Result
@@ -94,6 +107,7 @@ export function SyllabusEditorPage() {
         </Typography.Title>
         <Link to={backLink}>{BACK_TO_SYLLABUS}</Link>
       </Flex>
+      <RequestDraftBanner request={draft.sourceRequest} />
       <Alert
         type="info"
         showIcon
@@ -101,7 +115,12 @@ export function SyllabusEditorPage() {
         description={<ProgramsUsingList programs={programsUsing} />}
       />
       <Tabs
-        items={EDITOR_TABS.map((tab: EditorTab) => {
+        activeKey={activeTab}
+        onChange={setActiveTab}
+        items={EDITOR_TABS.filter(
+          // A request's copy carries no attachments; the request has its own documents.
+          (tab) => !(draft.sourceRequest && tab.key === 'attachments'),
+        ).map((tab: EditorTab) => {
           const disabled = tab.enabled ? !tab.enabled(tabProps) : false;
           return {
             key: tab.key,

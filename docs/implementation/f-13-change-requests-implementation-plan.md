@@ -12,7 +12,7 @@ It deliberately excludes every approval action — approve, return, reject, over
 > - Builds on: F-01 (`AppException`, `COMMON_ERRORS`, `createTestApp`, `client.ts`), F-02 (`AccessContext`, `PERMISSIONS.CHANGE_REQUEST_*`, `ROLE_CODES`, `PERMISSION_TABLE`), F-03 (`SubjectGroup`, `SubjectGroupMember`, `activeMembershipWhere`), F-04 (`edit-path.ts`, `HOME_FACULTY_CODE`, `courseEditState`, paging), F-05 (`CourseRelation`, `lockRequisiteGraph`), F-06 (`ProgramVersion`, `ProgramsService.update`, `VersionContentCopier`, `activeDirectorWhere`), F-07 (`curriculum-access.ts`, `CourseUsageReader`), F-08 (`ConsistencyChecker`, `acceptMismatch`), F-10 (`Syllabus`, `syllabus-access.ts`, `FileStorageService`, attachment upload), F-11 (`outcome-access.ts`, `currentRevisionByCourse`, copier steps)
 > - Tests: `docs/planning/test-plan.md:204-210` (KB-040..KB-046), `:325-333` (NT-B4-01..NT-B4-03, NT-B4-09)
 
-**Status**: Not started
+**Status**: Mã xong 2026-10-19 (BE-xx, FE-xx); còn nợ đi thử bằng trình duyệt — `docs/implement-report/f-13-change-requests-implement-report.md`
 
 ---
 

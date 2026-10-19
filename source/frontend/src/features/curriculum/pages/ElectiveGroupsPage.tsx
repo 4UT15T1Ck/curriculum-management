@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { generatePath, Link, useParams, useSearchParams } from 'react-router';
 import { FOCUS_PARAM, ROUTES } from '../../../routes';
 import { ApiError } from '../../../shared/api/client';
+import { CreateRequestButton } from '../../../shared/change-requests/CreateRequestButton';
+import { RequestDraftBanner } from '../../../shared/change-requests/RequestDraftBanner';
 import { versionLabel } from '../../../shared/constants/versionLabels';
 import type { ElectiveGroup } from '../api/curriculum';
 import { AssignItemsModal } from '../components/AssignItemsModal';
@@ -48,6 +50,7 @@ export function ElectiveGroupsPage() {
       <Link to={generatePath(ROUTES.curriculum, { programId, versionId })}>
         ← Khung chương trình {version.programCode}
       </Link>
+      <RequestDraftBanner request={version.sourceRequest} />
       <Flex justify="space-between" align="center" wrap gap="small">
         <Typography.Title level={2} style={{ margin: 0 }}>
           Nhóm tự chọn — {version.programCode} ({versionLabel(version)})
@@ -56,6 +59,15 @@ export function ElectiveGroupsPage() {
           <Button type="primary" onClick={() => setEditing('new')}>
             Thêm nhóm
           </Button>
+        )}
+        {curriculum.editPath === 'VIA_REQUEST' && (
+          <CreateRequestButton
+            prefill={{
+              type: 'CURRICULUM',
+              targetType: 'PROGRAM',
+              targetId: version.programId,
+            }}
+          />
         )}
       </Flex>
       {ungrouped.length > 0 && (

@@ -1,7 +1,8 @@
-import { App, Button, Tooltip } from 'antd';
+import { App, Button } from 'antd';
 import { generatePath, useNavigate } from 'react-router';
 import { ROUTES } from '../../../routes';
-import { CHANGE_REQUEST_PENDING_TOOLTIP } from '../../../shared/constants/editPath';
+import { REQUEST_ID_PARAM } from '../../../shared/change-requests/requestParams';
+import { CreateRequestButton } from '../../../shared/change-requests/CreateRequestButton';
 import { errorMessage } from '../../../shared/forms/applyFieldErrors';
 import type { CourseSyllabus } from '../api/syllabi';
 import { CREATE_SYLLABUS, EDIT_SYLLABUS } from '../constants/syllabusLabels';
@@ -16,9 +17,14 @@ export function SyllabusActions({ data }: SyllabusActionsProps) {
   const { message } = App.useApp();
   const navigate = useNavigate();
   const create = useCreateSyllabus(data.course.id);
-  const editorPath = generatePath(ROUTES.syllabusEdit, {
+  // Looking at a request's working copy: the request, not the course, is what a viewer acts on.
+  const copy = data.draft?.sourceRequest ?? null;
+  const editorBase = generatePath(ROUTES.syllabusEdit, {
     courseId: data.course.id,
   });
+  const editorPath = copy
+    ? `${editorBase}?${REQUEST_ID_PARAM}=${encodeURIComponent(copy.id)}`
+    : editorBase;
   if (data.canCreate)
     return (
       <Button
@@ -37,11 +43,15 @@ export function SyllabusActions({ data }: SyllabusActionsProps) {
         {CREATE_SYLLABUS}
       </Button>
     );
-  if (data.editPath === 'VIA_REQUEST')
+  if (data.editPath === 'VIA_REQUEST' && !copy)
     return (
-      <Tooltip title={CHANGE_REQUEST_PENDING_TOOLTIP}>
-        <Button disabled>Tạo đề xuất</Button>
-      </Tooltip>
+      <CreateRequestButton
+        prefill={{
+          type: 'SYLLABUS_CONTENT',
+          targetType: 'COURSE',
+          targetId: data.course.id,
+        }}
+      />
     );
   if (data.editPath === 'DIRECT' && data.draft)
     return (

@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { generatePath, Link, useParams, useSearchParams } from 'react-router';
 import { FOCUS_PARAM, ROUTES } from '../../../routes';
 import { ApiError } from '../../../shared/api/client';
+import { RequestDraftBanner } from '../../../shared/change-requests/RequestDraftBanner';
 import { versionLabel } from '../../../shared/constants/versionLabels';
 import type { CurriculumItem } from '../api/curriculum';
 import { CurriculumAddButton } from '../components/CurriculumAddButton';
@@ -80,6 +81,7 @@ export function CurriculumPage() {
       <Link to={generatePath(ROUTES.programDetail, { programId })}>
         ← Chương trình {version.programCode}
       </Link>
+      <RequestDraftBanner request={version.sourceRequest} />
       <Flex justify="space-between" align="center" wrap gap="small">
         <Typography.Title level={2} style={{ margin: 0 }}>
           Khung chương trình — {version.programCode} ({versionLabel(version)})

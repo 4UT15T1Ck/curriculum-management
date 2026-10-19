@@ -69,6 +69,7 @@ export function syllabus(patch: Partial<Syllabus> = {}): Syllabus {
     id: 's1',
     revisionNumber: 1,
     status: 'DRAFT',
+    sourceRequest: null,
     courseDescription: '<p>Mô tả tiếng Việt</p>',
     englishDescription: null,
     objectives: null,
@@ -131,5 +132,10 @@ export const ME = {
   mustChangePassword: false,
   orgUnit: null,
   roles: [],
-  permissions: ['course.view', 'syllabus.view', 'syllabus.edit'],
+  permissions: [
+    'course.view',
+    'syllabus.view',
+    'syllabus.edit',
+    'changeRequest.create',
+  ],
 };

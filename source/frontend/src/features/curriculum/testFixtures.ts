@@ -98,6 +98,7 @@ export function curriculum(patch: Partial<Curriculum> = {}): Curriculum {
       versionNumber: null,
       status: 'DRAFT',
       semesterCount: 4,
+      sourceRequest: null,
     },
     editPath: 'DIRECT',
     canEditStructure: true,

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { CHANGE_REQUEST_QUERY_ROOT } from '../../../shared/change-requests/changeRequestQueryRoot';
 import { OUTCOME_QUERY_ROOT } from '../../../shared/outcomes/outcomeQueryRoot';
 import {
   createPlo,
@@ -76,7 +77,11 @@ function useOutcomeMutation<TVars, TResult>(
   return useMutation({
     mutationFn,
     onSettled: () =>
-      queryClient.invalidateQueries({ queryKey: OUTCOME_QUERY_ROOT }),
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: OUTCOME_QUERY_ROOT }),
+        // On a request's working copy the request's diff changes too.
+        queryClient.invalidateQueries({ queryKey: CHANGE_REQUEST_QUERY_ROOT }),
+      ]),
   });
 }
 

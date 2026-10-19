@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { CHANGE_REQUEST_QUERY_ROOT } from '../../../shared/change-requests/changeRequestQueryRoot';
 import { OUTCOME_QUERY_ROOT } from '../../../shared/outcomes/outcomeQueryRoot';
 import { CURRICULUM_QUERY_ROOT } from '../../../shared/curriculum/curriculumQueryRoot';
 import {
@@ -25,13 +26,16 @@ import {
 
 export const SYLLABUS_QUERY_KEYS = {
   all: ['syllabi'] as const,
-  course: (courseId: string) => ['syllabi', courseId] as const,
+  // Every cached view of one course's syllabus, the request copies included: what a write invalidates.
+  courseRoot: (courseId: string) => ['syllabi', courseId] as const,
+  course: (courseId: string, requestId?: string) =>
+    ['syllabi', courseId, requestId ?? null] as const,
 };
 
-export function useCourseSyllabus(courseId: string) {
+export function useCourseSyllabus(courseId: string, requestId?: string) {
   return useQuery({
-    queryKey: SYLLABUS_QUERY_KEYS.course(courseId),
-    queryFn: () => fetchCourseSyllabus(courseId),
+    queryKey: SYLLABUS_QUERY_KEYS.course(courseId, requestId),
+    queryFn: () => fetchCourseSyllabus(courseId, requestId),
     enabled: Boolean(courseId),
   });
 }
@@ -45,9 +49,13 @@ function useSyllabusMutation<TVars, TResult>(
   return useMutation({
     mutationFn,
     onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: SYLLABUS_QUERY_KEYS.course(courseId),
-      }),
+      Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: SYLLABUS_QUERY_KEYS.courseRoot(courseId),
+        }),
+        // A write on a request's working copy changes the request's diff.
+        queryClient.invalidateQueries({ queryKey: CHANGE_REQUEST_QUERY_ROOT }),
+      ]),
   });
 }
 
@@ -122,9 +130,10 @@ function useCloMutation<TVars, TResult>(
     onSuccess: () =>
       Promise.all([
         queryClient.invalidateQueries({
-          queryKey: SYLLABUS_QUERY_KEYS.course(courseId),
+          queryKey: SYLLABUS_QUERY_KEYS.courseRoot(courseId),
         }),
         queryClient.invalidateQueries({ queryKey: OUTCOME_QUERY_ROOT }),
+        queryClient.invalidateQueries({ queryKey: CHANGE_REQUEST_QUERY_ROOT }),
       ]),
   });
 }

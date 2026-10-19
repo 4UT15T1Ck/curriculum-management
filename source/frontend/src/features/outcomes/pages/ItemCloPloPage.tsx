@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { generatePath, Link, useParams } from 'react-router';
 import { ROUTES } from '../../../routes';
 import { ApiError } from '../../../shared/api/client';
+import { RequestDraftBanner } from '../../../shared/change-requests/RequestDraftBanner';
 import { versionLabel } from '../../../shared/constants/versionLabels';
 import { errorMessage } from '../../../shared/forms/applyFieldErrors';
 import type { ItemCloPloMatrix } from '../api/outcomes';
@@ -104,7 +105,11 @@ export function ItemCloPloPage() {
         {revision &&
           ` · Theo đề cương bản ${revision.revisionNumber}${revision.status === 'DRAFT' ? ' (nháp)' : ''}`}
       </Typography.Text>
-      <OutcomeEditNotice editPath={data.editPath} />
+      <RequestDraftBanner request={version.sourceRequest} />
+      <OutcomeEditNotice
+        editPath={data.editPath}
+        programId={version.programId}
+      />
       {revision === null ? (
         <Empty description={NO_SYLLABUS_FOR_COURSE}>
           <Link

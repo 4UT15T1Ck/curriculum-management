@@ -4,6 +4,7 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
+import { CHANGE_REQUEST_QUERY_ROOT } from '../../../shared/change-requests/changeRequestQueryRoot';
 import {
   assignDirector,
   changeProgramStatus,
@@ -13,13 +14,16 @@ import {
   fetchDirectors,
   fetchProgram,
   fetchPrograms,
+  fetchVersionInfo,
   revokeDirector,
   updateProgram,
+  updateVersionInfo,
   type AssignDirectorRequest,
   type CloneProgramRequest,
   type ProgramQuery,
   type ProgramStatusAction,
   type UpdateProgramRequest,
+  type UpdateVersionInfoRequest,
 } from '../api/programs';
 
 export const PROGRAM_QUERY_KEYS = {
@@ -28,6 +32,8 @@ export const PROGRAM_QUERY_KEYS = {
   detail: (programId: string) => ['programs', 'detail', programId] as const,
   directors: (programId: string) =>
     ['programs', 'directors', programId] as const,
+  versionInfo: (versionId: string) =>
+    ['programs', 'version-info', versionId] as const,
 };
 
 export function useProgramList(query: ProgramQuery) {
@@ -114,3 +120,26 @@ export const useRevokeDirector = () =>
       assignmentId: string;
     }) => revokeDirector(programId, assignmentId),
   );
+
+export function useVersionInfo(versionId: string) {
+  return useQuery({
+    queryKey: PROGRAM_QUERY_KEYS.versionInfo(versionId),
+    queryFn: () => fetchVersionInfo(versionId),
+    enabled: Boolean(versionId),
+  });
+}
+
+// The info of a request's working copy; the request's diff reads it, so that refetches too.
+export function useUpdateVersionInfo(versionId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: UpdateVersionInfoRequest) =>
+      updateVersionInfo(versionId, body),
+    onSuccess: (info) => {
+      queryClient.setQueryData(PROGRAM_QUERY_KEYS.versionInfo(versionId), info);
+      return queryClient.invalidateQueries({
+        queryKey: CHANGE_REQUEST_QUERY_ROOT,
+      });
+    },
+  });
+}

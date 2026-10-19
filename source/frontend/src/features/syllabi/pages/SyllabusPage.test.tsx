@@ -116,7 +116,12 @@ describe('SyllabusPage', () => {
     expect(
       screen.getByRole('tab', { name: 'Nháp — bản 2' }),
     ).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Tạo đề xuất' })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Tạo đề xuất' }).closest('a'),
+    ).toHaveAttribute(
+      'href',
+      '/change-requests/new?type=SYLLABUS_CONTENT&targetType=COURSE&targetId=c1',
+    );
   });
 
   it('offers editing of the Draft by the direct path', async () => {

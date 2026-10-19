@@ -35,7 +35,7 @@ vi.mock('../../../shared/components/rich-text/RichTextEditor', () => ({
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status });
 
-function renderPage(data: CourseSyllabus) {
+function renderPage(data: CourseSyllabus, entry = '/courses/c1/syllabus/edit') {
   const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input);
     if (url === '/api/auth/me') return Promise.resolve(json(ME));
@@ -59,7 +59,7 @@ function renderPage(data: CourseSyllabus) {
       },
       { path: '/courses/:courseId/syllabus', element: <p>Trang đề cương</p> },
     ],
-    { initialEntries: ['/courses/c1/syllabus/edit'] },
+    { initialEntries: [entry] },
   );
   render(
     <QueryClientProvider
@@ -88,6 +88,37 @@ const writes = (fetchMock: ReturnType<typeof vi.fn>, method: string) =>
 afterEach(() => vi.unstubAllGlobals());
 
 describe('SyllabusEditorPage', () => {
+  it('edits the copy of a request: banner, no attachments tab, back link keeps the request, opens the tab asked for', async () => {
+    const fetchMock = renderPage(
+      courseSyllabus({
+        draft: {
+          ...courseSyllabus().draft!,
+          sourceRequest: {
+            id: 'r1',
+            requestCode: 'DX-2026-0001',
+            status: 'DRAFT',
+          },
+        },
+      }),
+      '/courses/c1/syllabus/edit?requestId=r1&tab=clos',
+    );
+    expect(await screen.findByText('DX-2026-0001')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('tab', { name: /Tệp đính kèm/ }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Về trang đề cương' }),
+    ).toHaveAttribute('href', '/courses/c1/syllabus?requestId=r1');
+    expect(screen.getByRole('tab', { selected: true })).toHaveTextContent(
+      /CLO|Chuẩn đầu ra/,
+    );
+    expect(
+      fetchMock.mock.calls.some(([url]) =>
+        String(url).includes('requestId=r1'),
+      ),
+    ).toBe(true);
+  });
+
   it('shows an info result instead of the form when the syllabus needs a change request', async () => {
     renderPage(courseSyllabus({ editPath: 'VIA_REQUEST' }));
     expect(

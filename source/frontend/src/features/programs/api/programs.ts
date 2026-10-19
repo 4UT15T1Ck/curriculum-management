@@ -7,6 +7,9 @@ export type ProgramPage = components['schemas']['ProgramPageDto'];
 export type ProgramVersionRef = components['schemas']['ProgramVersionRefDto'];
 export type ProgramVersionInfo = components['schemas']['ProgramVersionInfoDto'];
 export type ProgramDirector = components['schemas']['ProgramDirectorDto'];
+export type VersionInfoEdit = components['schemas']['VersionInfoEditDto'];
+export type UpdateVersionInfoRequest =
+  components['schemas']['UpdateVersionInfoDto'];
 export type DegreeLevel = components['schemas']['DegreeLevel'];
 export type ProgramStatus = components['schemas']['ProgramStatus'];
 export type ProgramVersionStatus =
@@ -74,3 +77,13 @@ export const revokeDirector = (programId: string, assignmentId: string) =>
     'POST',
     `${directorPath(programId, assignmentId)}/revoke`,
   );
+
+// The info of one version by id: the form of a change request's working copy (F-13).
+const versionInfoPath = (versionId: string) =>
+  `/program-versions/${encodeURIComponent(versionId)}/info`;
+export const fetchVersionInfo = (versionId: string) =>
+  getJson<VersionInfoEdit>(versionInfoPath(versionId));
+export const updateVersionInfo = (
+  versionId: string,
+  body: UpdateVersionInfoRequest,
+) => sendJson<VersionInfoEdit>('PATCH', versionInfoPath(versionId), body);

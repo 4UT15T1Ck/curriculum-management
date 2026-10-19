@@ -6,6 +6,7 @@ const initial: Syllabus = {
   id: 's1',
   revisionNumber: 1,
   status: 'DRAFT',
+  sourceRequest: null,
   courseDescription: '<p>Mô tả</p>',
   englishDescription: null,
   objectives: '<p>Mục tiêu</p>',

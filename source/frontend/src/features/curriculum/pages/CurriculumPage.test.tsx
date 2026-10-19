@@ -15,6 +15,8 @@ function renderPage(data: Curriculum = fixture(), status = 200, search = '') {
     'fetch',
     vi.fn((input: RequestInfo | URL) => {
       const url = String(input);
+      if (url === '/api/auth/me')
+        return Promise.resolve(json({ permissions: ['changeRequest.create'] }));
       if (url === '/api/program-versions/v1/curriculum')
         return Promise.resolve(json(status === 200 ? data : {}, status));
       return Promise.resolve(
@@ -131,14 +133,14 @@ describe('CurriculumPage', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('shows the add button, or a disabled request button on a released program', async () => {
+  it('shows the add button on an editable program', async () => {
     renderPage();
     expect(
       await screen.findByRole('button', { name: 'Thêm học phần' }),
     ).toBeEnabled();
   });
 
-  it('shows the disabled "Tạo đề xuất" instead of editing once the program is released', async () => {
+  it('links to the request form instead of editing once the program is released', async () => {
     renderPage(
       fixture({
         canAddItems: false,
@@ -147,9 +149,11 @@ describe('CurriculumPage', () => {
         items: [item('MAT101', 'Giải tích 1', { canEdit: false })],
       }),
     );
-    expect(
-      await screen.findByRole('button', { name: 'Tạo đề xuất' }),
-    ).toBeDisabled();
+    const request = await screen.findByRole('button', { name: 'Tạo đề xuất' });
+    expect(request.closest('a')).toHaveAttribute(
+      'href',
+      '/change-requests/new?type=CURRICULUM&targetType=PROGRAM&targetId=p1',
+    );
     expect(
       screen.queryByRole('button', { name: 'Thêm học phần' }),
     ).not.toBeInTheDocument();

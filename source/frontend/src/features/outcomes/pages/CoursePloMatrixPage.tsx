@@ -1,6 +1,7 @@
 import { Flex, Result, Skeleton, Typography } from 'antd';
 import { useParams } from 'react-router';
 import { ApiError } from '../../../shared/api/client';
+import { RequestDraftBanner } from '../../../shared/change-requests/RequestDraftBanner';
 import { versionLabel } from '../../../shared/constants/versionLabels';
 import { CoursePloGrid } from '../components/CoursePloGrid';
 import { OutcomeEditNotice } from '../components/OutcomeEditNotice';
@@ -28,7 +29,11 @@ export function CoursePloMatrixPage() {
       <Typography.Text type="secondary">
         Mỗi ô là trọng số (lớn hơn 0, không quá 1) mà học phần đóng góp cho PLO.
       </Typography.Text>
-      <OutcomeEditNotice editPath={data.editPath} />
+      <RequestDraftBanner request={version.sourceRequest} />
+      <OutcomeEditNotice
+        editPath={data.editPath}
+        programId={version.programId}
+      />
       <CoursePloGrid matrix={data} />
     </Flex>
   );

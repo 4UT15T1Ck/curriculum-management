@@ -15,6 +15,7 @@ export const VERSION: OutcomeVersion = {
   programName: 'Kỹ thuật máy tính',
   versionNumber: null,
   status: 'DRAFT',
+  sourceRequest: null,
 };
 
 export const ME = {

@@ -2,6 +2,7 @@ import { Button, Flex, Result, Skeleton, Typography } from 'antd';
 import { useState } from 'react';
 import { useParams } from 'react-router';
 import { ApiError } from '../../../shared/api/client';
+import { RequestDraftBanner } from '../../../shared/change-requests/RequestDraftBanner';
 import { versionLabel } from '../../../shared/constants/versionLabels';
 import type { Plo } from '../api/outcomes';
 import { OutcomeEditNotice } from '../components/OutcomeEditNotice';
@@ -37,7 +38,11 @@ export function PloListPage() {
           </Button>
         )}
       </Flex>
-      <OutcomeEditNotice editPath={data.editPath} />
+      <RequestDraftBanner request={version.sourceRequest} />
+      <OutcomeEditNotice
+        editPath={data.editPath}
+        programId={version.programId}
+      />
       <PloTable
         versionId={versionId}
         plos={data.plos}

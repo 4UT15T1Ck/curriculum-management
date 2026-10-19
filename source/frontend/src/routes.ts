@@ -28,6 +28,12 @@ export const ROUTES = {
   cloPloMatrix: '/programs/:programId/versions/:versionId/clo-plo-matrix',
   itemCloPlo: '/programs/:programId/versions/:versionId/items/:itemId/clo-plo',
   outcomeCoverage: '/programs/:programId/versions/:versionId/outcome-coverage',
+  programVersionInfo: '/programs/:programId/versions/:versionId/info',
+  changeRequests: '/change-requests',
+  changeRequestNew: '/change-requests/new',
+  changeRequestOrganizationalNew: '/change-requests/new-organizational',
+  changeRequestDetail: '/change-requests/:requestId',
+  changeRequestEdit: '/change-requests/:requestId/edit',
 } as const;
 
 // Row or group to scroll to and highlight on arrival; set by the consistency result list.

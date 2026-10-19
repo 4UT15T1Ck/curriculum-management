@@ -804,6 +804,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/program-versions/{versionId}/info': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ProgramVersionInfoController_read'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations['ProgramVersionInfoController_update'];
+    trace?: never;
+  };
   '/api/program-versions/{versionId}/curriculum': {
     parameters: {
       query?: never;
@@ -1279,6 +1295,214 @@ export interface paths {
     put?: never;
     post?: never;
     delete: operations['SyllabiController_removeAttachment'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/change-requests': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ChangeRequestsController_list'];
+    put?: never;
+    post: operations['ChangeRequestsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/change-requests/conflicts': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ChangeRequestsController_conflicts'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/change-requests/user-options': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ChangeRequestsController_userOptions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/change-requests/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ChangeRequestsController_read'];
+    put?: never;
+    post?: never;
+    delete: operations['ChangeRequestsController_remove'];
+    options?: never;
+    head?: never;
+    patch: operations['ChangeRequestsController_update'];
+    trace?: never;
+  };
+  '/api/change-requests/{id}/rebase': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ChangeRequestsController_rebase'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/change-requests/{id}/items': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['ChangeRequestsController_replaceItems'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/change-requests/{id}/diff': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ChangeRequestsController_diff'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/change-requests/{id}/submit-preview': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ChangeRequestsController_preview'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/change-requests/{id}/submit': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ChangeRequestsController_submit'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/change-requests/{id}/withdraw': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ChangeRequestsController_withdraw'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/change-requests/{id}/documents': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ChangeRequestsController_upload'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/change-request-documents/{documentId}/file': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ChangeRequestDocumentsController_download'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/change-request-documents/{documentId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['ChangeRequestDocumentsController_remove'];
     options?: never;
     head?: never;
     patch?: never;
@@ -1928,6 +2152,57 @@ export interface components {
       /** Format: date */
       validTo: string;
     };
+    VersionInfoProgramDto: {
+      id: string;
+      programCode: string;
+      degreeLevel: components['schemas']['DegreeLevel'];
+    };
+    /** @enum {string} */
+    ChangeRequestStatus:
+      | 'DRAFT'
+      | 'PENDING_COORDINATOR'
+      | 'PENDING_DIRECTOR'
+      | 'PENDING_ACADEMIC_OFFICE'
+      | 'APPROVED'
+      | 'EFFECTIVE'
+      | 'REJECTED'
+      | 'WITHDRAWN';
+    RequestRefDto: {
+      id: string;
+      requestCode: string;
+      status: components['schemas']['ChangeRequestStatus'];
+    };
+    VersionInfoEditDto: {
+      id: string;
+      versionNumber: string | null;
+      status: components['schemas']['ProgramVersionStatus'];
+      programName: string;
+      majorCode: string;
+      majorName: string;
+      semesterCount: number;
+      /** @example 150 */
+      totalCredits: string;
+      /** @example 140 */
+      compulsoryCredits: string;
+      /** @example 10 */
+      electiveCredits: string;
+      updatedAt: string;
+      program: components['schemas']['VersionInfoProgramDto'];
+      sourceRequest: components['schemas']['RequestRefDto'] | null;
+      canEdit: boolean;
+    };
+    UpdateVersionInfoDto: {
+      programName?: string;
+      majorCode?: string;
+      majorName?: string;
+      semesterCount?: number;
+      /** @example 130 */
+      totalCredits?: string;
+      /** @example 122 */
+      compulsoryCredits?: string;
+      /** @example 8 */
+      electiveCredits?: string;
+    };
     CurriculumVersionDto: {
       id: string;
       programId: string;
@@ -1936,6 +2211,7 @@ export interface components {
       versionNumber: string | null;
       status: components['schemas']['ProgramVersionStatus'];
       semesterCount: number;
+      sourceRequest: components['schemas']['RequestRefDto'] | null;
     };
     CurriculumElectiveGroupRefDto: {
       id: string;
@@ -2192,6 +2468,7 @@ export interface components {
       programName: string;
       versionNumber: string | null;
       status: components['schemas']['ProgramVersionStatus'];
+      sourceRequest: components['schemas']['RequestRefDto'] | null;
     };
     PloDto: {
       id: string;
@@ -2406,8 +2683,10 @@ export interface components {
     };
     SyllabusDto: {
       id: string;
-      revisionNumber: number;
+      /** @description Null on the working copy of a change request */
+      revisionNumber: number | null;
       status: components['schemas']['SyllabusStatus'];
+      sourceRequest: components['schemas']['RequestRefDto'] | null;
       /** @description Sanitized HTML; null = empty section */
       courseDescription: string | null;
       /** @description Sanitized HTML; null = empty section */
@@ -2494,6 +2773,244 @@ export interface components {
       cognitiveLevel?: string | null;
     };
     UploadAttachmentFormDto: {
+      /** Format: binary */
+      file: string;
+    };
+    /** @enum {string} */
+    ChangeRequestType:
+      | 'GRADING_FORMULA'
+      | 'OUTCOME'
+      | 'SYLLABUS_CONTENT'
+      | 'CURRICULUM'
+      | 'COURSE_RELATION'
+      | 'PROGRAM_INFO'
+      | 'ORGANIZATION';
+    /** @enum {string} */
+    RequestOrigin: 'UNIVERSITY' | 'FACULTY';
+    /** @enum {string} */
+    ChangeTargetType: 'COURSE' | 'PROGRAM' | 'SUBJECT_GROUP';
+    RequestTargetDto: {
+      targetType: components['schemas']['ChangeTargetType'];
+      id: string;
+      code: string;
+      name: string;
+    };
+    ChangeRequestSummaryDto: {
+      id: string;
+      requestCode: string;
+      requestType: components['schemas']['ChangeRequestType'];
+      target: components['schemas']['RequestTargetDto'];
+      title: string;
+      status: components['schemas']['ChangeRequestStatus'];
+      origin: components['schemas']['RequestOrigin'];
+      /** @description 0 = never submitted */
+      submissionRound: number;
+      createdBy: components['schemas']['UserRefDto'];
+      createdAt: string;
+      updatedAt: string;
+    };
+    ChangeRequestPageDto: {
+      items: components['schemas']['ChangeRequestSummaryDto'][];
+      total: number;
+      page: number;
+      pageSize: number;
+    };
+    ConflictDto: {
+      id: string;
+      requestCode: string;
+      title: string;
+      status: components['schemas']['ChangeRequestStatus'];
+      createdBy: components['schemas']['UserRefDto'];
+    };
+    UserOptionDto: {
+      id: string;
+      userCode: string;
+      fullName: string;
+    };
+    CreateChangeRequestDto: {
+      /** @description GRADING_FORMULA is refused until F-12 */
+      requestType: components['schemas']['ChangeRequestType'];
+      targetType: components['schemas']['ChangeTargetType'];
+      targetId: string;
+      title: string;
+      reason: string;
+      origin: components['schemas']['RequestOrigin'];
+      /** @description Required when origin is UNIVERSITY */
+      basisDocumentNumber?: string | null;
+    };
+    /** @enum {string} */
+    WorkspaceKind: 'PROGRAM_VERSION' | 'SYLLABUS';
+    RequestWorkspaceDto: {
+      kind: components['schemas']['WorkspaceKind'];
+      /** @description Version id or syllabus id of the copy */
+      copyId: string;
+      programId: string | null;
+      courseId: string | null;
+      /** @example Phiên bản 2.1 */
+      baseLabel: string;
+      isStale: boolean;
+    };
+    /** @enum {string} */
+    AuthoredEntityType:
+      'COURSE_FIELD' | 'COURSE_RELATION' | 'ORG_MEMBERSHIP' | 'ORG_DIRECTOR';
+    AuthoredItemDto: {
+      id: string;
+      entityType: components['schemas']['AuthoredEntityType'];
+      itemKey: string;
+      label: string;
+      oldValue: Record<string, never> | null;
+      newValue: Record<string, never> | null;
+    };
+    /** @enum {string} */
+    ChangeDocumentType:
+      | 'SUBMISSION'
+      | 'MINUTES'
+      | 'COUNCIL_MINUTES'
+      | 'REVIEW_MINUTES'
+      | 'OFFICIAL_LETTER';
+    ChangeRequestDocumentDto: {
+      id: string;
+      documentType: components['schemas']['ChangeDocumentType'];
+      fileName: string;
+      fileType: components['schemas']['AttachmentFileType'];
+      sizeBytes: number;
+      uploadedBy: components['schemas']['UserRefDto'];
+      createdAt: string;
+      /** @description Null = no approver has seen it yet */
+      seenInRound: number | null;
+      canRemove: boolean;
+    };
+    StepGroupRefDto: {
+      id: string;
+      groupCode: string;
+      groupName: string;
+    };
+    StepProgramRefDto: {
+      id: string;
+      programCode: string;
+    };
+    /** @enum {string} */
+    ApprovalAction: 'PENDING' | 'APPROVE' | 'RETURN' | 'REJECT';
+    ApprovalStepDto: {
+      id: string;
+      /** @enum {number} */
+      approvalLevel: 1 | 2 | 3;
+      levelName: string;
+      approver: components['schemas']['UserRefDto'] | null;
+      forSubjectGroup: components['schemas']['StepGroupRefDto'] | null;
+      forProgram: components['schemas']['StepProgramRefDto'] | null;
+      action: components['schemas']['ApprovalAction'];
+      isSkipped: boolean;
+      skipReason: string | null;
+      remark: string | null;
+      recordedAt: string | null;
+    };
+    RequestActionsDto: {
+      canEdit: boolean;
+      canDelete: boolean;
+      canSubmit: boolean;
+      canWithdraw: boolean;
+      canUpload: boolean;
+    };
+    ChangeRequestDetailDto: {
+      id: string;
+      requestCode: string;
+      requestType: components['schemas']['ChangeRequestType'];
+      target: components['schemas']['RequestTargetDto'];
+      title: string;
+      status: components['schemas']['ChangeRequestStatus'];
+      origin: components['schemas']['RequestOrigin'];
+      /** @description 0 = never submitted */
+      submissionRound: number;
+      createdBy: components['schemas']['UserRefDto'];
+      createdAt: string;
+      updatedAt: string;
+      reason: string;
+      basisDocumentNumber: string | null;
+      workspace: components['schemas']['RequestWorkspaceDto'] | null;
+      authoredItems: components['schemas']['AuthoredItemDto'][];
+      documents: components['schemas']['ChangeRequestDocumentDto'][];
+      /** @description Current round only; empty before the first submit */
+      steps: components['schemas']['ApprovalStepDto'][];
+      conflicts: components['schemas']['ConflictDto'][];
+      permissions: components['schemas']['RequestActionsDto'];
+    };
+    UpdateChangeRequestDto: {
+      title?: string;
+      reason?: string;
+      origin?: components['schemas']['RequestOrigin'];
+      /** @description Required when origin is UNIVERSITY */
+      basisDocumentNumber?: string | null;
+    };
+    AuthoredItemInputBase: {
+      /** @enum {string} */
+      operation:
+        | 'SET_COURSE_FIELD'
+        | 'ADD_RELATION'
+        | 'UPDATE_RELATION'
+        | 'REMOVE_RELATION'
+        | 'ADD_MEMBER'
+        | 'END_MEMBERSHIP'
+        | 'ASSIGN_DIRECTOR'
+        | 'END_DIRECTOR';
+    };
+    ReplaceAuthoredItemsDto: {
+      /** @description The whole list: items not sent are removed */
+      items: components['schemas']['AuthoredItemInputBase'][];
+    };
+    /** @enum {string} */
+    DiffChange: 'ADDED' | 'REMOVED' | 'CHANGED';
+    DiffFieldDto: {
+      name: string;
+      label: string;
+      before: string | null;
+      after: string | null;
+    };
+    DiffRowDto: {
+      itemKey: string;
+      label: string;
+      change: components['schemas']['DiffChange'];
+      fields: components['schemas']['DiffFieldDto'][];
+    };
+    DiffSectionDto: {
+      entityType: string;
+      title: string;
+      rows: components['schemas']['DiffRowDto'][];
+    };
+    ChangeDiffDto: {
+      /** @description True while a Draft: computed from the working copy at read time */
+      live: boolean;
+      sections: components['schemas']['DiffSectionDto'][];
+    };
+    AffectedProgramDto: {
+      id: string;
+      programCode: string;
+      programName: string;
+    };
+    PreviewApproverDto: {
+      name: string;
+      scope: string | null;
+      skipReason: string | null;
+    };
+    PreviewLevelDto: {
+      /** @enum {number} */
+      approvalLevel: 1 | 2 | 3;
+      levelName: string;
+      approvers: components['schemas']['PreviewApproverDto'][];
+    };
+    BlockingIssueDto: {
+      /** @example STALE_BASE */
+      code: string;
+      message: string;
+    };
+    SubmitPreviewDto: {
+      itemCount: number;
+      affectedPrograms: components['schemas']['AffectedProgramDto'][];
+      levels: components['schemas']['PreviewLevelDto'][];
+      blockingIssues: components['schemas']['BlockingIssueDto'][];
+    };
+    UploadDocumentFormDto: {
+      documentType: components['schemas']['ChangeDocumentType'];
       /** Format: binary */
       file: string;
     };
@@ -4020,6 +4537,52 @@ export interface operations {
       };
     };
   };
+  ProgramVersionInfoController_read: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        versionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['VersionInfoEditDto'];
+        };
+      };
+    };
+  };
+  ProgramVersionInfoController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        versionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateVersionInfoDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['VersionInfoEditDto'];
+        };
+      };
+    };
+  };
   ProgramVersionsCurriculumController_read: {
     parameters: {
       query?: never;
@@ -4570,7 +5133,10 @@ export interface operations {
   };
   SyllabiController_forCourse: {
     parameters: {
-      query?: never;
+      query?: {
+        /** @description A change request's id: show its working copy as the Draft */
+        requestId?: string;
+      };
       header?: never;
       path: {
         courseId: string;
@@ -4873,6 +5439,357 @@ export interface operations {
       header?: never;
       path: {
         attachmentId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ChangeRequestsController_list: {
+    parameters: {
+      query?: {
+        page?: number;
+        pageSize?: number;
+        status?: components['schemas']['ChangeRequestStatus'];
+        requestType?: components['schemas']['ChangeRequestType'];
+        origin?: components['schemas']['RequestOrigin'];
+        createdById?: string;
+        mine?: boolean;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChangeRequestPageDto'];
+        };
+      };
+    };
+  };
+  ChangeRequestsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateChangeRequestDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChangeRequestDetailDto'];
+        };
+      };
+    };
+  };
+  ChangeRequestsController_conflicts: {
+    parameters: {
+      query: {
+        targetType: components['schemas']['ChangeTargetType'];
+        targetId: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ConflictDto'][];
+        };
+      };
+    };
+  };
+  ChangeRequestsController_userOptions: {
+    parameters: {
+      query?: {
+        q?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['UserOptionDto'][];
+        };
+      };
+    };
+  };
+  ChangeRequestsController_read: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChangeRequestDetailDto'];
+        };
+      };
+    };
+  };
+  ChangeRequestsController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ChangeRequestsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateChangeRequestDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChangeRequestDetailDto'];
+        };
+      };
+    };
+  };
+  ChangeRequestsController_rebase: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChangeRequestDetailDto'];
+        };
+      };
+    };
+  };
+  ChangeRequestsController_replaceItems: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReplaceAuthoredItemsDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChangeRequestDetailDto'];
+        };
+      };
+    };
+  };
+  ChangeRequestsController_diff: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChangeDiffDto'];
+        };
+      };
+    };
+  };
+  ChangeRequestsController_preview: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SubmitPreviewDto'];
+        };
+      };
+    };
+  };
+  ChangeRequestsController_submit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChangeRequestDetailDto'];
+        };
+      };
+    };
+  };
+  ChangeRequestsController_withdraw: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChangeRequestDetailDto'];
+        };
+      };
+    };
+  };
+  ChangeRequestsController_upload: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': components['schemas']['UploadDocumentFormDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChangeRequestDocumentDto'];
+        };
+      };
+    };
+  };
+  ChangeRequestDocumentsController_download: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        documentId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ChangeRequestDocumentsController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        documentId: string;
       };
       cookie?: never;
     };

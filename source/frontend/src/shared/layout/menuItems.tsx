@@ -54,6 +54,11 @@ export const APP_MENU: readonly AppMenuItem[] = [
     hideForRoles: [STUDENT_ROLE_CODE],
   },
   {
+    path: ROUTES.changeRequests,
+    label: 'Đề xuất thay đổi',
+    permission: PERMISSIONS.changeRequestView,
+  },
+  {
     path: ROUTES.permissionMatrix,
     label: 'Ma trận quyền',
     permission: PERMISSIONS.permissionView,

@@ -190,10 +190,16 @@ describe('ProgramOverviewPage', () => {
     ).toHaveAttribute('href', '/programs/p1/versions/v9/curriculum');
   });
 
-  it('shows the disabled request button when the edit must go through a request', async () => {
-    renderPage({ ...PROGRAM, editPath: 'VIA_REQUEST' });
+  it('links to the request form when the edit must go through a request', async () => {
+    renderPage({ ...PROGRAM, editPath: 'VIA_REQUEST' }, [], {
+      ...ME,
+      permissions: ['program.view', 'changeRequest.create'],
+    });
     const button = await screen.findByRole('button', { name: 'Tạo đề xuất' });
-    expect(button).toBeDisabled();
+    expect(button.closest('a')).toHaveAttribute(
+      'href',
+      '/change-requests/new?type=PROGRAM_INFO&targetType=PROGRAM&targetId=p1',
+    );
     expect(
       screen.queryByRole('button', { name: 'Sửa thông tin' }),
     ).not.toBeInTheDocument();

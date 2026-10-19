@@ -1,8 +1,8 @@
-import { Button, Tooltip } from 'antd';
+import { Button } from 'antd';
 import { generatePath, useNavigate } from 'react-router';
 import { ROUTES } from '../../../routes';
 import type { CourseDetail } from '../api/courses';
-import { CHANGE_REQUEST_PENDING_TOOLTIP } from '../../../shared/constants/editPath';
+import { CreateRequestButton } from '../../../shared/change-requests/CreateRequestButton';
 
 interface CourseEditButtonProps {
   course: CourseDetail;
@@ -14,9 +14,13 @@ export function CourseEditButton({ course }: CourseEditButtonProps) {
   if (course.editPath === null) return null;
   if (course.editPath === 'VIA_REQUEST')
     return (
-      <Tooltip title={CHANGE_REQUEST_PENDING_TOOLTIP}>
-        <Button disabled>Tạo đề xuất</Button>
-      </Tooltip>
+      <CreateRequestButton
+        prefill={{
+          type: 'COURSE_RELATION',
+          targetType: 'COURSE',
+          targetId: course.id,
+        }}
+      />
     );
   return (
     <Button

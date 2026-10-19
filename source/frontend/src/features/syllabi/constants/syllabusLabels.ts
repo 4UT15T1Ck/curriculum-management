@@ -95,3 +95,4 @@ export const EDITOR_TAB_LABELS = {
   attachments: ATTACHMENTS_SECTION_LABEL,
   clos: 'CLO',
 } as const;
+export const REQUEST_COPY_TAB_LABEL = 'Bản nháp của đề xuất';

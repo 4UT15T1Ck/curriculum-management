@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Popconfirm, Table, Tooltip, App } from 'antd';
+import { Alert, Button, Card, Popconfirm, Table, App } from 'antd';
 import type { TableColumnsType } from 'antd';
 import { useState } from 'react';
 import { Link, generatePath } from 'react-router';
@@ -8,7 +8,7 @@ import { useCan } from '../../../shared/auth/useCan';
 import { errorMessage } from '../../../shared/forms/applyFieldErrors';
 import type { CourseRelation, RelatedCourse } from '../api/courseRelations';
 import type { CourseDetail } from '../api/courses';
-import { CHANGE_REQUEST_PENDING_TOOLTIP } from '../../../shared/constants/editPath';
+import { CreateRequestButton } from '../../../shared/change-requests/CreateRequestButton';
 import { relationLabel, type RelationSide } from '../constants/relationLabels';
 import {
   useCourseRelations,
@@ -78,11 +78,14 @@ export function CourseRelationsSection({
       render: (_value, { relation }) => {
         if (relation.editPath === 'VIA_REQUEST')
           return (
-            <Tooltip title={CHANGE_REQUEST_PENDING_TOOLTIP}>
-              <Button disabled size="small">
-                Tạo đề xuất
-              </Button>
-            </Tooltip>
+            <CreateRequestButton
+              size="small"
+              prefill={{
+                type: 'COURSE_RELATION',
+                targetType: 'COURSE',
+                targetId: course.id,
+              }}
+            />
           );
         if (relation.editPath === null) return null;
         return (

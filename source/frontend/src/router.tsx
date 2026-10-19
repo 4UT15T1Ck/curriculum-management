@@ -123,6 +123,37 @@ const ProgramFormPage = lazy(() =>
   })),
 );
 
+const ChangeRequestListPage = lazy(() =>
+  import('./features/change-requests/pages/ChangeRequestListPage').then(
+    (module) => ({ default: module.ChangeRequestListPage }),
+  ),
+);
+const ChangeRequestFormPage = lazy(() =>
+  import('./features/change-requests/pages/ChangeRequestFormPage').then(
+    (module) => ({ default: module.ChangeRequestFormPage }),
+  ),
+);
+const OrganizationalRequestPage = lazy(() =>
+  import('./features/change-requests/pages/OrganizationalRequestPage').then(
+    (module) => ({ default: module.OrganizationalRequestPage }),
+  ),
+);
+const ChangeRequestDetailPage = lazy(() =>
+  import('./features/change-requests/pages/ChangeRequestDetailPage').then(
+    (module) => ({ default: module.ChangeRequestDetailPage }),
+  ),
+);
+const ChangeRequestEditPage = lazy(() =>
+  import('./features/change-requests/pages/ChangeRequestEditPage').then(
+    (module) => ({ default: module.ChangeRequestEditPage }),
+  ),
+);
+const VersionInfoEditPage = lazy(() =>
+  import('./features/programs/pages/VersionInfoEditPage').then((module) => ({
+    default: module.VersionInfoEditPage,
+  })),
+);
+
 const HomePage = lazy(() =>
   import('./features/home/pages/HomePage').then((module) => ({
     default: module.HomePage,
@@ -244,6 +275,56 @@ export const router = createBrowserRouter([
             element: (
               <RequirePermission code={PERMISSIONS.syllabusEdit}>
                 <SyllabusEditorPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.programVersionInfo,
+            element: (
+              <RequirePermission code={PERMISSIONS.programView}>
+                <VersionInfoEditPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.changeRequests,
+            element: (
+              <RequirePermission code={PERMISSIONS.changeRequestView}>
+                <ChangeRequestListPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.changeRequestNew,
+            element: (
+              <RequirePermission code={PERMISSIONS.changeRequestCreate}>
+                <ChangeRequestFormPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.changeRequestOrganizationalNew,
+            element: (
+              <RequirePermission
+                code={PERMISSIONS.changeRequestCreateOrganizational}
+              >
+                <OrganizationalRequestPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.changeRequestDetail,
+            element: (
+              <RequirePermission code={PERMISSIONS.changeRequestView}>
+                <ChangeRequestDetailPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.changeRequestEdit,
+            element: (
+              <RequirePermission code={PERMISSIONS.changeRequestView}>
+                <ChangeRequestEditPage />
               </RequirePermission>
             ),
           },

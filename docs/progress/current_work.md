@@ -4,7 +4,7 @@
 
 - **Last updated**: 2026-10-19
 - **Active area**: dựng bản MVP (`docs/planning/epics.md` §0)
-- **Start here**: dựng F-13 (đề xuất thay đổi; xem `docs/implementation/` và README). F-11 đã xong mã: F-13 thêm đường VIA_REQUEST cho PLO, trọng số, liên kết CLO–PLO và CLO; F-15 thay `currentRevisionByCourse` (`src/shared/syllabi/current-revision.ts`) bằng bản đề cương ghim theo dòng khung và gán lại liên kết CLO khi ban hành. F-13 và F-15 gọi `ConsistencyChecker.assertPasses(versionId, tx)` sau `lockRequisiteGraph(tx)` (`src/shared/curriculum/`).
+- **Start here**: dựng F-14 (phê duyệt và thông báo; xem `docs/implementation/` và README). F-13 đã xong mã: `RoutingPlanner` tạo sẵn các dòng `ApprovalStep` theo từng vòng gửi, F-14 thêm hành động Duyệt / Trả lại / Từ chối, bộ lọc hàng chờ và thông báo; F-15 ban hành bản nháp làm việc (`sourceRequestId` → `originRequestId`) và dùng `StaleChecker`. Chi tiết hook ở báo cáo dựng F-13.
 
 ---
 
@@ -26,6 +26,7 @@
 - F-07: người dùng đi thử 9 bước kế hoạch §7 bằng trình duyệt (khung theo dòng và theo học kỳ, lọc, thêm trùng / học kỳ 9, điều kiện xếp sau và vòng, kéo thả kể cả bàn phím, nhóm tự chọn, "Chương trình đang sử dụng" ở học phần, đăng nhập R4), áp migration `20261019085325_curriculum` (`pnpm prisma:migrate` rồi `pnpm prisma:seed`), nạp danh mục khối kiến thức khi có tệp Excel và thay sáu học phần mẫu DEMO* của 1024034 — `docs/implement-report/f-07-curriculum-elective-groups-implement-report.md`.
 - F-08: người dùng đi thử 8 bước kế hoạch §7 bằng trình duyệt (thẻ credit, chấp nhận chênh lệch kèm lý do, xóa dòng thấy cảnh báo trở lại, vòng danh mục–khung, "Tới chỗ sửa", dòng tổng chương trình, thẻ ở tổng quan, đăng nhập R2) và áp migration `20261019092846_credit_mismatch_acceptance` (`pnpm prisma:migrate`) — `docs/implement-report/f-08-consistency-check-implement-report.md`.
 - F-11: người dùng đi thử bằng trình duyệt (PLO thêm / trùng mã / xóa có đếm, ma trận học phần–PLO nhập `0,5` và `1,5`, xóa ô có liên kết CLO, ma trận CLO–PLO cột bị khóa, kiểm tra phủ đăng nhập R4, tab CLO và bật EN, nhân bản chương trình, R6) và áp migration `20261019102707_outcomes` (`pnpm prisma:migrate`) — `docs/implement-report/f-11-plo-clo-matrices-implement-report.md`.
+- F-13: người dùng đi thử bằng trình duyệt NT-B4-01/03/09 với R1–R5 (tạo đề xuất từng loại, sửa bản nháp làm việc, so sánh, gửi duyệt, rút) và áp migration `20261019110535_change_requests` (`pnpm prisma:migrate` rồi `pnpm prisma:seed`) — `docs/implement-report/f-13-change-requests-implement-report.md`.
 - F-10: người dùng đi thử 7 bước kế hoạch §7 bằng trình duyệt (tạo Nháp, soạn đậm / danh sách / bảng, dán `<script>`, tuần kéo thả, bật EN và "Chưa dịch", tệp PDF tên tiếng Việt và tệp bị từ chối, hai chương trình cùng đề cương, R5 khác nhóm, R6) và áp migration `20261019095730_syllabi` (`pnpm prisma:migrate`); đặt `FILES_ROOT` vào ổ bền — `docs/implement-report/f-10-syllabus-implement-report.md`.
 
 ### Agreed Approach

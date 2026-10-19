@@ -22,6 +22,9 @@ export const PERMISSIONS = {
   outcomeView: 'outcome.view',
   ploEdit: 'plo.edit',
   cloEdit: 'clo.edit',
+  changeRequestView: 'changeRequest.view',
+  changeRequestCreate: 'changeRequest.create',
+  changeRequestCreateOrganizational: 'changeRequest.createOrganizational',
 } as const satisfies Record<string, PermissionCode>;
 
 export function hasPermission(

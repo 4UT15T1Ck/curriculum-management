@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { CHANGE_REQUEST_QUERY_ROOT } from '../../../shared/change-requests/changeRequestQueryRoot';
 import { COURSE_QUERY_ROOT } from '../../../shared/courses/courseQueryKeys';
 import { CURRICULUM_QUERY_ROOT } from '../../../shared/curriculum/curriculumQueryRoot';
 import { OUTCOME_QUERY_ROOT } from '../../../shared/outcomes/outcomeQueryRoot';
@@ -52,6 +53,8 @@ function useCurriculumMutation<TVars, TResult>(
         queryClient.invalidateQueries({ queryKey: COURSE_QUERY_ROOT }),
         // A removed row takes its cells in the PLO and CLO matrices with it.
         queryClient.invalidateQueries({ queryKey: OUTCOME_QUERY_ROOT }),
+        // On a request's working copy the request's diff changes too.
+        queryClient.invalidateQueries({ queryKey: CHANGE_REQUEST_QUERY_ROOT }),
       ]),
   });
 }

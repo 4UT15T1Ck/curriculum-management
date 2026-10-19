@@ -10,15 +10,18 @@ import {
   Typography,
 } from 'antd';
 import { useState } from 'react';
-import { generatePath, Link, useParams } from 'react-router';
+import { generatePath, Link, useParams, useSearchParams } from 'react-router';
 import { ROUTES } from '../../../routes';
 import { ApiError } from '../../../shared/api/client';
 import { PERMISSIONS } from '../../../shared/auth/permissions';
 import { useCan } from '../../../shared/auth/useCan';
+import { REQUEST_ID_PARAM } from '../../../shared/change-requests/requestParams';
+import { RequestDraftBanner } from '../../../shared/change-requests/RequestDraftBanner';
 import type { Syllabus } from '../api/syllabi';
 import { SyllabusActions } from '../components/SyllabusActions';
 import { SyllabusSections } from '../components/SyllabusSections';
 import {
+  REQUEST_COPY_TAB_LABEL,
   BACK_TO_COURSE,
   LANGUAGE_OPTIONS,
   NO_SYLLABUS,
@@ -31,7 +34,10 @@ import { translated } from '../utils/syllabusLanguage';
 
 export function SyllabusPage() {
   const { courseId = '' } = useParams();
-  const { data, isPending, error } = useCourseSyllabus(courseId);
+  const [searchParams] = useSearchParams();
+  // A request's working copy is shown as the Draft when the link carries the request id (F-13).
+  const requestId = searchParams.get(REQUEST_ID_PARAM) ?? undefined;
+  const { data, isPending, error } = useCourseSyllabus(courseId, requestId);
   const canViewCourse = useCan(PERMISSIONS.courseView);
   const [language, setLanguage] = useState<SyllabusLanguage>('vi');
   if (isPending) return <Skeleton active />;
@@ -77,13 +83,17 @@ export function SyllabusPage() {
           <SyllabusActions data={data} />
         </Space>
       </Flex>
+      <RequestDraftBanner request={data.draft?.sourceRequest ?? null} />
       {revisions.length === 0 ? (
         <Empty description={NO_SYLLABUS} />
       ) : (
         <Tabs
           items={revisions.map((revision) => ({
             key: revision.id,
-            label: `${SYLLABUS_STATUS_LABELS[revision.status]} — bản ${revision.revisionNumber}`,
+            label:
+              revision.revisionNumber === null
+                ? REQUEST_COPY_TAB_LABEL
+                : `${SYLLABUS_STATUS_LABELS[revision.status]} — bản ${revision.revisionNumber}`,
             children: (
               <SyllabusSections syllabus={revision} language={language} />
             ),
