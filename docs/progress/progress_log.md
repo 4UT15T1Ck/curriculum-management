@@ -84,3 +84,12 @@ Format:
 - API tài khoản, gán/thu hồi vai trò, ma trận quyền; màn hình MH-05, MH-06, MH-15; menu và route lọc theo quyền.
 - Kiểm tra: backend tsc 0, oxlint 0, đơn vị 66/66, đầu-cuối 39/39; frontend tsc 0, oxlint 0, đơn vị 35/35, `vite build` ổn; Prettier sạch. Dựng qua Codex (4 lượt), bộ điều phối sinh migration và chạy kiểm thử.
 - Còn nợ: đi thử bằng trình duyệt (kế hoạch §7). Sự cố lúc dựng ở báo cáo dựng; không có lỗi đã phát hành nên không ghi `error_log.md`.
+
+## [F-03] Đơn vị và nhóm chuyên môn — hoàn thiện mã
+**Date**: 2026-10-19
+**Files changed**: `source/backend/prisma/{schema.prisma,migrations/20261019024639_subject_groups}`, `source/backend/src/shared/{time,subject-groups,authz}/*`, `source/backend/src/features/{org-units,subject-groups,users}/*`, `source/backend/test/*`, `source/frontend/src/shared/{api,auth,layout,subject-groups,users,validity}/*`, `source/frontend/src/features/{org-units,subject-groups,users}/*`, `source/frontend/src/{router.tsx,routes.ts}`, `docs/architecture/*`, `docs/implementation/README.md`, `docs/implement-report/f-03-org-units-subject-groups-implement-report.md`, `docs/progress/*`
+- Quản lý cây đơn vị (thêm, sửa, chuyển, ngừng, kích hoạt lại; không xóa), nhóm chuyên môn kèm danh sách ảnh hưởng khi ngừng, thành viên và Điều phối có khoảng hiệu lực; R4, R5 suy ra từ hàng đang hiệu lực trong nhóm `ACTIVE`; `validity.ts` dùng chung thay hàm riêng của F-02.
+- Màn hình MH-07, MH-08 (danh sách, chi tiết), thẻ nhóm trên MH-06; ô chọn `UserSelect` dùng chung; menu và route theo quyền.
+- Hoàn thiện: sửa 6 ca kiểm thử giao diện hỏng (`UserSelect` đẩy thừa đối số, kiểm thử trang thiếu router/`retry:false`, cây đơn vị không mở nút cha vừa có con), bỏ mục menu trùng.
+- Kiểm tra: backend tsc 0, oxlint 0, đơn vị 101/101, đầu-cuối 69/69 (Testcontainers); frontend tsc 0, oxlint 0, đơn vị 44/44, `vite build` ổn; Prettier sạch ở cả hai.
+- Còn nợ: đi thử bằng trình duyệt (kế hoạch §7); áp migration lên cơ sở dữ liệu phát triển. Chi tiết sự cố ở báo cáo dựng.

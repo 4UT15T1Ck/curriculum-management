@@ -88,7 +88,7 @@ Kế hoạch: `docs/implementation/f-02-accounts-roles-permissions-implementatio
 - `PUT|DELETE /api/roles/:roleCode/permissions/:permissionCode` (`permission.manage`) — đặt hoặc bỏ ô; ghi `updatedBy` và một dòng nhật ký ứng dụng. Ô khóa (`LOCKED_CELLS`: R1 × `permission.manage`, R1 × `user.manage`) không đổi được.
 
 ### Backend — `src/features/org-units/`
-- `GET /api/org-units` (`@AnyAuthenticated`) — đơn vị đang hoạt động cho ô chọn. Màn hình cây đơn vị là F-03.
+- `GET /api/org-units` (`@AnyAuthenticated`) — danh sách đơn vị cho ô chọn. Ghi đơn vị và màn hình cây thuộc F-03 (§3).
 
 ### Frontend
 #### `UserListPage` — MH-05 Danh sách tài khoản (`/users`)
@@ -99,3 +99,33 @@ Kế hoạch: `docs/implementation/f-02-accounts-roles-permissions-implementatio
 
 #### `PermissionMatrixPage` — MH-15 Ma trận quyền (`/permissions`)
 - Cần `permission.view`; `MatrixCell` sửa được khi có `permission.manage` và ô không khóa.
+
+---
+
+## 3. Đơn vị và nhóm chuyên môn (F-03)
+
+Kế hoạch: `docs/implementation/f-03-org-units-subject-groups-implementation-plan.md`; báo cáo dựng: `docs/implement-report/f-03-org-units-subject-groups-implement-report.md`. Mã xong, chưa đi thử bằng trình duyệt.
+
+### Backend — `src/features/org-units/`
+- Ghi đơn vị cần `orgUnit.manage`: `POST /api/org-units` (chỉ `FACULTY`/`OFFICE`, cha phải đang hoạt động và đúng loại), `PATCH /api/org-units/:unitId` (mã, loại không sửa; đổi cha chạy kiểm chu trình), `POST .../deactivate`, `POST .../activate` (lặp lại không lỗi). Không có route xóa.
+- Lỗi: `UNIT_CODE_TAKEN` 409, `PARENT_INVALID`, `PARENT_CYCLE`, `PARENT_INACTIVE`, `ROOT_UNIT_LOCKED`, `UNIT_HAS_ACTIVE_CHILDREN`, `UNIT_HAS_ACTIVE_GROUPS`. Đơn vị còn tài khoản vẫn ngừng được.
+
+### Backend — `src/features/subject-groups/`
+- `GET /api/subject-groups` (`subjectGroup.view`, lọc theo phạm vi, `?facultyId&status`) và `GET /api/subject-groups/:groupId` (404 trước, ngoài phạm vi → 403 `OUT_OF_SCOPE`; kèm mọi hàng thành viên đã có). Tóm tắt có `activeMemberCount`, `activeCoordinators`, `hasActiveCoordinator`.
+- Ghi nhóm cần `orgUnit.manage`: tạo, sửa (`groupCode` không sửa), `GET .../deactivation-impact` (thành viên, Điều phối; `courses: []` đến F-04), `.../deactivate`, `.../activate` (từ chối khi khoa ngừng). Nhóm ngừng giữ nguyên hàng; thành viên mất phạm vi ngay.
+- Thành viên: `POST .../members` (nhóm và người đang hoạt động; chồng thời gian → 409 `MEMBERSHIP_OVERLAP`; Điều phối không phủ bởi thành viên → 400 `COORDINATOR_NOT_MEMBER`), `POST .../members/:memberId/end` (trả mọi hàng bị đổi; cắt hoặc thu hồi hàng Điều phối bên trong), `.../revoke` (từ chối khi còn Điều phối phụ thuộc → 409 `MEMBER_HAS_COORDINATOR`). `GET /api/subject-group-memberships?userId=` (`orgUnit.manage` hoặc `user.manage`) cho MH-06.
+- Vai trò R4, R5 tự theo hàng: hết kỳ Điều phối thì `me.roles` mất R4 ở yêu cầu kế tiếp, R5 giữ.
+
+### Frontend
+#### `OrgUnitTreePage` — MH-07 Cây đơn vị (`/org-units`)
+- Cần `orgUnit.manage`. Cây dựng bằng `buildOrgTree` từ `GET /org-units` và `GET /subject-groups` (nhóm nằm dưới khoa, bấm sang MH-08); mọi nút mở sẵn trừ nút người dùng thu lại. `OrgUnitDetailPanel` sửa, thêm đơn vị con, ngừng (hộp xác nhận), kích hoạt lại; mọi thao tác làm mất hiệu lực khóa `org-units` dùng chung nên ô chọn đơn vị ở nơi khác thấy ngay.
+
+#### `SubjectGroupListPage` — MH-08 Nhóm chuyên môn (`/subject-groups`)
+- Cần `subjectGroup.view`; lọc khoa, trạng thái; thẻ "Chưa có Điều phối". Có `orgUnit.manage` thì thêm, sửa, kích hoạt lại, và ngừng sau khi `DeactivateGroupModal` nạp danh sách ảnh hưởng.
+
+#### `SubjectGroupDetailPage` — MH-08 chi tiết (`/subject-groups/:groupId`)
+- Bảng Điều phối và Thành viên (`MemberTable`), ẩn hàng hết hạn/thu hồi trừ khi bật lịch sử; `AddMemberModal` (Thành viên hoặc Điều phối, ô chọn `UserSelect`), `EndMemberModal`, thu hồi. 403 hiện "Nhóm này nằm ngoài phạm vi của bạn".
+
+#### MH-06 — `UserSubjectGroupsCard`
+- Thẻ nhóm chuyên môn của một tài khoản trên trang chi tiết tài khoản.
+

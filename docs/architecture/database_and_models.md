@@ -34,7 +34,7 @@ Tệp này ghi những gì **đã có migration** trong `source/backend/prisma/`
 | Truy cập | Prisma 7.10.0, `@prisma/adapter-pg` |
 | Lược đồ | `source/backend/prisma/schema.prisma` |
 | Migration | `source/backend/prisma/migrations/` (`prisma.config.ts`) |
-| Phiên bản lược đồ hiện tại | `20261018151319_access_control` |
+| Phiên bản lược đồ hiện tại | `20261019024639_subject_groups` |
 
 ### Migration Rule
 
@@ -62,6 +62,8 @@ Nhật ký kiểm toán (NFR-10, bảng `AuditLog`) hoãn theo F01-07 — `docs/
 ## Entities
 
 Migration `20261018141101_auth_session` (F-01) sinh bằng `prisma migrate diff --from-empty` vì lúc dựng không có cơ sở dữ liệu chạy sẵn; đã áp trên PostgreSQL 18 của Testcontainers trong kiểm thử đầu-cuối (`test/migrations.ts`), đã áp trên cơ sở dữ liệu phát triển ngày 2026-10-18.
+
+Migration `20261019024639_subject_groups` (F-03) thêm `SubjectGroup`, `SubjectGroupMember` và hai enum; chỉ thêm, không đụng hàng của F-02.
 
 Migration `20261018151319_access_control` (F-02) sinh bằng `prisma migrate dev --create-only --name access_control`; đã áp trên cơ sở dữ liệu phát triển. Thêm `OrgUnit` tối thiểu, `Role`, `Permission`, `RolePermission`, `RoleAssignment` và `User.orgUnitId`.
 
@@ -91,7 +93,31 @@ Migration `20261018151319_access_control` (F-02) sinh bằng `prisma migrate dev
 | `status` | `OrgUnitStatus` | Mặc định `ACTIVE` |
 | `createdAt` / `updatedAt` | `DateTime` | |
 
-Bản tối thiểu cho F-02; F-03 mở rộng.
+Cột không đổi từ F-02; F-03 thêm quan hệ ngược `subjectGroups`. Loại đơn vị cha hợp lệ là hằng `ALLOWED_PARENT_TYPES` (`features/org-units/org-unit-hierarchy.ts`): `FACULTY` và `OFFICE` chỉ nằm dưới `UNIVERSITY`; đổi cha chạy kiểm chu trình ở service. Không có thao tác xóa đơn vị — chỉ `INACTIVE` / `ACTIVE`.
+
+### `SubjectGroup` — table `SubjectGroup`
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `String` | `cuid(2)` |
+| `groupCode` | `String` | Duy nhất, không sửa sau khi tạo |
+| `groupName` | `String` | |
+| `facultyId` | `String` | FK `OrgUnit`, chỉ mục; phải là đơn vị `FACULTY` (kiểm ở service) |
+| `status` | `SubjectGroupStatus` | Mặc định `ACTIVE` |
+| `createdAt` / `updatedAt` | `DateTime` | |
+
+### `SubjectGroupMember` — table `SubjectGroupMember`
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `String` | `cuid(2)` |
+| `subjectGroupId` | `String` | FK `SubjectGroup`, chỉ mục |
+| `lecturerId` | `String` | FK `User`, chỉ mục |
+| `memberRole` | `SubjectGroupMemberRole` | `MEMBER` hoặc `COORDINATOR` — hai hàng riêng |
+| `validFrom` / `validTo` | `Date` / `Date?` | `@db.Date` |
+| `assignedById` | `String?` | FK `User` |
+| `revokedAt` / `revokedById` | `DateTime?` / `String?` | Thu hồi chỉ ghi hai cột này |
+| `createdAt` / `updatedAt` | `DateTime` | |
+
+Không có ràng buộc duy nhất hay loại trừ ở cơ sở dữ liệu: service chặn hai hàng chưa thu hồi cùng (nhóm, người, vai trò) chồng thời gian (`MEMBERSHIP_OVERLAP`) và đòi hàng `COORDINATOR` nằm trọn trong một hàng `MEMBER` cùng người, cùng nhóm (`COORDINATOR_NOT_MEMBER`). Một nhóm có thể có nhiều Điều phối. Kết thúc thành viên chỉ rút ngắn `validTo` và cắt các hàng Điều phối bên trong; hàng không bị xóa hay kéo dài.
 
 ### `Role` — table `Role`
 | Column | Type | Notes |
@@ -101,7 +127,9 @@ Bản tối thiểu cho F-02; F-03 mở rộng.
 | `roleName` | `String` | |
 | `description` | `String?` | |
 | `isSystemRole` | `Boolean` | Mặc định `false` |
-| `scopeSource` | `ScopeSource` | Mặc định `NONE`; khác `NONE` là vai trò suy ra, không có hàng `RoleAssignment` |
+| `scopeSource` | `SubjectGroupStatus` | `ACTIVE`, `INACTIVE` |
+| `SubjectGroupMemberRole` | `MEMBER`, `COORDINATOR` |
+| `ScopeSource` | Mặc định `NONE`; khác `NONE` là vai trò suy ra, không có hàng `RoleAssignment` |
 | `createdAt` / `updatedAt` | `DateTime` | |
 
 ### `Permission` — table `Permission`

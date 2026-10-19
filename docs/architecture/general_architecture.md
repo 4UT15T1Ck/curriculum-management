@@ -54,7 +54,8 @@ src/
 │   ├── auth/              đăng nhập, đăng xuất, me, đổi mật khẩu (F-01)
 │   ├── users/             tài khoản, gán vai trò (F-02)
 │   ├── permissions/       vai trò, ma trận vai trò × quyền (F-02)
-│   ├── org-units/         danh sách đơn vị cho ô chọn (F-02, F-03 mở rộng)
+│   ├── org-units/         danh sách đơn vị cho ô chọn (F-02); thêm, sửa, chuyển, ngừng, kích hoạt đơn vị (F-03)
+│   ├── subject-groups/    nhóm chuyên môn, thành viên, Điều phối (F-03)
 │   └── health/            trạng thái hệ thống
 ├── shared/
 │   ├── config/            env.validation.ts — lớp Env (class-validator); sai thì dừng khi khởi động
@@ -65,7 +66,8 @@ src/
 │   ├── auth/              @Public, @AllowPendingPasswordChange, @CurrentUser, CsrfGuard, AuthenticatedGuard
 │   ├── authz/             @RequirePermission, @AnyAuthenticated, @CurrentAccess, PermissionGuard, ScopeService, AccessContext, PERMISSIONS, LOCKED_CELLS
 │   ├── pagination/        PageQueryDto + Page<T>
-│   ├── time/              todayDate() — ngày hôm nay theo Asia/Ho_Chi_Minh
+│   ├── time/              todayDate() — ngày hôm nay theo Asia/Ho_Chi_Minh; validity.ts — validityState, parsePeriod, overlapsPeriod dùng chung cho mọi bảng có khoảng hiệu lực
+│   ├── subject-groups/    active-membership.ts — một bộ dựng điều kiện "hàng thành viên đang hiệu lực" cho bộ đọc phạm vi, tóm tắt nhóm
 │   ├── exception/         AppException, ErrorDefinition, COMMON_ERRORS, validation-exception.factory
 │   ├── filter/            AllExceptionsFilter — mọi lỗi ra dạng ErrorResponseDto
 │   └── dtos/              ErrorResponseDto, RefDto
@@ -92,14 +94,14 @@ test/                      đầu-cuối: Testcontainers dựng PostgreSQL + Red
 | Phiên | Cookie HttpOnly `ctdt.sid`, hàng trong bảng `session` (PostgreSQL), `rolling`, hết hạn sau `SESSION_IDLE_MINUTES` không hoạt động; đăng nhập gọi `regenerate` |
 | CSRF | `CsrfGuard`: phương thức khác GET/HEAD/OPTIONS phải có `X-Requested-With: XMLHttpRequest`, thiếu → 403 `CSRF_HEADER_MISSING` |
 | Phân quyền | `PermissionGuard` từ chối mặc định: route không `@Public` phải có `@RequirePermission(...codes)` (đủ một trong các mã) hoặc `@AnyAuthenticated()`, thiếu cả hai → 403. Quyền nạp lại mỗi yêu cầu, không cache |
-| Phạm vi | `ScopeService.loadAccess()` dựng `AccessContext` một lần mỗi yêu cầu, gắn vào `request.access`; service lấy bằng `@CurrentAccess()` và kiểm phạm vi đồng bộ trên đó. Vai trò `scopeSource = NONE` lấy từ hàng `RoleAssignment` (`SYSTEM`/`UNIT`); vai trò khác suy ra qua `ScopeSourceReader` — các tính năng sau (F-03, F-06, F-17) điền bộ đọc |
+| Phạm vi | `ScopeService.loadAccess()` dựng `AccessContext` một lần mỗi yêu cầu, gắn vào `request.access`; service lấy bằng `@CurrentAccess()` và kiểm phạm vi đồng bộ trên đó. Vai trò `scopeSource = NONE` lấy từ hàng `RoleAssignment` (`SYSTEM`/`UNIT`); vai trò khác suy ra qua `ScopeSourceReader`: F-03 đã điền `SUBJECT_GROUP_MEMBER` (R5) và `SUBJECT_GROUP_COORDINATOR` (R4) từ hàng đang hiệu lực trong nhóm `ACTIVE`; F-06, F-17 điền tiếp |
 | Mã quyền | Hằng `PERMISSIONS` (`shared/authz/permission-codes.ts`); không viết cứng mã vai trò trong mã |
 | Người dùng hiện tại | `@CurrentUser()`; không đọc `req.session` trong controller |
 | Kiểm thử | Đơn vị `*.spec.ts` cạnh tệp; đầu-cuối `test/*.e2e-spec.ts` dùng `configureApp` chung với `main.ts` |
 
 ### Chưa dựng
 
-Bộ đọc phạm vi suy ra cho Giám đốc CTĐT, nhóm chuyên môn, sinh viên — F-03, F-06, F-17. Nhật ký kiểm toán hoãn (F01-07, `docs/planning/deferred-scope.md` §2).
+Bộ đọc phạm vi suy ra cho Giám đốc CTĐT và sinh viên — F-06, F-17 (nhóm chuyên môn đã có từ F-03). Nhật ký kiểm toán hoãn (F01-07, `docs/planning/deferred-scope.md` §2).
 
 ---
 
@@ -115,11 +117,14 @@ src/
 │   ├── hooks/             useQuery / useMutation
 │   ├── pages/<Name>Page.tsx   một tệp cho mỗi màn hình, test cạnh tệp
 │   └── schema/            `rules` cho AntD Form
-│   (auth, health, home, users, permissions)
+│   (auth, health, home, users, permissions, org-units, subject-groups)
 ├── shared/
 │   ├── api/               client.ts (getJson, sendJson, ApiError, header CSRF), queryClient.ts, errorCodes.ts, schema.d.ts (sinh từ OpenAPI, có trong git)
 │   ├── auth/              me.ts, useMe, useLogout, RequireAuth, permissions.ts, useCan, RequirePermission
 │   ├── org-units/         orgUnits.ts, useOrgUnits, OrgUnitSelect — dùng chung cho mọi ô chọn đơn vị
+│   ├── subject-groups/    subjectGroups.ts, useSubjectGroups — danh sách nhóm dùng chung (cây đơn vị, trang nhóm, F-04)
+│   ├── users/             userOptions.ts, UserSelect — ô tìm tài khoản đang hoạt động
+│   ├── validity/          nhãn, màu và định dạng ngày của trạng thái hiệu lực
 │   └── layout/            AppLayout.tsx (Header, Sider, Content), menuItems.tsx (mục menu kèm quyền cần)
 └── test/setup.ts          jest-dom, bản giả ResizeObserver cho Vitest
 ```

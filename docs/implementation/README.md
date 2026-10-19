@@ -141,7 +141,8 @@ Thứ tự phụ thuộc đáng chú ý: F-02 cần `OrgUnit` của F-03 (CV-011
 ### Active
 - [F-01 Đăng nhập, phiên](f-01-auth-session-implementation-plan.md) — xong 2026-10-18
 - [F-02 Tài khoản, vai trò, phạm vi quyền](f-02-accounts-roles-permissions-implementation-plan.md) — mã xong 2026-10-19; còn nợ đi thử bằng trình duyệt (§7)
-- Tiếp theo F-03
+- [F-03 Đơn vị và nhóm chuyên môn](f-03-org-units-subject-groups-implementation-plan.md) — mã xong 2026-10-19; còn nợ đi thử bằng trình duyệt
+- Tiếp theo F-04
 
 ### Completed
 - …
