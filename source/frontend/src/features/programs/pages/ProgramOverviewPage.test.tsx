@@ -134,8 +134,8 @@ describe('ProgramOverviewPage', () => {
       '/programs/p1/versions/v1/elective-groups',
     );
     expect(
-      screen.queryByRole('link', { name: 'Kiểm tra nhất quán' }),
-    ).not.toBeInTheDocument();
+      screen.getByRole('link', { name: 'Kiểm tra nhất quán' }),
+    ).toHaveAttribute('href', '/programs/p1/versions/v1/consistency');
   });
 
   it('opens the current version when the program has no Draft', async () => {

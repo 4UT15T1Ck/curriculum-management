@@ -12,7 +12,7 @@ It deliberately excludes calling the checker from submit and release (F-13, F-15
 > - Builds on: F-02 (`AccessContext`, `PERMISSIONS.PROGRAM_VIEW`, `PROGRAM_EDIT_INFO`, `PERMISSION_TABLE`), F-04 (`decimal.ts`), F-05 (`requisite-graph.ts`), F-06 (`ProgramVersion` credit columns, `programTarget`, `ProgramSectionLinks`), F-07 (`curriculum-warnings.ts`, `CurriculumSharedModule`, `CurriculumService.read`, `CurriculumDto`, `CurriculumPage`, `CurriculumTotals`, `CurriculumWarningsPanel`)
 > - Tests: `docs/planning/test-plan.md:167` (KB-013), `:172-175` (KB-018..KB-021), `:299` (NT-B2-06)
 
-**Status**: Not started
+**Status**: Mã xong 2026-10-19 (BE-01..BE-05, FE-01..FE-04); còn nợ đi thử bằng trình duyệt (§7) — `docs/implement-report/f-08-consistency-check-implement-report.md`
 
 ---
 

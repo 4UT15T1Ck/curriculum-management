@@ -1,15 +1,13 @@
-import { Card, Col, Row, Tooltip, Typography } from 'antd';
+import { Card, Col, Row, Typography } from 'antd';
 import { generatePath, Link } from 'react-router';
 import { ROUTES } from '../../../routes';
 import type { ProgramDetail } from '../api/programs';
-import { SECTION_NOT_BUILT_TOOLTIP } from '../constants/programLabels';
 
 interface ProgramSectionLinksProps {
   program: ProgramDetail;
 }
 
 // The curriculum and its elective groups open the version being worked on: the Draft, else the current one.
-// Later features turn their card into a link when they add the route (F-08 the consistency check).
 export function ProgramSectionLinks({ program }: ProgramSectionLinksProps) {
   const workingVersion = program.draftVersion ?? program.currentVersion;
   const params = { programId: program.id, versionId: workingVersion.id };
@@ -21,6 +19,10 @@ export function ProgramSectionLinks({ program }: ProgramSectionLinksProps) {
     {
       title: 'Nhóm tự chọn',
       to: generatePath(ROUTES.electiveGroups, params),
+    },
+    {
+      title: 'Kiểm tra nhất quán',
+      to: generatePath(ROUTES.consistency, params),
     },
   ];
   return (
@@ -34,13 +36,6 @@ export function ProgramSectionLinks({ program }: ProgramSectionLinksProps) {
           </Link>
         </Col>
       ))}
-      <Col xs={24} md={8}>
-        <Tooltip title={SECTION_NOT_BUILT_TOOLTIP}>
-          <Card size="small" title="Kiểm tra nhất quán" aria-disabled>
-            Chưa có
-          </Card>
-        </Tooltip>
-      </Col>
     </Row>
   );
 }

@@ -135,3 +135,11 @@ Format:
 - Giao diện: MH-25 (dòng / theo học kỳ, lọc, tổng, cảnh báo, kéo thả bằng `@dnd-kit` có bàn phím, hộp thoại dòng và điều kiện), MH-26 (nhóm tự chọn, `Transfer`), "Chương trình đang sử dụng" ở chi tiết và sửa học phần, các thẻ tổng quan chương trình thành liên kết; `CourseSelect` nhận `statuses`; `withQuery` nhận mảng.
 - Kiểm tra: backend tsc 0, oxlint 0, đơn vị 358/358 (41 tệp), đầu-cuối 193/193 (12 tệp, Testcontainers); frontend tsc 0, oxlint 0, đơn vị 173/173 (35 tệp), `vite build` ổn; Prettier sạch ở cả hai.
 - Còn nợ: đi thử bằng trình duyệt (kế hoạch §7), áp migration lên cơ sở dữ liệu phát triển, bảng khối kiến thức còn rỗng (chưa có tệp Excel). Điểm lệch kế hoạch ở báo cáo dựng.
+
+## [F-08] Kiểm tra nhất quán — dựng mã
+**Date**: 2026-10-19
+**Files changed**: `source/backend/prisma/{schema.prisma,migrations/20261019092846_credit_mismatch_acceptance}`, `source/backend/src/shared/curriculum/*`, `source/backend/src/features/{consistency,curriculum}/*`, `source/backend/src/app.module.ts`, `source/backend/test/*`, `source/frontend/src/features/{consistency,curriculum,programs}/*`, `source/frontend/src/{router.tsx,routes.ts}`, `source/frontend/src/shared/api/schema.d.ts`, `docs/{implement-report,progress,implementation}/*`
+- Năm cột chấp nhận chênh lệch trên `ProgramVersion` (một `CHECK` năm-hoặc-không), `programCredits` (nhóm tự chọn tính theo mức tối thiểu), `curriculumWarnings` mở rộng (6 mã mới, mức `ERROR`), `ConsistencyChecker.check` / `assertPasses` dùng chung, hai route `GET …/consistency` và `PUT …/credit-mismatch-acceptance`.
+- Giao diện MH-27, dòng tổng chương trình ở MH-25, nút và thẻ "Kiểm tra nhất quán", `?focus=` làm nổi dòng/nhóm.
+- Kiểm tra: backend đơn vị 391, đầu-cuối 207; frontend 190; tsc, oxlint, Prettier, build sạch.
+- Còn nợ: đi thử bằng trình duyệt, áp migration lên cơ sở dữ liệu phát triển.

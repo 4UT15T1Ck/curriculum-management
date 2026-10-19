@@ -10,7 +10,7 @@ import { CurriculumPage } from './CurriculumPage';
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status });
 
-function renderPage(data: Curriculum = fixture(), status = 200) {
+function renderPage(data: Curriculum = fixture(), status = 200, search = '') {
   vi.stubGlobal(
     'fetch',
     vi.fn((input: RequestInfo | URL) => {
@@ -29,7 +29,7 @@ function renderPage(data: Curriculum = fixture(), status = 200) {
         element: <CurriculumPage />,
       },
     ],
-    { initialEntries: ['/programs/p1/versions/v1/curriculum'] },
+    { initialEntries: [`/programs/p1/versions/v1/curriculum${search}`] },
   );
   render(
     <QueryClientProvider
@@ -54,6 +54,9 @@ const courseCodes = () =>
   bodyRows()
     .map((row) => /MAT101|PHY101|IT301/.exec(row.textContent ?? '')?.[0])
     .filter(Boolean);
+
+// jsdom has no layout, hence no scrollIntoView; the ?focus effect calls it.
+Element.prototype.scrollIntoView = vi.fn();
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -86,7 +89,9 @@ describe('CurriculumPage', () => {
       ).toBeInTheDocument();
     // Per-semester totals come from the server; the grand total is added without float drift (5.5 + 0 + 3 + 0).
     expect(await screen.findByText('Tín chỉ theo học kỳ')).toBeInTheDocument();
-    expect(screen.getByText('8.5')).toBeInTheDocument();
+    // The program line counts the elective group by its minimum, not every row (US-029 AC1).
+    expect(screen.getByText(/11\.5 \/ 150/)).toBeInTheDocument();
+    expect(screen.getByText('Lệch so với khai báo')).toBeInTheDocument();
     expect(screen.getByText('Tín chỉ theo khối kiến thức')).toBeInTheDocument();
   });
 
@@ -179,6 +184,7 @@ describe('CurriculumPage', () => {
             message: 'Học kỳ 2 chưa có học phần nào.',
             semester: 2,
             itemId: null,
+            groupId: null,
           },
           {
             code: 'REQUISITE_NOT_EARLIER',
@@ -186,6 +192,7 @@ describe('CurriculumPage', () => {
             message: 'IT301 cần MAT101 trước.',
             semester: 3,
             itemId: 'i-IT301',
+            groupId: null,
           },
         ],
       }),
@@ -246,6 +253,48 @@ describe('CurriculumPage', () => {
     expect(screen.getByText(/Học kỳ 2 — 0 TC/)).toBeInTheDocument();
     expect(screen.getByText(/Học kỳ 4 — 0 TC/)).toBeInTheDocument();
     expect(screen.getAllByText('Chưa có học phần')).toHaveLength(2);
+  });
+
+  it('links to the consistency check, which is open for every status', async () => {
+    renderPage();
+    expect(
+      (
+        await screen.findByRole('button', { name: 'Kiểm tra nhất quán' })
+      ).closest('a'),
+    ).toHaveAttribute('href', '/programs/p1/versions/v1/consistency');
+  });
+
+  it('highlights the row named by ?focus and shows errors before warnings', async () => {
+    renderPage(
+      fixture({
+        warnings: [
+          {
+            code: 'REQUISITE_NOT_EARLIER',
+            severity: 'HIGH',
+            message: 'Cảnh báo một.',
+            semester: 3,
+            itemId: 'i-IT301',
+            groupId: null,
+          },
+          {
+            code: 'REQUISITE_CYCLE',
+            severity: 'ERROR',
+            message: 'Vòng điều kiện: A → B → A.',
+            semester: 1,
+            itemId: 'i-MAT101',
+            groupId: null,
+          },
+        ],
+      }),
+      200,
+      '?focus=i-PHY101',
+    );
+    const row = (await screen.findByText('PHY101')).closest('tr');
+    expect(row).toHaveClass('ant-table-row-selected');
+    const entries = within(
+      screen.getByRole('list', { name: 'Cảnh báo của khung' }),
+    ).getAllByRole('listitem');
+    expect(entries[0]).toHaveTextContent('Vòng điều kiện');
   });
 
   it('links to the elective groups and back to the program', async () => {

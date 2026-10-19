@@ -13,7 +13,11 @@ interface ElectiveGroupTableProps {
   curriculum: Curriculum;
   onEdit: (group: ElectiveGroup) => void;
   onAssign: (group: ElectiveGroup) => void;
+  // Group to highlight, from the consistency result's `focus` parameter.
+  focusId?: string | null;
 }
+
+export const groupElementId = (groupId: string) => `elective-group-${groupId}`;
 
 function minimumText(group: ElectiveGroup): string {
   return [
@@ -37,6 +41,7 @@ export function ElectiveGroupTable({
   curriculum,
   onEdit,
   onAssign,
+  focusId,
 }: ElectiveGroupTableProps) {
   const { message } = App.useApp();
   const remove = useDeleteGroup(curriculum.version.id);
@@ -109,6 +114,10 @@ export function ElectiveGroupTable({
       columns={columns}
       dataSource={curriculum.electiveGroups}
       locale={{ emptyText: 'Chưa có nhóm tự chọn' }}
+      rowClassName={(group) =>
+        group.id === focusId ? 'ant-table-row-selected' : ''
+      }
+      onRow={(group) => ({ id: groupElementId(group.id) })}
       expandable={{
         rowExpandable: (group) => group.itemIds.length > 0,
         expandedRowRender: (group) => (

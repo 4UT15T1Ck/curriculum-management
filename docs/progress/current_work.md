@@ -4,7 +4,7 @@
 
 - **Last updated**: 2026-10-19
 - **Active area**: dựng bản MVP (`docs/planning/epics.md` §0)
-- **Start here**: dựng F-08 (`docs/implementation/f-08-consistency-check-implementation-plan.md`) — kiểm tra nhất quán; F-08 mở rộng `curriculumWarnings` (`src/shared/curriculum/`), chạy lại `findRequisiteCycle` trên hợp cạnh danh mục và khung của cả phiên bản, và bật thẻ "Kiểm tra nhất quán" ở `ProgramSectionLinks`.
+- **Start here**: dựng F-10 (`docs/implementation/f-10-syllabus-implementation-plan.md`) — đề cương. F-08 đã xong mã; F-13 và F-15 gọi `ConsistencyChecker.assertPasses(versionId, tx)` sau `lockRequisiteGraph(tx)` (`src/shared/curriculum/`).
 
 ---
 
@@ -24,6 +24,7 @@
 - F-06: người dùng đi thử 6 bước kế hoạch §7 bằng trình duyệt (danh sách 1024034 với "Nháp", thêm chương trình lệch tín chỉ thấy chênh lệch rồi sửa, phân công Giám đốc rồi đăng nhập bằng người đó, kết thúc phân công hôm qua, nhân bản, ngừng sử dụng), áp migration `20261019082727_programs` lên cơ sở dữ liệu phát triển (`pnpm prisma:migrate` rồi `pnpm prisma:seed`), và thay giá trị giữ chỗ của 1024034 bằng số liệu từ tệp Excel khung của Khoa — `docs/implement-report/f-06-programs-directors-implement-report.md`.
 
 - F-07: người dùng đi thử 9 bước kế hoạch §7 bằng trình duyệt (khung theo dòng và theo học kỳ, lọc, thêm trùng / học kỳ 9, điều kiện xếp sau và vòng, kéo thả kể cả bàn phím, nhóm tự chọn, "Chương trình đang sử dụng" ở học phần, đăng nhập R4), áp migration `20261019085325_curriculum` (`pnpm prisma:migrate` rồi `pnpm prisma:seed`), nạp danh mục khối kiến thức khi có tệp Excel và thay sáu học phần mẫu DEMO* của 1024034 — `docs/implement-report/f-07-curriculum-elective-groups-implement-report.md`.
+- F-08: người dùng đi thử 8 bước kế hoạch §7 bằng trình duyệt (thẻ credit, chấp nhận chênh lệch kèm lý do, xóa dòng thấy cảnh báo trở lại, vòng danh mục–khung, "Tới chỗ sửa", dòng tổng chương trình, thẻ ở tổng quan, đăng nhập R2) và áp migration `20261019092846_credit_mismatch_acceptance` (`pnpm prisma:migrate`) — `docs/implement-report/f-08-consistency-check-implement-report.md`.
 
 ### Agreed Approach
 - MVP = F-01..F-08, F-10, F-11, F-13, F-14, F-15 (13 tính năng, 298 điểm); F-09, F-12, F-16, F-26, B5, B6 làm sau.

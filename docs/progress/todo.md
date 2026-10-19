@@ -36,7 +36,7 @@ Một dòng cho mỗi tính năng; việc chi tiết (CV-xxx) ở `docs/planning
 |---|---|---|---|
 | F-06 | Thông tin chương trình, Giám đốc CTĐT | 🔄 | Mã xong 2026-10-19, kiểm thử xanh (backend đơn vị 269, đầu-cuối 158; frontend 119); `Program`/`ProgramVersion` ở Nháp, Giám đốc CTĐT có thời hạn và lịch sử, phạm vi R3 thật, nhân bản qua `VersionContentCopier`; còn nợ đi thử bằng trình duyệt (kế hoạch §7), áp migration `programs` lên cơ sở dữ liệu phát triển và thay giá trị giữ chỗ của 1024034 — `docs/implement-report/f-06-programs-directors-implement-report.md` |
 | F-07 | Khung chương trình, nhóm tự chọn | 🔄 | Mã xong 2026-10-19, kiểm thử xanh (backend đơn vị 358, đầu-cuối 193; frontend 173); khung có điều kiện riêng, nhóm tự chọn, kéo thả, nhân bản chép khung, chặn giảm số học kỳ; còn nợ đi thử bằng trình duyệt (kế hoạch §7, 9 bước), áp migration `curriculum` lên cơ sở dữ liệu phát triển, nạp danh mục khối kiến thức và thay dữ liệu mẫu DEMO* của 1024034 — `docs/implement-report/f-07-curriculum-elective-groups-implement-report.md` |
-| F-08 | Kiểm tra nhất quán | ❌ | Quy tắc trên khung Nháp |
+| F-08 | Kiểm tra nhất quán | 🔄 | Mã xong 2026-10-19, kiểm thử xanh (backend đơn vị 391, đầu-cuối 207; frontend 190); tổng tín chỉ theo mức tối thiểu của nhóm, chấp nhận chênh lệch kèm lý do, `ConsistencyChecker.assertPasses` cho F-13/F-15; còn nợ đi thử bằng trình duyệt (kế hoạch §7, 8 bước) và áp migration `credit_mismatch_acceptance` — `docs/implement-report/f-08-consistency-check-implement-report.md` |
 | F-09 | Nhập, xuất Excel | ❌ | Sau MVP. ExcelJS trong worker; chạy thử → xác nhận |
 
 ## B3 — Đề cương và chuẩn đầu ra

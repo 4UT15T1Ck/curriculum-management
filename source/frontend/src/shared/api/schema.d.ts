@@ -932,6 +932,38 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/program-versions/{versionId}/consistency': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ConsistencyController_report'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/program-versions/{versionId}/credit-mismatch-acceptance': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['ConsistencyController_accept'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1656,16 +1688,39 @@ export interface components {
       listedCredits: string;
       itemCount: number;
     };
+    CreditBreakdownDto: {
+      /** @example 98 */
+      compulsory: string;
+      /** @example 50 */
+      elective: string;
+      /** @example 148 */
+      total: string;
+    };
+    ProgramCreditsDto: {
+      computed: components['schemas']['CreditBreakdownDto'];
+      declared: components['schemas']['CreditBreakdownDto'];
+      mismatch: boolean;
+    };
     /** @enum {string} */
-    CurriculumWarningCode: 'EMPTY_SEMESTER' | 'REQUISITE_NOT_EARLIER';
+    CurriculumWarningCode:
+      | 'EMPTY_SEMESTER'
+      | 'REQUISITE_NOT_EARLIER'
+      | 'REQUISITE_OUTSIDE'
+      | 'ELECTIVE_WITHOUT_GROUP'
+      | 'DUPLICATE_COURSE'
+      | 'GROUP_MINIMUM_UNREACHABLE'
+      | 'REQUISITE_CYCLE'
+      | 'CREDIT_MISMATCH'
+      | 'CREDIT_MISMATCH_ACCEPTED';
     /** @enum {string} */
-    WarningSeverity: 'INFO' | 'HIGH';
+    WarningSeverity: 'ERROR' | 'HIGH' | 'INFO';
     CurriculumWarningDto: {
       code: components['schemas']['CurriculumWarningCode'];
       severity: components['schemas']['WarningSeverity'];
       message: string;
       semester: number | null;
       itemId: string | null;
+      groupId: string | null;
     };
     CurriculumDto: {
       version: components['schemas']['CurriculumVersionDto'];
@@ -1677,6 +1732,7 @@ export interface components {
       blocks: components['schemas']['BlockTotalDto'][];
       knowledgeBlocks: components['schemas']['KnowledgeBlockDto'][];
       electiveGroups: components['schemas']['ElectiveGroupDto'][];
+      programCredits: components['schemas']['ProgramCreditsDto'];
       warnings: components['schemas']['CurriculumWarningDto'][];
     };
     CreateCurriculumItemDto: {
@@ -1734,6 +1790,78 @@ export interface components {
     };
     AssignGroupItemsDto: {
       itemIds: string[];
+    };
+    ConsistencyVersionDto: {
+      id: string;
+      programId: string;
+      programCode: string;
+      programName: string;
+      versionNumber: string | null;
+      status: components['schemas']['ProgramVersionStatus'];
+    };
+    CreditAcceptedByDto: {
+      id: string;
+      fullName: string;
+    };
+    CreditAcceptanceDto: {
+      reason: string;
+      /** @example -2 */
+      compulsoryGap: string;
+      /** @example 0 */
+      electiveGap: string;
+      acceptedBy: components['schemas']['CreditAcceptedByDto'];
+      acceptedAt: string;
+    };
+    CreditCheckDto: {
+      declared: components['schemas']['CreditBreakdownDto'];
+      computed: components['schemas']['CreditBreakdownDto'];
+      /** @description Tính từ khung trừ khai báo; có thể âm. */
+      gap: components['schemas']['CreditBreakdownDto'];
+      mismatch: boolean;
+      acceptance: components['schemas']['CreditAcceptanceDto'] | null;
+      acceptanceCurrent: boolean;
+    };
+    GroupRequirementDto: {
+      id: string;
+      groupCode: string;
+      groupName: string;
+      minCredits: string | null;
+      minCourses: number | null;
+      /**
+       * @description Phần nhóm cộng vào tổng.
+       * @example 6
+       */
+      requiredCredits: string;
+      /** @example 15 */
+      listedCredits: string;
+      itemCount: number;
+    };
+    ConsistencyIssueDto: {
+      code: components['schemas']['CurriculumWarningCode'];
+      severity: components['schemas']['WarningSeverity'];
+      message: string;
+      semester: number | null;
+      itemId: string | null;
+      groupId: string | null;
+    };
+    ConsistencyReportDto: {
+      version: components['schemas']['ConsistencyVersionDto'];
+      checkedAt: string;
+      credits: components['schemas']['CreditCheckDto'];
+      groups: components['schemas']['GroupRequirementDto'][];
+      issues: components['schemas']['ConsistencyIssueDto'][];
+      errorCount: number;
+      warningCount: number;
+      /** @description errorCount === 0: what assertPasses decides. */
+      passes: boolean;
+      canAcceptMismatch: boolean;
+    };
+    AcceptCreditMismatchDto: {
+      reason: string;
+      /** @example -2 */
+      compulsoryGap: string;
+      /** @example 0 */
+      electiveGap: string;
     };
   };
   responses: never;
@@ -3486,6 +3614,52 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['ElectiveGroupDto'];
+        };
+      };
+    };
+  };
+  ConsistencyController_report: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        versionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ConsistencyReportDto'];
+        };
+      };
+    };
+  };
+  ConsistencyController_accept: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        versionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AcceptCreditMismatchDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ConsistencyReportDto'];
         };
       };
     };

@@ -25,6 +25,8 @@ interface CurriculumTableProps {
   sortable: boolean;
   onEdit: (item: CurriculumItem) => void;
   onRequisites: (item: CurriculumItem) => void;
+  // Row to highlight, from the consistency result's `focus` parameter.
+  focusId?: string | null;
 }
 
 const flag = (on: boolean) => (on ? <CheckOutlined aria-label="Có" /> : null);
@@ -35,6 +37,7 @@ export function CurriculumTable({
   sortable,
   onEdit,
   onRequisites,
+  focusId,
 }: CurriculumTableProps) {
   const { sensors, onDragEnd, isSaving } = useSemesterReorder(curriculum);
   const columns: TableColumnsType<CurriculumItem> = [
@@ -117,6 +120,9 @@ export function CurriculumTable({
       dataSource={items}
       scroll={{ x: 'max-content' }}
       components={sortable ? { body: { row: SortableRow } } : undefined}
+      rowClassName={(item) =>
+        item.id === focusId ? 'ant-table-row-selected' : ''
+      }
       onRow={(item) => ({ id: itemElementId(item.id) })}
     />
   );

@@ -1,7 +1,15 @@
-import { Flex, Result, Segmented, Skeleton, Space, Typography } from 'antd';
-import { useState } from 'react';
-import { generatePath, Link, useParams } from 'react-router';
-import { ROUTES } from '../../../routes';
+import {
+  Button,
+  Flex,
+  Result,
+  Segmented,
+  Skeleton,
+  Space,
+  Typography,
+} from 'antd';
+import { useEffect, useState } from 'react';
+import { generatePath, Link, useParams, useSearchParams } from 'react-router';
+import { FOCUS_PARAM, ROUTES } from '../../../routes';
 import { ApiError } from '../../../shared/api/client';
 import { versionLabel } from '../../../shared/constants/versionLabels';
 import type { CurriculumItem } from '../api/curriculum';
@@ -19,7 +27,11 @@ import {
   type CurriculumView,
 } from '../constants/curriculumLabels';
 import { useCurriculum } from '../hooks/useCurriculum';
-import { useCurriculumFilters } from '../hooks/useCurriculumFilters';
+import {
+  EMPTY_CURRICULUM_FILTERS,
+  useCurriculumFilters,
+} from '../hooks/useCurriculumFilters';
+import { itemElementId } from '../components/CurriculumWarningsPanel';
 
 const VIEW_OPTIONS = (
   Object.keys(CURRICULUM_VIEW_LABELS) as CurriculumView[]
@@ -34,6 +46,23 @@ export function CurriculumPage() {
   );
   const [editing, setEditing] = useState<CurriculumItem | 'new' | null>(null);
   const [requisitesOf, setRequisitesOf] = useState<CurriculumItem | null>(null);
+  const [searchParams] = useSearchParams();
+  const focusId = searchParams.get(FOCUS_PARAM);
+  const focusVisible = visible.some((row) => row.id === focusId);
+  const focusKnown = Boolean(
+    focusId && curriculum?.items.some((row) => row.id === focusId),
+  );
+  // Arriving from the consistency result: clear a filter that hides the row, then bring it into view.
+  useEffect(() => {
+    if (!focusKnown) return;
+    if (!focusVisible) {
+      setFilters(EMPTY_CURRICULUM_FILTERS);
+      return;
+    }
+    document
+      .getElementById(itemElementId(focusId!))
+      ?.scrollIntoView({ block: 'center' });
+  }, [focusKnown, focusVisible, focusId, setFilters]);
   if (isPending) return <Skeleton active />;
   if (!curriculum) {
     if (error instanceof ApiError && error.status === 403)
@@ -69,6 +98,9 @@ export function CurriculumPage() {
           >
             Nhóm tự chọn
           </Link>
+          <Link to={generatePath(ROUTES.consistency, { programId, versionId })}>
+            <Button>Kiểm tra nhất quán</Button>
+          </Link>
           <CurriculumAddButton
             curriculum={curriculum}
             onAdd={() => setEditing('new')}
@@ -89,6 +121,7 @@ export function CurriculumPage() {
           sortable={!filtered && curriculum.canEditStructure}
           onEdit={setEditing}
           onRequisites={setRequisitesOf}
+          focusId={focusId}
         />
       ) : (
         <SemesterBoard

@@ -1,13 +1,16 @@
 import { Alert, Button, Flex, Result, Skeleton, Typography } from 'antd';
-import { useState } from 'react';
-import { generatePath, Link, useParams } from 'react-router';
-import { ROUTES } from '../../../routes';
+import { useEffect, useState } from 'react';
+import { generatePath, Link, useParams, useSearchParams } from 'react-router';
+import { FOCUS_PARAM, ROUTES } from '../../../routes';
 import { ApiError } from '../../../shared/api/client';
 import { versionLabel } from '../../../shared/constants/versionLabels';
 import type { ElectiveGroup } from '../api/curriculum';
 import { AssignItemsModal } from '../components/AssignItemsModal';
 import { ElectiveGroupFormModal } from '../components/ElectiveGroupFormModal';
-import { ElectiveGroupTable } from '../components/ElectiveGroupTable';
+import {
+  ElectiveGroupTable,
+  groupElementId,
+} from '../components/ElectiveGroupTable';
 import { useCurriculum } from '../hooks/useCurriculum';
 
 export function ElectiveGroupsPage() {
@@ -15,6 +18,17 @@ export function ElectiveGroupsPage() {
   const { data: curriculum, isPending, error } = useCurriculum(versionId);
   const [editing, setEditing] = useState<ElectiveGroup | 'new' | null>(null);
   const [assigning, setAssigning] = useState<ElectiveGroup | null>(null);
+  const [searchParams] = useSearchParams();
+  const focusId = searchParams.get(FOCUS_PARAM);
+  const focusKnown = Boolean(
+    focusId && curriculum?.electiveGroups.some((group) => group.id === focusId),
+  );
+  useEffect(() => {
+    if (focusKnown)
+      document
+        .getElementById(groupElementId(focusId!))
+        ?.scrollIntoView({ block: 'center' });
+  }, [focusKnown, focusId]);
   if (isPending) return <Skeleton active />;
   if (!curriculum) {
     if (error instanceof ApiError && error.status === 403)
@@ -55,6 +69,7 @@ export function ElectiveGroupsPage() {
         curriculum={curriculum}
         onEdit={setEditing}
         onAssign={setAssigning}
+        focusId={focusId}
       />
       {editing && (
         <ElectiveGroupFormModal

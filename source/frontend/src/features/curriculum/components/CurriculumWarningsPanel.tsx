@@ -13,14 +13,16 @@ function scrollToItem(itemId: string) {
     ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-// HIGH warnings first (they block a clean check later); INFO ones are reminders.
+const ALERT_TYPE = { ERROR: 'error', HIGH: 'warning', INFO: 'info' } as const;
+const RANK = { ERROR: 0, HIGH: 1, INFO: 2 } as const;
+
+// Errors first (they block submit and release), then warnings; INFO ones are reminders.
 export function CurriculumWarningsPanel({
   warnings,
 }: CurriculumWarningsPanelProps) {
   if (warnings.length === 0) return null;
   const ordered = [...warnings].sort(
-    (left, right) =>
-      Number(right.severity === 'HIGH') - Number(left.severity === 'HIGH'),
+    (left, right) => RANK[left.severity] - RANK[right.severity],
   );
   return (
     <Flex vertical gap="small" role="list" aria-label="Cảnh báo của khung">
@@ -28,7 +30,7 @@ export function CurriculumWarningsPanel({
         <Alert
           key={`${warning.code}-${warning.itemId ?? warning.semester}-${index}`}
           role="listitem"
-          type={warning.severity === 'HIGH' ? 'warning' : 'info'}
+          type={ALERT_TYPE[warning.severity]}
           showIcon
           message={warning.message}
           action={

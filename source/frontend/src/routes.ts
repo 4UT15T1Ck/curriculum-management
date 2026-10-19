@@ -20,4 +20,8 @@ export const ROUTES = {
   programEdit: '/programs/:programId/edit',
   curriculum: '/programs/:programId/versions/:versionId/curriculum',
   electiveGroups: '/programs/:programId/versions/:versionId/elective-groups',
+  consistency: '/programs/:programId/versions/:versionId/consistency',
 } as const;
+
+// Row or group to scroll to and highlight on arrival; set by the consistency result list.
+export const FOCUS_PARAM = 'focus';

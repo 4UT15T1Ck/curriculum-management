@@ -123,6 +123,11 @@ export function curriculum(patch: Partial<Curriculum> = {}): Curriculum {
     electiveGroups: [
       group({ itemIds: ['i-IT301'], listedCredits: '3', itemCount: 1 }),
     ],
+    programCredits: {
+      computed: { compulsory: '5.5', elective: '6', total: '11.5' },
+      declared: { compulsory: '100', elective: '50', total: '150' },
+      mismatch: true,
+    },
     warnings: [],
     ...patch,
   };

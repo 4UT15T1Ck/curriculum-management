@@ -34,5 +34,3 @@ export const CLONE_SCOPE_NOTE =
   'Bản mới ở trạng thái Nháp, chép thông tin chương trình và khung; chưa chép PLO và ma trận. Giám đốc CTĐT phân công lại sau.';
 export const REVOKE_DIRECTOR_CONFIRM =
   'Chỉ dùng khi phân công nhập nhầm. Lịch sử vẫn giữ dòng đã thu hồi.';
-export const SECTION_NOT_BUILT_TOOLTIP =
-  'Có từ khi tính năng kiểm tra nhất quán được dựng';

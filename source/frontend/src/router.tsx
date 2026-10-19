@@ -77,6 +77,11 @@ const ElectiveGroupsPage = lazy(() =>
     default: module.ElectiveGroupsPage,
   })),
 );
+const ConsistencyPage = lazy(() =>
+  import('./features/consistency/pages/ConsistencyPage').then((module) => ({
+    default: module.ConsistencyPage,
+  })),
+);
 const ProgramFormPage = lazy(() =>
   import('./features/programs/pages/ProgramFormPage').then((module) => ({
     default: module.ProgramFormPage,
@@ -244,6 +249,14 @@ export const router = createBrowserRouter([
             element: (
               <RequirePermission code={PERMISSIONS.programView}>
                 <ElectiveGroupsPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.consistency,
+            element: (
+              <RequirePermission code={PERMISSIONS.programView}>
+                <ConsistencyPage />
               </RequirePermission>
             ),
           },
