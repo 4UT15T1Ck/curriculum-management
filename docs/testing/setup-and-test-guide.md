@@ -23,8 +23,9 @@ Một chỗ để bắt đầu: dựng hệ thống trên máy, chạy kiểm th
 3. Tạo `.env` cạnh `package.json` (mẫu đầy đủ ở §1.3). Tối thiểu cần `DATABASE_URL`, `SESSION_SECRET` và `SEED_ADMIN_PASSWORD`.
 4. `pnpm prisma:migrate` — áp 13 migration (`auth_session` … `release_versions`).
 5. `SEED_ADMIN_PASSWORD=<≥ 8 ký tự, có chữ và số> pnpm prisma:seed` — chạy lại nhiều lần không sinh trùng.
-6. `pnpm dev` → API `http://localhost:3000/api`, tài liệu API `http://localhost:3000/api/docs`. Biên dịch bằng SWC nên lên trong vài giây nhưng không kiểm kiểu; kiểm kiểu bằng `pnpm typecheck`. Nếu dừng ở `Watching for file changes` mà không thấy `Nest application successfully started`: kiểm tra PostgreSQL/Redis đã chạy và `DATABASE_URL`, `REDIS_PORT` đúng.
-7. Kiểm tra: `GET /api/health` trả `{"status":"ok","database":"up","redis":"up"}`.
+6. (Tùy chọn, để đi thử bằng trình duyệt) `SEED_DEMO_PASSWORD=<≥ 8 ký tự, có chữ và số> pnpm prisma:seed:demo` — nạp tài khoản các vai, nhóm chuyên môn, học phần, khung 1024034 và một CTĐT thứ hai (§3.1). Chạy **sau** `pnpm prisma:seed` (thiếu thì báo lỗi rõ); chạy lại nhiều lần không đổi gì.
+7. `pnpm dev` → API `http://localhost:3000/api`, tài liệu API `http://localhost:3000/api/docs`. Biên dịch bằng SWC nên lên trong vài giây nhưng không kiểm kiểu; kiểm kiểu bằng `pnpm typecheck`. Nếu dừng ở `Watching for file changes` mà không thấy `Nest application successfully started`: kiểm tra PostgreSQL/Redis đã chạy và `DATABASE_URL`, `REDIS_PORT` đúng.
+8. Kiểm tra: `GET /api/health` trả `{"status":"ok","database":"up","redis":"up"}`.
 
 ### 1.2. Frontend — `source/frontend`
 
@@ -48,6 +49,10 @@ SESSION_SECRET=
 # Mật khẩu tài khoản R1 đầu tiên: ≥ 8 ký tự, có chữ và số
 SEED_ADMIN_PASSWORD=
 # SEED_ADMIN_USERNAME=admin
+
+# --- Chỉ cho dữ liệu mẫu (pnpm prisma:seed:demo, tùy chọn) ---
+# Mật khẩu chung của các tài khoản mẫu: ≥ 8 ký tự, có chữ và số
+SEED_DEMO_PASSWORD=
 
 # --- Tùy chọn (giá trị mặc định) ---
 NODE_ENV=development
@@ -86,6 +91,8 @@ Thiếu `DATABASE_URL` hoặc `SESSION_SECRET`, hay một biến sai kiểu, th�
 | CTĐT 1024034 (bản Nháp) + 6 học phần `DEMO*` + khung mẫu | **Dữ liệu giữ chỗ** — thay bằng Excel thật của Khoa |
 | Học kỳ, khóa | **Giữ chỗ** — thay bằng lịch thật |
 
+`pnpm prisma:seed:demo` (tùy chọn) bổ sung: 8 tài khoản mẫu, khoa `KHOA_KHCB` (chỉ để có một học phần của khoa khác), 4 nhóm chuyên môn, 17 học phần, quan hệ học phần, một nhóm tương đương, khung + PLO + ma trận + đề cương Nháp cho 1024034 (thay sáu học phần `DEMO*` giữ chỗ nếu khung chưa bị sửa) và CTĐT thứ hai 1024035. Không tạo bản ban hành, đề xuất hay phê duyệt.
+
 ---
 
 ## 2. Kiểm thử tự động
@@ -106,22 +113,26 @@ Ma trận quyền được kiểm tự động ở `source/backend/test/permissi
 
 ### 3.1. Chuẩn bị tài khoản cho các vai
 
-Đăng nhập `admin`, vào **Tài khoản** (MH-05) tạo các tài khoản dưới đây. R3, R4, R5 là vai **suy ra** — chúng chỉ có hiệu lực khi có phân công tương ứng.
+**Cách nhanh:** chạy `pnpm prisma:seed:demo` (§1.1 bước 6). Tất cả tài khoản dưới đây dùng chung mật khẩu `SEED_DEMO_PASSWORD`, không bị buộc đổi mật khẩu lần đầu. Các bước tạo tay ở bảng sau đó **không còn bắt buộc**; chỉ cần khi muốn thử chính màn hình Tài khoản (MH-05), nhóm chuyên môn hay phân công Giám đốc.
 
-| Vai | Ai | Cách cấp |
-|---|---|---|
-| R1 | Phòng Đào tạo | Gán vai R1 (MH-06) — `admin` đã có |
-| R2 | Ban lãnh đạo khoa | Gán vai R2 |
-| R3 | Giám đốc CTĐT | Phân công Giám đốc trên trang CTĐT (MH-22) |
-| R4 | Điều phối nhóm chuyên môn | Thêm vào nhóm chuyên môn với vai Điều phối (cần F-03: tạo nhóm trước) |
-| R5 | Giảng viên | Thêm vào nhóm chuyên môn làm thành viên |
-| R6 | Sinh viên | Gán vai R6, phạm vi đơn vị (không gán phạm vi toàn hệ thống — sẽ thấy cả bản Nháp) |
+| Tài khoản | Vai | Có hiệu lực nhờ | Làm được gì |
+|---|---|---|---|
+| `r2.lanhdao` | R2 Ban lãnh đạo khoa | Gán vai, toàn hệ thống | Xem toàn khoa theo ma trận quyền R2 (MH-06) |
+| `r3.giamdoc` | R3 | Giám đốc CTĐT 1024034 | Sửa khung, PLO, ma trận, đề cương của 1024034; tạo đề xuất |
+| `r3.giamdoc2` | R3 | Giám đốc CTĐT 1024035 | Như trên nhưng cho CTĐT thứ hai; ngoài 1024034 là ngoài phạm vi |
+| `r4.dieuphoi` | R4 | Điều phối nhóm Khoa học máy tính (`KHMT`) | Quản lý học phần, quan hệ của nhóm `KHMT`; đồng ý đề xuất ở cấp nhóm |
+| `r4.dieuphoi2` | R4 | Điều phối nhóm Công nghệ phần mềm (`CNPM`) | Như trên cho nhóm `CNPM` |
+| `r5.giangvien` | R5 | Thành viên nhóm `KHMT` | Soạn đề cương, CLO của học phần nhóm `KHMT` |
+| `r5.giangvien2` | R5 | Thành viên nhóm `CNPM` | Như trên cho nhóm `CNPM`; học phần `KHMT` là ngoài nhóm |
+| `r6.sinhvien` | R6 | Gán vai, phạm vi đơn vị Phòng Đào tạo | Chỉ thấy bản đã ban hành, **không thấy bản Nháp** |
 
-Nên tạo thêm **một giảng viên ở nhóm khác** và **một Giám đốc của CTĐT khác** để thử các trường hợp bị từ chối do ngoài phạm vi.
+R1 vẫn là `admin`. R3, R4, R5 là vai **suy ra** từ phân công, R6 gán tay bằng seed (giao diện không gán R6; phạm vi đơn vị phải khác khoa của CTĐT, nếu không sẽ đọc được bản Nháp). Nhóm còn lại `HTTT`, `MMT` chưa có người điều phối — thử bằng `admin`.
+
+Dữ liệu mẫu đã có **một giảng viên ở nhóm khác** (`r5.giangvien2`) và **một Giám đốc của CTĐT khác** (`r3.giamdoc2`); với tài khoản tự tạo, nên có để thử các trường hợp bị từ chối do ngoài phạm vi.
 
 ### 3.2. Thứ tự đi thử
 
-Đi theo thứ tự dưới đây — mỗi tính năng dùng dữ liệu tạo ở tính năng trước. Bước cụ thể nằm trong báo cáo dựng của tính năng (cột cuối). Xong tính năng nào thì đổi 🔄 → ✅ ở `docs/progress/todo.md`.
+Đi theo thứ tự dưới đây — mỗi tính năng dùng dữ liệu tạo ở tính năng trước. Bước cụ thể nằm trong báo cáo dựng của tính năng (cột cuối). Nếu đã chạy `pnpm prisma:seed:demo`, các bước **tạo** tài khoản, nhóm, học phần, quan hệ, khung, PLO, ma trận và đề cương Nháp (xem bảng dưới) có thể bỏ qua — dùng dữ liệu mẫu; vẫn làm các bước **sửa, xóa, thử lỗi**. Xong tính năng nào thì đổi 🔄 → ✅ ở `docs/progress/todo.md`.
 
 | # | Tính năng | Vai | Nghiệm thu | Bước chi tiết |
 |---|---|---|---|---|
@@ -138,6 +149,21 @@ Nên tạo thêm **một giảng viên ở nhóm khác** và **một Giám đố
 | 11 | F-13 Đề xuất thay đổi | R1..R5 | NT-B4-03, NT-B4-09 | `implement-report/f-13-*` |
 | 12 | F-14 Duyệt ba cấp, thông báo | R1, R2, R3, R4, R5 | NT-B4-04, NT-B4-07, NT-B4-08 | `implement-report/f-14-*` |
 | 13 | F-15 phần 2 — duyệt cuối, kích hoạt, đính chính | R1, R3 | NT-B4-05, NT-B4-06, NT-B4-10, NT-B4-12 | `implement-report/f-15-*` |
+
+**Dữ liệu mẫu đã có sẵn cho các bước tạo (`pnpm prisma:seed:demo`):**
+
+| Tính năng | Đã có | Còn phải tự làm |
+|---|---|---|
+| F-02 | 8 tài khoản và vai ở §3.1 | Thử tạo, khóa, gán vai, đổi mật khẩu |
+| F-03 | 4 nhóm `KHMT`, `CNPM`, `HTTT`, `MMT`; điều phối và thành viên của `KHMT`, `CNPM` | Thêm thành viên, thu hồi, nhóm `HTTT`/`MMT` |
+| F-04 | 17 học phần, có học phần 0 tín chỉ (`ITS100`) và học phần khoa khác (`MAT101`) | Tạo, sửa, ngừng, thử tín chỉ sai |
+| F-05 | Tiên quyết có ngưỡng 2 (`PRG101` → `DSA201`), học trước, song hành (`DBS201` ~ `DBS202`), nhóm tương đương `TD-CSDL` | Thử vòng: `WEB301`, `SWE302`, `SWE301` chưa có quan hệ nào, đặt A → B → C → A |
+| F-06 | CTĐT 1024034 (Giám đốc `r3.giamdoc`) và 1024035 (`r3.giamdoc2`) | Thêm CTĐT lệch tín chỉ, đổi Giám đốc, nhân bản, ngừng |
+| F-07 | Khung 1024034: 16 dòng, học kỳ 1–6, nhóm tự chọn `TC1`, điều kiện xếp sau; khung nhỏ của 1024035 | Thêm trùng, học kỳ 9, kéo thả, thêm nhóm |
+| F-08 | Tín chỉ khai báo 28 + 6 = 34 khớp khung; kiểm tra chỉ còn 4 mục thông tin (học kỳ 7–10 trống) | Làm lệch rồi chấp nhận kèm lý do, tạo vòng |
+| F-10 | Đề cương Nháp cho cả 17 học phần; `PRG101`, `DSA201`, `DBS201` có đủ mục, tuần và CLO | Soạn, kéo thả tuần, tệp đính kèm, bản EN |
+| F-11 | 6 PLO, ma trận học phần–PLO có trọng số, liên kết CLO–PLO của ba học phần trên | Nhập trọng số `0,5`, xóa ô có liên kết, kiểm tra phủ |
+| F-15, F-13, F-14 | Không có — chỉ có bản Nháp, chưa ban hành | Toàn bộ: ban hành, đề xuất, duyệt |
 
 **Không kiểm ở MVP** (tính năng sau MVP): NT-B1-06 (nhật ký kiểm toán), NT-B2-01..03, NT-B2-09 (Excel, F-09), NT-B3-06..08 (công thức điểm, F-12), NT-B4-02 (đề xuất sửa công thức điểm, F-12), NT-B4-11 (gán khóa, F-16), toàn bộ B5, B6.
 

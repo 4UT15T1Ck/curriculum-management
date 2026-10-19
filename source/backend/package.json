@@ -20,6 +20,7 @@
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
     "prisma:generate": "prisma generate",
     "prisma:seed": "prisma db seed",
+    "prisma:seed:demo": "tsx prisma/seed-demo.ts",
     "prisma:migrate": "prisma migrate dev",
     "postinstall": "prisma generate",
     "format": "prettier --write .",
