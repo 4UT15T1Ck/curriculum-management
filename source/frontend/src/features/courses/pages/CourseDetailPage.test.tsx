@@ -4,6 +4,7 @@ import { App } from 'antd';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 import { CANCEL_CONFIRM_TEXT } from '../constants/courseLabels';
+import { GRADE_POINT_MESSAGE } from '../schema/courseRules';
 import { CourseDetailPage } from './CourseDetailPage';
 
 const course = {
@@ -23,16 +24,65 @@ const course = {
   },
   isForeign: false,
   programsUsing: [],
+  equivalenceGroup: null,
   editPath: 'DIRECT',
   canChangeStatus: true,
   createdAt: '2026-10-19T00:00:00.000Z',
   updatedAt: '2026-10-19T00:00:00.000Z',
 };
 
-function renderPage(respond: (url: string, init?: RequestInit) => Response) {
-  const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) =>
-    Promise.resolve(respond(String(input), init)),
-  );
+const ME = {
+  id: 'u1',
+  username: 'admin',
+  userCode: 'AD',
+  fullName: 'Quản trị',
+  email: null,
+  mustChangePassword: false,
+  orgUnit: null,
+  roles: [],
+  permissions: ['course.view', 'course.edit', 'courseRelation.edit'],
+};
+
+const relation = (patch: Record<string, unknown> = {}) => ({
+  id: 'r1',
+  relationType: 'PREREQUISITE',
+  sourceCourse: {
+    id: 'c2',
+    courseCode: 'IT002',
+    courseName: 'Toán rời rạc',
+    credits: '3',
+    status: 'ACTIVE',
+  },
+  targetCourse: {
+    id: 'c1',
+    courseCode: 'IT001',
+    courseName: 'Nhập môn lập trình',
+    credits: '2.5',
+    status: 'ACTIVE',
+  },
+  minScore: '2',
+  editPath: 'DIRECT',
+  ...patch,
+});
+
+// The page also asks who the caller is and for the course's relations; every other GET is the course itself.
+function renderPage(
+  respond: (url: string, init?: RequestInit) => Response,
+  options: { relations?: unknown[]; permissions?: string[] } = {},
+) {
+  const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    if (url === '/api/auth/me')
+      return Promise.resolve(
+        json({
+          ...ME,
+          permissions: options.permissions ?? ME.permissions,
+        }),
+      );
+    if (url === '/api/courses/c1/relations')
+      return Promise.resolve(json(options.relations ?? []));
+    return Promise.resolve(respond(url, init));
+  });
   vi.stubGlobal('fetch', fetchMock);
   const router = createMemoryRouter(
     [{ path: '/courses/:courseId', element: <CourseDetailPage /> }],
@@ -151,12 +201,23 @@ describe('CourseDetailPage', () => {
     );
   });
 
-  it('shows the server message when a discontinue is refused for lack of a replacement', async () => {
+  it('shows the server message when a discontinue is refused', async () => {
     const message = 'Hãy khai báo học phần thay thế trước khi ngừng mở lớp.';
-    renderPage((_url, init) =>
-      init?.method === 'POST'
-        ? json({ code: 'REPLACEMENT_REQUIRED', message }, 409)
-        : json(course),
+    renderPage(
+      (_url, init) =>
+        init?.method === 'POST'
+          ? json({ code: 'REPLACEMENT_REQUIRED', message }, 409)
+          : json(course),
+      {
+        relations: [
+          relation({
+            relationType: 'REPLACEMENT',
+            sourceCourse: relation().targetCourse,
+            targetCourse: relation().sourceCourse,
+            minScore: null,
+          }),
+        ],
+      },
     );
     fireEvent.click(
       await screen.findByRole('button', { name: 'Đổi trạng thái' }),
@@ -166,10 +227,124 @@ describe('CourseDetailPage', () => {
         selector: '.ant-dropdown-menu-title-content',
       }),
     );
-    fireEvent.click(
-      await screen.findByRole('button', { name: 'Ngừng mở lớp' }),
-    );
+    const ok = await screen.findByRole('button', { name: 'Ngừng mở lớp' });
+    await waitFor(() => expect(ok).toBeEnabled());
+    fireEvent.click(ok);
     expect(await screen.findByText(message)).toBeInTheDocument();
+  });
+
+  it('lists each relation from this course side, with the other course and the threshold', async () => {
+    renderPage(() => json(course), {
+      relations: [
+        relation(),
+        relation({
+          id: 'r2',
+          relationType: 'REPLACEMENT',
+          sourceCourse: relation().targetCourse,
+          targetCourse: relation().sourceCourse,
+          minScore: null,
+        }),
+        relation({
+          id: 'r3',
+          relationType: 'REPLACEMENT',
+          editPath: 'VIA_REQUEST',
+          minScore: null,
+        }),
+      ],
+    });
+    expect(
+      await screen.findByText('Cần đạt tiên quyết học phần'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Được thay thế bởi')).toBeInTheDocument();
+    expect(screen.getByText('Thay thế cho')).toBeInTheDocument();
+    expect(screen.getAllByText(/IT002 — Toán rời rạc/)).toHaveLength(3);
+    expect(screen.getByText('2')).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Xóa' })).toHaveLength(2);
+    expect(screen.getByRole('button', { name: 'Tạo đề xuất' })).toBeDisabled();
+  });
+
+  it('edits a threshold in place, refusing a value above 4 on the client', async () => {
+    const fetchMock = renderPage(
+      (url, init) =>
+        init?.method === 'PATCH' && url === '/api/course-relations/r1'
+          ? json(relation({ minScore: '2.5' }))
+          : json(course),
+      { relations: [relation()] },
+    );
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Sửa ngưỡng điểm' }),
+    );
+    const input = screen.getByLabelText('Ngưỡng điểm');
+    fireEvent.change(input, { target: { value: '4.5' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Lưu' }));
+    expect(await screen.findByText(GRADE_POINT_MESSAGE)).toBeInTheDocument();
+    expect(
+      fetchMock.mock.calls.some(([, init]) => init?.method === 'PATCH'),
+    ).toBe(false);
+    fireEvent.change(input, { target: { value: '2.5' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Lưu' }));
+    await waitFor(() =>
+      expect(
+        fetchMock.mock.calls.find(([, init]) => init?.method === 'PATCH')?.[1]
+          ?.body,
+      ).toBe(JSON.stringify({ minScore: '2.5' })),
+    );
+  });
+
+  it('offers adding a relation only to holders of courseRelation.edit', async () => {
+    renderPage(() => json(course));
+    expect(
+      await screen.findByRole('button', { name: 'Thêm quan hệ' }),
+    ).toBeInTheDocument();
+    expect(await screen.findByText('Chưa có quan hệ nào')).toBeInTheDocument();
+  });
+
+  it('hides the add button and the row actions without the right', async () => {
+    renderPage(() => json({ ...course, editPath: null }), {
+      permissions: ['course.view'],
+      relations: [relation({ editPath: null })],
+    });
+    await screen.findByText('Cần đạt tiên quyết học phần');
+    expect(
+      screen.queryByRole('button', { name: 'Thêm quan hệ' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Xóa' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows the equivalent courses, or says there are none', async () => {
+    renderPage(() => json(course));
+    expect(
+      await screen.findByText('Chưa thuộc nhóm tương đương nào'),
+    ).toBeInTheDocument();
+  });
+
+  it('links the equivalence group and its other members', async () => {
+    renderPage(() =>
+      json({
+        ...course,
+        equivalenceGroup: {
+          id: 'eg',
+          groupCode: 'EQ1',
+          members: [
+            {
+              id: 'c9',
+              courseCode: 'IT900',
+              courseName: 'Mã cũ',
+              credits: '3',
+              status: 'ACTIVE',
+            },
+          ],
+        },
+      }),
+    );
+    const group = await screen.findByRole('link', { name: 'EQ1' });
+    expect(group).toHaveAttribute('href', '/equivalence-groups?q=EQ1');
+    expect(screen.getByRole('link', { name: /IT900 — Mã cũ/ })).toHaveAttribute(
+      'href',
+      '/courses/c9',
+    );
   });
 
   it('renders not found when the course does not exist', async () => {

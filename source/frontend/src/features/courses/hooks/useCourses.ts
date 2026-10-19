@@ -4,6 +4,7 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
+import { COURSE_RELATION_ROOT_KEY } from './useCourseRelations';
 import { subjectGroupsQueryKey } from '../../../shared/subject-groups/subjectGroups';
 import {
   changeCourseStatus,
@@ -14,6 +15,7 @@ import {
   type CourseAction,
   type CourseDetail,
   type CourseQuery,
+  type DiscontinueCourseRequest,
   type UpdateCourseRequest,
 } from '../api/courses';
 
@@ -53,6 +55,10 @@ function useCourseMutation<TVars>(
         queryKey: [...COURSE_QUERY_KEYS.all, 'list'],
       });
       void queryClient.invalidateQueries({ queryKey: subjectGroupsQueryKey });
+      // A discontinue can write a REPLACEMENT relation; every course's relation list may have changed.
+      void queryClient.invalidateQueries({
+        queryKey: COURSE_RELATION_ROOT_KEY,
+      });
     },
   });
 }
@@ -65,6 +71,13 @@ export const useUpdateCourse = () =>
   );
 export const useChangeCourseStatus = () =>
   useCourseMutation(
-    ({ courseId, action }: { courseId: string; action: CourseAction }) =>
-      changeCourseStatus(courseId, action),
+    ({
+      courseId,
+      action,
+      body,
+    }: {
+      courseId: string;
+      action: CourseAction;
+      body?: DiscontinueCourseRequest;
+    }) => changeCourseStatus(courseId, action, body),
   );

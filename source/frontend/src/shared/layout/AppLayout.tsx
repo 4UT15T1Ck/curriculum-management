@@ -6,12 +6,18 @@ import { Link, Outlet, useLocation } from 'react-router';
 import { useMe } from '../auth/useMe';
 import { useLogout } from '../auth/useLogout';
 import { ROUTES } from '../../routes';
-import { APP_MENU, toMenuItems } from './menuItems';
+import {
+  APP_MENU,
+  openMenuGroups,
+  selectedMenuPath,
+  toMenuItems,
+} from './menuItems';
 
 export function AppLayout() {
   const { pathname } = useLocation();
   const { data: me } = useMe();
   const logoutMutation = useLogout();
+  const selectedPath = selectedMenuPath(APP_MENU, pathname);
   const userMenu: MenuProps['items'] = [
     {
       key: ROUTES.account,
@@ -46,14 +52,8 @@ export function AppLayout() {
         <Layout.Sider breakpoint="lg" collapsedWidth={0} theme="light">
           <Menu
             mode="inline"
-            selectedKeys={[
-              APP_MENU.find(
-                (item) =>
-                  pathname === item.path ||
-                  (item.path !== ROUTES.home &&
-                    pathname.startsWith(`${item.path}/`)),
-              )?.path ?? pathname,
-            ]}
+            selectedKeys={[selectedPath]}
+            defaultOpenKeys={openMenuGroups(APP_MENU, selectedPath)}
             items={toMenuItems(APP_MENU, me?.permissions ?? [])}
           />
         </Layout.Sider>

@@ -13,4 +13,5 @@ export const ROUTES = {
   courseNew: '/courses/new',
   courseDetail: '/courses/:courseId',
   courseEdit: '/courses/:courseId/edit',
+  equivalenceGroups: '/equivalence-groups',
 } as const;

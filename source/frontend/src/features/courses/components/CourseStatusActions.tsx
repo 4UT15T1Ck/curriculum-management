@@ -1,4 +1,5 @@
 import { App, Button, Dropdown } from 'antd';
+import { useState } from 'react';
 import { errorMessage } from '../../../shared/forms/applyFieldErrors';
 import type { CourseAction, CourseDetail, CourseStatus } from '../api/courses';
 import {
@@ -8,6 +9,7 @@ import {
   NEXT_STATUS,
 } from '../constants/courseLabels';
 import { useChangeCourseStatus } from '../hooks/useCourses';
+import { DiscontinueCourseModal } from './DiscontinueCourseModal';
 
 interface CourseStatusActionsProps {
   course: CourseDetail;
@@ -23,6 +25,7 @@ const ACTIONS_BY_STATUS: Record<CourseStatus, CourseAction[]> = {
 export function CourseStatusActions({ course }: CourseStatusActionsProps) {
   const { modal, message } = App.useApp();
   const mutation = useChangeCourseStatus();
+  const [discontinuing, setDiscontinuing] = useState(false);
   const run = (action: CourseAction) =>
     mutation.mutateAsync(
       { courseId: course.id, action },
@@ -37,29 +40,40 @@ export function CourseStatusActions({ course }: CourseStatusActionsProps) {
           ),
       },
     );
+  // Discontinuing has its own dialog: it needs a replacement course (HP-02); reopen and cancel keep a plain confirm.
   const confirm = (action: CourseAction) =>
-    modal.confirm({
-      title: `${COURSE_ACTION_LABELS[action]} ${course.courseCode}?`,
-      content: action === 'cancel' ? CANCEL_CONFIRM_TEXT : undefined,
-      okButtonProps: { danger: action === 'cancel' },
-      okText: COURSE_ACTION_LABELS[action],
-      onOk: () => run(action).catch(() => undefined),
-    });
+    action === 'discontinue'
+      ? setDiscontinuing(true)
+      : modal.confirm({
+          title: `${COURSE_ACTION_LABELS[action]} ${course.courseCode}?`,
+          content: action === 'cancel' ? CANCEL_CONFIRM_TEXT : undefined,
+          okButtonProps: { danger: action === 'cancel' },
+          okText: COURSE_ACTION_LABELS[action],
+          onOk: () => run(action).catch(() => undefined),
+        });
   const actions = ACTIONS_BY_STATUS[course.status];
   if (actions.length === 0) return null;
   return (
-    <Dropdown
-      trigger={['click']}
-      menu={{
-        items: actions.map((action) => ({
-          key: action,
-          label: COURSE_ACTION_LABELS[action],
-          danger: action === 'cancel',
-        })),
-        onClick: ({ key }) => confirm(key as CourseAction),
-      }}
-    >
-      <Button loading={mutation.isPending}>Đổi trạng thái</Button>
-    </Dropdown>
+    <>
+      <Dropdown
+        trigger={['click']}
+        menu={{
+          items: actions.map((action) => ({
+            key: action,
+            label: COURSE_ACTION_LABELS[action],
+            danger: action === 'cancel',
+          })),
+          onClick: ({ key }) => confirm(key as CourseAction),
+        }}
+      >
+        <Button loading={mutation.isPending}>Đổi trạng thái</Button>
+      </Dropdown>
+      {discontinuing && (
+        <DiscontinueCourseModal
+          course={course}
+          onClose={() => setDiscontinuing(false)}
+        />
+      )}
+    </>
   );
 }

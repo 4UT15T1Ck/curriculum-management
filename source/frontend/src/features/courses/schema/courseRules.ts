@@ -5,6 +5,11 @@ import type { Rule } from 'antd/es/form';
 export const CREDITS_PATTERN = /^\d{1,3}(\.\d{1,2})?$/;
 export const CREDITS_MESSAGE =
   'Số tín chỉ phải là số từ 0 đến 999.99, tối đa 2 chữ số thập phân (ví dụ 3, 2.5 hoặc 0).';
+// Mirrors GRADE_POINT_PATTERN and GRADE_POINT_MESSAGE in source/backend/src/shared/decimal/decimal.ts:
+// the 4-point scale, 0 to 4 with at most two decimals.
+export const GRADE_POINT_PATTERN = /^(4(\.0{1,2})?|[0-3](\.\d{1,2})?)$/;
+export const GRADE_POINT_MESSAGE =
+  'Ngưỡng điểm theo thang 4: từ 0 đến 4, tối đa 2 chữ số thập phân (ví dụ 2 hoặc 2.5).';
 export const COURSE_CODE_MAX = 20;
 export const COURSE_NAME_MAX = 200;
 

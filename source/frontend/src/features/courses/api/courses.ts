@@ -7,6 +7,8 @@ export type CoursePage = components['schemas']['CoursePageDto'];
 export type CourseUsage = components['schemas']['CourseUsageDto'];
 export type CourseType = components['schemas']['CourseType'];
 export type CourseStatus = components['schemas']['CourseStatus'];
+export type DiscontinueCourseRequest =
+  components['schemas']['DiscontinueCourseDto'];
 export type CreateCourseRequest = components['schemas']['CreateCourseDto'];
 export type UpdateCourseRequest = components['schemas']['UpdateCourseDto'];
 export type CourseQuery = NonNullable<
@@ -32,5 +34,9 @@ export const createCourse = (body: CreateCourseRequest) =>
   sendJson<CourseDetail>('POST', COURSES_PATH, body);
 export const updateCourse = (courseId: string, body: UpdateCourseRequest) =>
   sendJson<CourseDetail>('PATCH', coursePath(courseId), body);
-export const changeCourseStatus = (courseId: string, action: CourseAction) =>
-  sendJson<CourseDetail>('POST', `${coursePath(courseId)}/${action}`);
+// Only discontinue takes a body: the replacement course, related in the same step (D11).
+export const changeCourseStatus = (
+  courseId: string,
+  action: CourseAction,
+  body?: DiscontinueCourseRequest,
+) => sendJson<CourseDetail>('POST', `${coursePath(courseId)}/${action}`, body);

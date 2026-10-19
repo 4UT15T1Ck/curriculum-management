@@ -3,7 +3,9 @@ import { useParams } from 'react-router';
 import { ApiError } from '../../../shared/api/client';
 import { CourseEditButton } from '../components/CourseEditButton';
 import { CourseInfoCard } from '../components/CourseInfoCard';
+import { CourseRelationsSection } from '../components/CourseRelationsSection';
 import { CourseStatusActions } from '../components/CourseStatusActions';
+import { EquivalentCoursesCard } from '../components/EquivalentCoursesCard';
 import { ProgramsUsingList } from '../components/ProgramsUsingList';
 import { useCourse } from '../hooks/useCourses';
 
@@ -30,6 +32,8 @@ export function CourseDetailPage() {
         </Space>
       </Flex>
       <CourseInfoCard course={course} />
+      <CourseRelationsSection course={course} />
+      <EquivalentCoursesCard course={course} />
       <ProgramsUsingList programs={course.programsUsing} />
     </Flex>
   );

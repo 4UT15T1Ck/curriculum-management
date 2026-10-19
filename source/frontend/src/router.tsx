@@ -52,6 +52,11 @@ const CourseFormPage = lazy(() =>
     default: module.CourseFormPage,
   })),
 );
+const EquivalenceGroupsPage = lazy(() =>
+  import('./features/equivalence-groups/pages/EquivalenceGroupsPage').then(
+    (module) => ({ default: module.EquivalenceGroupsPage }),
+  ),
+);
 
 const HomePage = lazy(() =>
   import('./features/home/pages/HomePage').then((module) => ({
@@ -158,6 +163,14 @@ export const router = createBrowserRouter([
             element: (
               <RequirePermission code={PERMISSIONS.courseEdit}>
                 <CourseFormPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.equivalenceGroups,
+            element: (
+              <RequirePermission code={PERMISSIONS.courseView}>
+                <EquivalenceGroupsPage />
               </RequirePermission>
             ),
           },

@@ -11,6 +11,7 @@ export const PERMISSIONS = {
   subjectGroupView: 'subjectGroup.view',
   courseView: 'course.view',
   courseEdit: 'course.edit',
+  courseRelationEdit: 'courseRelation.edit',
 } as const satisfies Record<string, PermissionCode>;
 
 export function hasPermission(

@@ -532,6 +532,150 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/courses/{courseId}/relations': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['CourseRelationsController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/course-relations': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['CourseRelationsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/course-relations/{relationId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['CourseRelationsController_remove'];
+    options?: never;
+    head?: never;
+    patch: operations['CourseRelationsController_update'];
+    trace?: never;
+  };
+  '/api/equivalence-groups': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['EquivalenceGroupsController_list'];
+    put?: never;
+    post: operations['EquivalenceGroupsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/equivalence-groups/{groupId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['EquivalenceGroupsController_detail'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations['EquivalenceGroupsController_update'];
+    trace?: never;
+  };
+  '/api/equivalence-groups/{groupId}/members': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['EquivalenceGroupsController_addMember'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/equivalence-groups/{groupId}/members/{courseId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['EquivalenceGroupsController_removeMember'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/equivalence-groups/{groupId}/merge': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['EquivalenceGroupsController_merge'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/equivalence-groups/{groupId}/dissolve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['EquivalenceGroupsController_dissolve'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -954,6 +1098,19 @@ export interface components {
     };
     /** @enum {string} */
     EditPath: 'DIRECT' | 'VIA_REQUEST';
+    RelatedCourseDto: {
+      id: string;
+      courseCode: string;
+      courseName: string;
+      /** @example 3 */
+      credits: string;
+      status: components['schemas']['CourseStatus'];
+    };
+    CourseEquivalenceDto: {
+      id: string;
+      groupCode: string;
+      members: components['schemas']['RelatedCourseDto'][];
+    };
     CourseDetailDto: {
       id: string;
       courseCode: string;
@@ -969,6 +1126,7 @@ export interface components {
       programsUsing: components['schemas']['CourseUsageDto'][];
       editPath: components['schemas']['EditPath'] | null;
       canChangeStatus: boolean;
+      equivalenceGroup: components['schemas']['CourseEquivalenceDto'] | null;
       createdAt: string;
       updatedAt: string;
     };
@@ -980,6 +1138,61 @@ export interface components {
       courseType?: components['schemas']['CourseType'];
       ownerFacultyId?: string;
       ownerGroupId?: string | null;
+    };
+    DiscontinueCourseDto: {
+      /** @description Học phần thay thế; quan hệ Thay thế được tạo cùng lúc với việc ngừng mở lớp. */
+      replacementCourseId?: string;
+    };
+    /** @enum {string} */
+    CourseRelationType:
+      'PRIOR' | 'PREREQUISITE' | 'COREQUISITE' | 'REPLACEMENT';
+    CourseRelationDto: {
+      id: string;
+      relationType: components['schemas']['CourseRelationType'];
+      sourceCourse: components['schemas']['RelatedCourseDto'];
+      targetCourse: components['schemas']['RelatedCourseDto'];
+      minScore: string | null;
+      editPath: components['schemas']['EditPath'] | null;
+    };
+    CreateCourseRelationDto: {
+      sourceCourseId: string;
+      targetCourseId: string;
+      relationType: components['schemas']['CourseRelationType'];
+      /** @example 2 */
+      minScore?: string | null;
+    };
+    UpdateCourseRelationDto: {
+      /** @example 2 */
+      minScore: string | null;
+    };
+    EquivalenceGroupDto: {
+      id: string;
+      groupCode: string;
+      note: string | null;
+      members: components['schemas']['RelatedCourseDto'][];
+      updatedAt: string;
+    };
+    EquivalenceGroupPageDto: {
+      items: components['schemas']['EquivalenceGroupDto'][];
+      total: number;
+      page: number;
+      pageSize: number;
+    };
+    CreateEquivalenceGroupDto: {
+      groupCode: string;
+      note?: string | null;
+      courseIds: string[];
+    };
+    UpdateEquivalenceGroupDto: {
+      groupCode?: string;
+      note?: string | null;
+    };
+    AddEquivalenceMemberDto: {
+      courseId: string;
+    };
+    MergeEquivalenceGroupsDto: {
+      /** @description Nhóm sẽ bị xóa; học phần của nó chuyển sang nhóm được giữ. */
+      otherGroupId: string;
     };
   };
   responses: never;
@@ -1919,7 +2132,11 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DiscontinueCourseDto'];
+      };
+    };
     responses: {
       200: {
         headers: {
@@ -1970,6 +2187,278 @@ export interface operations {
         content: {
           'application/json': components['schemas']['CourseDetailDto'];
         };
+      };
+    };
+  };
+  CourseRelationsController_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        courseId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CourseRelationDto'][];
+        };
+      };
+    };
+  };
+  CourseRelationsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateCourseRelationDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CourseRelationDto'];
+        };
+      };
+    };
+  };
+  CourseRelationsController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        relationId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CourseRelationsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        relationId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateCourseRelationDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CourseRelationDto'];
+        };
+      };
+    };
+  };
+  EquivalenceGroupsController_list: {
+    parameters: {
+      query?: {
+        page?: number;
+        pageSize?: number;
+        /** @description Mã nhóm hoặc mã học phần của một thành viên */
+        q?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EquivalenceGroupPageDto'];
+        };
+      };
+    };
+  };
+  EquivalenceGroupsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateEquivalenceGroupDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EquivalenceGroupDto'];
+        };
+      };
+    };
+  };
+  EquivalenceGroupsController_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EquivalenceGroupDto'];
+        };
+      };
+    };
+  };
+  EquivalenceGroupsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateEquivalenceGroupDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EquivalenceGroupDto'];
+        };
+      };
+    };
+  };
+  EquivalenceGroupsController_addMember: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AddEquivalenceMemberDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EquivalenceGroupDto'];
+        };
+      };
+    };
+  };
+  EquivalenceGroupsController_removeMember: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+        courseId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EquivalenceGroupDto'];
+        };
+      };
+    };
+  };
+  EquivalenceGroupsController_merge: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['MergeEquivalenceGroupsDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EquivalenceGroupDto'];
+        };
+      };
+    };
+  };
+  EquivalenceGroupsController_dissolve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
