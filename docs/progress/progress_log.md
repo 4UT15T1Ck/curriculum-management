@@ -104,3 +104,13 @@ Format:
 - Kiểm tra: backend tsc 0, oxlint 0, đơn vị 149/149 (24 tệp), đầu-cuối 97/97 (8 tệp, Testcontainers, gồm ca đo 500 học phần dưới 2 giây); frontend tsc 0, oxlint 0, đơn vị 65/65 (19 tệp), `vite build` ổn; Prettier sạch ở cả hai.
 - Còn nợ: đi thử bằng trình duyệt (kế hoạch §7) và áp migration lên cơ sở dữ liệu phát triển. Điểm lệch kế hoạch ở báo cáo dựng.
 
+## [F-05] Quan hệ học phần, nhóm tương đương — dựng mã
+**Date**: 2026-10-19
+**Files changed**: `source/backend/prisma/{schema.prisma,migrations/20261019075207_course_relations}`, `source/backend/src/shared/{courses,authz/edit-path*,decimal}/*`, `source/backend/src/features/{course-relations,equivalence-groups,courses}/*`, `source/backend/src/app.module.ts`, `source/backend/test/*`, `source/frontend/src/shared/{api,auth,courses,hooks,layout,users}/*`, `source/frontend/src/features/{courses,equivalence-groups}/*`, `source/frontend/src/{router.tsx,routes.ts}`, `docs/architecture/*`, `docs/implementation/{README.md,f-05-course-relations-equivalence-implementation-plan.md}`, `docs/implement-report/f-05-course-relations-equivalence-implement-report.md`, `docs/progress/*`
+- Bảng `CourseRelation` (bốn loại, `minScore Decimal(4,2)`, duy nhất theo bộ ba, hai `CHECK` viết tay), `EquivalentCourseGroup`, cột `Course.equivalenceGroupId` — migration `20261019075207_course_relations` sinh bằng `prisma migrate dev` trên PostgreSQL 18 thật.
+- Chống chu trình BR-11: hàm thuần `findRequisiteCycle` (`shared/courses/requisite-graph.ts`, F-07 và F-09 dùng lại) chạy dưới khóa `pg_advisory_xact_lock`; thông điệp nêu đường đi `A → B → C → A`; song hành và thay thế không bị kiểm. Hai yêu cầu song song B→A và A→B: đúng một bên thành công.
+- Điền hai móc của F-04: `CourseUsageReader.hasActiveReplacement` (đọc quan hệ `REPLACEMENT` tới học phần `ACTIVE`, nhận `tx`) và ngừng mở lớp nhận `replacementCourseId`, tạo quan hệ cùng giao dịch; ngừng mở lớp nay đi được đường thành công (KB-008). Chi tiết học phần thêm `equivalenceGroup`.
+- Nhóm tương đương (tạo, sửa, thêm, bớt, gộp, giải thể) chỉ R1 qua `assertSchoolWideDirect`; học phần ở nhóm khác → 409 kèm lời mời gộp.
+- Giao diện: mục "Quan hệ học phần" và thẻ "Học phần tương đương" trên MH-17, hộp thoại ngừng mở lớp chọn học phần thay thế, MH-19 `/equivalence-groups`, menu "Học phần" thành nhóm; `CourseSelect`, `CourseMultiSelect`, `useDebouncedValue` dùng chung.
+- Kiểm tra: backend tsc 0, oxlint 0, đơn vị 223/223 (28 tệp), đầu-cuối 130/130 (10 tệp, Testcontainers); frontend tsc 0, oxlint 0, đơn vị 93/93 (24 tệp), `vite build` ổn; Prettier sạch ở cả hai.
+- Còn nợ: đi thử bằng trình duyệt (kế hoạch §7) và áp migration lên cơ sở dữ liệu phát triển. Điểm lệch kế hoạch ở báo cáo dựng.

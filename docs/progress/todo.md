@@ -28,7 +28,7 @@ Một dòng cho mỗi tính năng; việc chi tiết (CV-xxx) ở `docs/planning
 | F-02 | Tài khoản, vai trò, phạm vi quyền | 🔄 | Mã xong 2026-10-19, kiểm thử xanh, migration `access_control` + seed đã chạy; còn nợ đi thử bằng trình duyệt (kế hoạch §7) |
 | F-03 | Đơn vị và nhóm chuyên môn | 🔄 | Mã xong 2026-10-19, kiểm thử xanh (backend đơn vị 101, đầu-cuối 69; frontend 44); còn nợ đi thử bằng trình duyệt và áp migration `subject_groups` lên cơ sở dữ liệu phát triển — `docs/implement-report/f-03-org-units-subject-groups-implement-report.md` |
 | F-04 | Danh mục học phần | 🔄 | Mã xong 2026-10-19, kiểm thử xanh (backend đơn vị 149, đầu-cuối 97; frontend 65); còn nợ đi thử bằng trình duyệt (kế hoạch §7) và áp migration `courses` lên cơ sở dữ liệu phát triển — `docs/implement-report/f-04-course-catalog-implement-report.md` |
-| F-05 | Quan hệ học phần, nhóm tương đương | ❌ | Chống chu trình (BR-11), nhóm tương đương (DEC-06) |
+| F-05 | Quan hệ học phần, nhóm tương đương | 🔄 | Mã xong 2026-10-19, kiểm thử xanh (backend đơn vị 223, đầu-cuối 130; frontend 93); chống chu trình (BR-11), nhóm tương đương (DEC-06), ngừng mở lớp đi được đường thành công (KB-008); còn nợ đi thử bằng trình duyệt (kế hoạch §7) và áp migration `course_relations` lên cơ sở dữ liệu phát triển — `docs/implement-report/f-05-course-relations-equivalence-implement-report.md` |
 
 ## B2 — Chương trình đào tạo và khung
 

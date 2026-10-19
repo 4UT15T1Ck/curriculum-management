@@ -67,6 +67,8 @@ Migration `20261019024639_subject_groups` (F-03) thêm `SubjectGroup`, `SubjectG
 
 Migration `20261019072717_courses` (F-04) sinh bằng `prisma migrate dev --name courses` trên PostgreSQL 18 thật (ICU `vi-VN`); thêm `Course` và hai enum `CourseType`, `CourseStatus`; chỉ thêm, không đụng bảng cũ. Đã áp trên PostgreSQL của Testcontainers trong kiểm thử đầu-cuối (4 migration); chưa áp lên cơ sở dữ liệu phát triển của người dùng.
 
+Migration `20261019075207_course_relations` (F-05) sinh bằng `prisma migrate dev --create-only --name course_relations` trên PostgreSQL 18 thật (ICU `vi-VN`, container Docker), rồi nối tay hai ràng buộc `CHECK` ở cuối `migration.sql` và áp bằng `prisma migrate dev`; thêm `CourseRelation`, `EquivalentCourseGroup`, enum `CourseRelationType` và cột `Course.equivalenceGroupId`; chỉ thêm. Đã áp trên PostgreSQL của Testcontainers trong kiểm thử đầu-cuối (5 migration); chưa áp lên cơ sở dữ liệu phát triển của người dùng.
+
 Migration `20261018151319_access_control` (F-02) sinh bằng `prisma migrate dev --create-only --name access_control`; đã áp trên cơ sở dữ liệu phát triển. Thêm `OrgUnit` tối thiểu, `Role`, `Permission`, `RolePermission`, `RoleAssignment` và `User.orgUnitId`.
 
 ### `User` — table `User`
@@ -133,9 +135,32 @@ Không có ràng buộc duy nhất hay loại trừ ở cơ sở dữ liệu: se
 | `status` | `CourseStatus` | Mặc định `ACTIVE`; `CANCELLED` là trạng thái cuối |
 | `ownerFacultyId` | `String` | FK `OrgUnit` (`Restrict`), chỉ mục; phải là `FACULTY` đang hoạt động (kiểm ở service) |
 | `ownerGroupId` | `String?` | FK `SubjectGroup` (`Restrict`), chỉ mục; nếu có phải là nhóm `ACTIVE` của chính `ownerFaculty` (kiểm ở service) |
+| `equivalenceGroupId` | `String?` | FK `EquivalentCourseGroup` (`SetNull`), chỉ mục (F-05); một học phần thuộc nhiều nhất một nhóm tương đương |
 | `createdAt` / `updatedAt` | `DateTime` | |
 
-Không có thao tác xóa học phần — chỉ chuyển trạng thái. Quan hệ ngược: `OrgUnit.ownedCourses`, `SubjectGroup.ownedCourses`. "Học phần khoa khác" = `ownerFaculty.unitCode` khác `HOME_FACULTY_CODE` (`KHOA_CNTT`, `src/shared/org-units/home-faculty.ts`); không lưu thành cột. Cột `equivalenceGroup` chưa có — F-05 thêm cùng bảng nhóm tương đương. Tìm kiếm: `ILIKE '%q%'` trên mã và tên không dùng được chỉ mục; chấp nhận ở quy mô vài trăm dòng (đo 500 dòng trong đầu-cuối).
+Không có thao tác xóa học phần — chỉ chuyển trạng thái. Quan hệ ngược: `OrgUnit.ownedCourses`, `SubjectGroup.ownedCourses`. "Học phần khoa khác" = `ownerFaculty.unitCode` khác `HOME_FACULTY_CODE` (`KHOA_CNTT`, `src/shared/org-units/home-faculty.ts`); không lưu thành cột. Quan hệ ngược `relationsAsSource`, `relationsAsTarget` (F-05). Tìm kiếm: `ILIKE '%q%'` trên mã và tên không dùng được chỉ mục; chấp nhận ở quy mô vài trăm dòng (đo 500 dòng trong đầu-cuối).
+
+### `CourseRelation` — table `CourseRelation` (F-05)
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `String` | `cuid(2)` |
+| `sourceCourseId` | `String` | FK `Course` (`Restrict`): học phần học trước / tiên quyết / song hành, hoặc học phần bị ngừng (với `REPLACEMENT`) |
+| `targetCourseId` | `String` | FK `Course` (`Restrict`), chỉ mục: học phần **có** yêu cầu, hoặc học phần thay thế |
+| `relationType` | `CourseRelationType` | `PRIOR`, `PREREQUISITE`, `COREQUISITE`, `REPLACEMENT`; quan hệ "tương đương" (loại thứ năm của FR-18) là thành viên nhóm, không nằm ở đây |
+| `minScore` | `Decimal(4,2)?` | Ngưỡng điểm thang 4 (0..4, tối đa 2 số lẻ), chỉ `PREREQUISITE`; gửi và nhận dạng chuỗi |
+| `createdAt` / `updatedAt` | `DateTime` | |
+
+Duy nhất `(sourceCourseId, targetCourseId, relationType)` (`CourseRelation_sourceCourseId_targetCourseId_relationType_key`). **Hai ràng buộc `CHECK` viết tay trong `migration.sql`** (Prisma không mô hình hóa `CHECK` và không diff chúng nên giữ qua các migration sau — đừng "dọn" khỏi SQL): `CourseRelation_not_self` (`sourceCourseId <> targetCourseId`) và `CourseRelation_minScore_prerequisite_only` (`minScore IS NULL OR relationType = 'PREREQUISITE'`). Xóa quan hệ là xóa thật, không xóa mềm (D12). Quan hệ thuộc về một học phần ("học phần sở hữu"): đích với `PRIOR`/`PREREQUISITE`/`COREQUISITE`, nguồn với `REPLACEMENT`; phạm vi và đường sửa kiểm trên học phần đó. Chu trình trên các cạnh `PRIOR` + `PREREQUISITE` do service chặn (BR-11), không phải cơ sở dữ liệu.
+
+### `EquivalentCourseGroup` — table `EquivalentCourseGroup` (F-05)
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `String` | `cuid(2)` |
+| `groupCode` | `String` | Duy nhất; cắt khoảng trắng, viết hoa khi ghi; tối đa 20 ký tự |
+| `note` | `String?` | Tối đa 500 ký tự; rỗng lưu `null` |
+| `createdAt` / `updatedAt` | `DateTime` | |
+
+Thành viên là `Course.equivalenceGroupId` (không có bảng nối, M-4). Nhóm có ít nhất 2 học phần (service giữ); giải thể xóa nhóm sau khi xóa `equivalenceGroupId` của các thành viên (`SetNull` là lưới an toàn). Nhóm nằm ngoài ảnh chụp phiên bản nên R1 sửa trực tiếp bất cứ lúc nào (EC-16, E-11).
 
 ### `Role` — table `Role`
 | Column | Type | Notes |
@@ -213,6 +238,7 @@ Hình dạng do `connect-pg-simple` quy định (`createTableIfMissing: false`, 
 | `SubjectGroupMemberRole` | `MEMBER`, `COORDINATOR` |
 | `CourseType` | `THEORY`, `PRACTICE`, `LAB`, `PROJECT`, `CAPSTONE`, `INTERNSHIP`, `CONDITIONAL` |
 | `CourseStatus` | `ACTIVE`, `DISCONTINUED`, `CANCELLED` |
+| `CourseRelationType` | `PRIOR`, `PREREQUISITE`, `COREQUISITE`, `REPLACEMENT` |
 
 Các enum sau Giá trị liệt kê lưu ở dạng `SCREAMING_SNAKE` như từ điển dữ liệu ghi (ví dụ `DRAFT`, `PENDING`, `ACTIVE`, `HISTORICAL`).
 
