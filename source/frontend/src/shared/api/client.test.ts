@@ -1,5 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ApiError, getJson, sendJson, withQuery } from './client';
+import {
+  ApiError,
+  downloadFile,
+  fileNameFromHeader,
+  getJson,
+  sendForm,
+  sendJson,
+  withQuery,
+} from './client';
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -85,5 +93,76 @@ describe('withQuery', () => {
 
   it('returns the bare path when there is nothing to send', () => {
     expect(withQuery('/courses', { status: [] })).toBe('/courses');
+  });
+});
+
+describe('file helpers', () => {
+  it('sends a form without a Content-Type of its own', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response('{"id":"a"}'));
+    vi.stubGlobal('fetch', fetchMock);
+    const form = new FormData();
+    form.append('file', new Blob(['x']), 'a.pdf');
+
+    await expect(sendForm('/up', form)).resolves.toEqual({ id: 'a' });
+
+    const init = fetchMock.mock.calls[0][1];
+    expect(init.method).toBe('POST');
+    expect(init.body).toBe(form);
+    expect(init.headers).not.toHaveProperty('Content-Type');
+    expect(init.headers).toMatchObject({
+      'X-Requested-With': 'XMLHttpRequest',
+    });
+  });
+
+  it('reads the UTF-8 name from Content-Disposition', () => {
+    const header = `attachment; filename="De cuong.pdf"; filename*=UTF-8''${encodeURIComponent('Đề cương.pdf')}`;
+
+    expect(fileNameFromHeader(header, 'x.pdf')).toBe('Đề cương.pdf');
+    expect(fileNameFromHeader(null, 'x.pdf')).toBe('x.pdf');
+    expect(
+      fileNameFromHeader("attachment; filename*=UTF-8''%E0%A4%A", 'x'),
+    ).toBe('x');
+  });
+
+  it('downloads through a link named by the server', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response('pdf', {
+          headers: {
+            'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent('Đề cương.pdf')}`,
+          },
+        }),
+      ),
+    );
+    URL.createObjectURL = vi.fn(() => 'blob:x');
+    URL.revokeObjectURL = vi.fn();
+    const click = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(function (this: HTMLAnchorElement) {
+        expect(this.download).toBe('Đề cương.pdf');
+      });
+
+    await downloadFile('/file', 'fallback.pdf');
+
+    expect(click).toHaveBeenCalledOnce();
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:x');
+    click.mockRestore();
+  });
+
+  it('throws the API error instead of saving an error page', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response('{"code":"FILE_MISSING","message":"Mất tệp"}', {
+          status: 404,
+        }),
+      ),
+    );
+
+    await expect(downloadFile('/file', 'x.pdf')).rejects.toMatchObject({
+      status: 404,
+      code: 'FILE_MISSING',
+    });
   });
 });

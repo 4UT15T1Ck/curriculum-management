@@ -313,4 +313,27 @@ describe('CurriculumPage', () => {
       await screen.findByText('Không tìm thấy khung chương trình'),
     ).toBeInTheDocument();
   });
+
+  it('tags a row without a syllabus and links every row to its syllabus, even a read-only one (EC-44)', async () => {
+    renderPage(
+      fixture({
+        items: [
+          item('MAT101', 'Giải tích 1', { hasSyllabus: false, canEdit: false }),
+          item('PHY101', 'Vật lý 1', {
+            displayOrder: 2,
+            sortOrder: 2,
+            hasSyllabus: true,
+            canEdit: false,
+          }),
+        ],
+      }),
+    );
+    await screen.findByText('Giải tích 1');
+    expect(screen.getAllByText('Chưa có đề cương')).toHaveLength(1);
+    const links = screen.getAllByRole('link', { name: 'Đề cương' });
+    expect(links.map((link) => link.getAttribute('href'))).toEqual([
+      '/courses/c-MAT101/syllabus',
+      '/courses/c-PHY101/syllabus',
+    ]);
+  });
 });

@@ -32,6 +32,5 @@ export const NEXT_STATUS: Record<CourseAction, CourseStatus> = {
 };
 export const CANCEL_CONFIRM_TEXT =
   'Học phần đã hủy không mở lại được và không sửa được. Chỉ hủy học phần chưa từng dùng trong phiên bản đã ban hành và chưa có kết quả học tập.';
-export const NOT_USED_BY_PROGRAMS =
-  'Học phần chưa được chương trình nào sử dụng';
 export const PROGRAMS_USING_TITLE = 'Chương trình đang sử dụng';
+export const SYLLABUS_LINK = 'Đề cương';

@@ -964,6 +964,134 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/courses/{courseId}/syllabus': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['SyllabiController_forCourse'];
+    put?: never;
+    post: operations['SyllabiController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/syllabi/{syllabusId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations['SyllabiController_update'];
+    trace?: never;
+  };
+  '/api/syllabi/{syllabusId}/weekly-contents': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['SyllabiController_createWeek'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/syllabi/{syllabusId}/weekly-contents/order': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['SyllabiController_reorderWeeks'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/weekly-contents/{weeklyContentId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['SyllabiController_removeWeek'];
+    options?: never;
+    head?: never;
+    patch: operations['SyllabiController_updateWeek'];
+    trace?: never;
+  };
+  '/api/syllabi/{syllabusId}/attachments': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['SyllabiController_upload'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/syllabus-attachments/{attachmentId}/file': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['SyllabiController_download'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/syllabus-attachments/{attachmentId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['SyllabiController_removeAttachment'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1639,6 +1767,8 @@ export interface components {
       plannedSemester: number;
       sortOrder: number;
       course: components['schemas']['RelatedCourseDto'];
+      /** @description The course has a syllabus revision (EC-44). */
+      hasSyllabus: boolean;
       blockSymbol: string | null;
       blockName: string | null;
       isElective: boolean;
@@ -1862,6 +1992,101 @@ export interface components {
       compulsoryGap: string;
       /** @example 0 */
       electiveGap: string;
+    };
+    SyllabusCourseDto: {
+      id: string;
+      courseCode: string;
+      courseName: string;
+      englishName: string | null;
+      /** @example 3 */
+      credits: string;
+      status: components['schemas']['CourseStatus'];
+    };
+    /** @enum {string} */
+    SyllabusStatus: 'DRAFT' | 'PUBLISHED' | 'HISTORICAL';
+    WeeklyContentDto: {
+      id: string;
+      weekLabel: string;
+      /** @description 1-based, contiguous */
+      sortOrder: number;
+      /** @description Sanitized HTML */
+      content: string;
+      teachingActivities: string | null;
+    };
+    /** @enum {string} */
+    AttachmentFileType: 'PDF' | 'DOCX' | 'XLSX' | 'IMAGE';
+    SyllabusAttachmentDto: {
+      id: string;
+      /** @description Original name, UTF-8 decoded */
+      fileName: string;
+      fileType: components['schemas']['AttachmentFileType'];
+      sizeBytes: number;
+      uploadedBy: components['schemas']['UserRefDto'];
+      recordedAt: string;
+      canDelete: boolean;
+    };
+    SyllabusDto: {
+      id: string;
+      revisionNumber: number;
+      status: components['schemas']['SyllabusStatus'];
+      /** @description Sanitized HTML; null = empty section */
+      courseDescription: string | null;
+      /** @description Sanitized HTML; null = empty section */
+      englishDescription: string | null;
+      /** @description Sanitized HTML; null = empty section */
+      objectives: string | null;
+      /** @description Sanitized HTML; null = empty section */
+      teachingMethods: string | null;
+      /** @description Sanitized HTML; null = empty section */
+      assessmentMethods: string | null;
+      /** @description Sanitized HTML; null = empty section */
+      references: string | null;
+      publishedAt: string | null;
+      updatedAt: string;
+      weeklyContents: components['schemas']['WeeklyContentDto'][];
+      attachments: components['schemas']['SyllabusAttachmentDto'][];
+    };
+    AttachmentRulesDto: {
+      maxBytes: number;
+      fileTypes: components['schemas']['AttachmentFileType'][];
+    };
+    CourseSyllabusDto: {
+      course: components['schemas']['SyllabusCourseDto'];
+      programsUsing: components['schemas']['CourseUsageDto'][];
+      published: components['schemas']['SyllabusDto'] | null;
+      draft: components['schemas']['SyllabusDto'] | null;
+      canCreate: boolean;
+      editPath: components['schemas']['EditPath'] | null;
+      attachmentRules: components['schemas']['AttachmentRulesDto'];
+    };
+    UpdateSyllabusDto: {
+      courseDescription?: string | null;
+      englishDescription?: string | null;
+      objectives?: string | null;
+      teachingMethods?: string | null;
+      assessmentMethods?: string | null;
+      references?: string | null;
+    };
+    CreateWeeklyContentDto: {
+      /** @example Tuần 1 */
+      weekLabel: string;
+      /** @description HTML; sanitized on save */
+      content: string;
+      teachingActivities?: string | null;
+    };
+    ReorderWeeklyContentsDto: {
+      ids: string[];
+    };
+    UpdateWeeklyContentDto: {
+      /** @example Tuần 1 */
+      weekLabel?: string;
+      /** @description HTML; sanitized on save */
+      content?: string;
+      teachingActivities?: string | null;
+    };
+    UploadAttachmentFormDto: {
+      /** Format: binary */
+      file: string;
     };
   };
   responses: never;
@@ -3661,6 +3886,230 @@ export interface operations {
         content: {
           'application/json': components['schemas']['ConsistencyReportDto'];
         };
+      };
+    };
+  };
+  SyllabiController_forCourse: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        courseId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CourseSyllabusDto'];
+        };
+      };
+    };
+  };
+  SyllabiController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        courseId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CourseSyllabusDto'];
+        };
+      };
+    };
+  };
+  SyllabiController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        syllabusId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateSyllabusDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SyllabusDto'];
+        };
+      };
+    };
+  };
+  SyllabiController_createWeek: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        syllabusId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateWeeklyContentDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['WeeklyContentDto'];
+        };
+      };
+    };
+  };
+  SyllabiController_reorderWeeks: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        syllabusId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReorderWeeklyContentsDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['WeeklyContentDto'][];
+        };
+      };
+    };
+  };
+  SyllabiController_removeWeek: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        weeklyContentId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SyllabiController_updateWeek: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        weeklyContentId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateWeeklyContentDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['WeeklyContentDto'];
+        };
+      };
+    };
+  };
+  SyllabiController_upload: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        syllabusId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': components['schemas']['UploadAttachmentFormDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SyllabusAttachmentDto'];
+        };
+      };
+    };
+  };
+  SyllabiController_download: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        attachmentId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SyllabiController_removeAttachment: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        attachmentId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

@@ -17,6 +17,8 @@ export const PERMISSIONS = {
   programClone: 'program.clone',
   curriculumEdit: 'curriculum.edit',
   directorAssign: 'director.assign',
+  syllabusView: 'syllabus.view',
+  syllabusEdit: 'syllabus.edit',
 } as const satisfies Record<string, PermissionCode>;
 
 export function hasPermission(

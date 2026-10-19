@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { COURSE_QUERY_ROOT } from '../../../shared/courses/courseQueryKeys';
+import { CURRICULUM_QUERY_ROOT } from '../../../shared/curriculum/curriculumQueryRoot';
 import {
   assignGroupItems,
   createGroup,
@@ -20,8 +21,9 @@ import {
 } from '../api/curriculum';
 
 export const CURRICULUM_QUERY_KEYS = {
-  all: ['curriculum'] as const,
-  version: (versionId: string) => ['curriculum', versionId] as const,
+  all: CURRICULUM_QUERY_ROOT,
+  version: (versionId: string) =>
+    [...CURRICULUM_QUERY_ROOT, versionId] as const,
 };
 
 export function useCurriculum(versionId: string) {

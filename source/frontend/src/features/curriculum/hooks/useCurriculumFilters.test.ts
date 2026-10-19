@@ -23,6 +23,7 @@ function item(
       credits: '3',
       status: 'ACTIVE',
     },
+    hasSyllabus: true,
     blockSymbol: null,
     blockName: null,
     isElective: false,

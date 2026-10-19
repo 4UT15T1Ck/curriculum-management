@@ -4,19 +4,26 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { Table, Tag, Tooltip } from 'antd';
+import { Space, Table, Tag, Tooltip } from 'antd';
 import type { TableColumnsType } from 'antd';
+import { generatePath, Link } from 'react-router';
+import { ROUTES } from '../../../routes';
+import {
+  DragHandle,
+  SortableRow,
+} from '../../../shared/components/SortableRow';
 import type { Curriculum, CurriculumItem } from '../api/curriculum';
 import {
   ELECTIVE_KIND_LABELS,
   HT_DA_LABEL,
+  NO_SYLLABUS_TAG,
+  SYLLABUS_LINK,
   TQ_DA_LABEL,
 } from '../constants/curriculumLabels';
 import { useSemesterReorder } from '../hooks/useSemesterReorder';
 import { CurriculumItemActions } from './CurriculumItemActions';
 import { itemElementId } from './CurriculumWarningsPanel';
 import { RequisiteTags } from './RequisiteTags';
-import { DragHandle, SortableRow } from './SortableRow';
 
 interface CurriculumTableProps {
   curriculum: Curriculum;
@@ -46,7 +53,15 @@ export function CurriculumTable({
       : []),
     { title: 'TT', dataIndex: 'displayOrder', width: 56 },
     { title: 'Mã HP', render: (_value, item) => item.course.courseCode },
-    { title: 'Tên học phần', render: (_value, item) => item.course.courseName },
+    {
+      title: 'Tên học phần',
+      render: (_value, item) => (
+        <Space size={4} wrap>
+          {item.course.courseName}
+          {!item.hasSyllabus && <Tag color="warning">{NO_SYLLABUS_TAG}</Tag>}
+        </Space>
+      ),
+    },
     {
       title: 'TC',
       align: 'right',
@@ -101,12 +116,19 @@ export function CurriculumTable({
     {
       title: 'Thao tác',
       render: (_value, item) => (
-        <CurriculumItemActions
-          versionId={curriculum.version.id}
-          item={item}
-          onEdit={onEdit}
-          onRequisites={onRequisites}
-        />
+        <Space size={0} wrap>
+          <Link
+            to={generatePath(ROUTES.syllabus, { courseId: item.course.id })}
+          >
+            {SYLLABUS_LINK}
+          </Link>
+          <CurriculumItemActions
+            versionId={curriculum.version.id}
+            item={item}
+            onEdit={onEdit}
+            onRequisites={onRequisites}
+          />
+        </Space>
       ),
     },
   ];

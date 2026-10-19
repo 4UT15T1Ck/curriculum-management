@@ -150,3 +150,12 @@ Format:
 - `globalSetup` dựng một PostgreSQL (ICU `vi-VN`) và một Redis cho cả lượt chạy, migrate một lần vào cơ sở dữ liệu mẫu `ctdt_template`; mỗi tệp kiểm thử nhận một cơ sở dữ liệu riêng sao từ mẫu (`startPostgres`), xóa khi xong. Tệp mới không gọi `applyMigrations` nữa.
 - `health.e2e-spec.ts` vẫn dựng container riêng vì nó tắt Redis (`startPostgresContainer`, `startRedisContainer`).
 - 207/207 đạt; thời gian chạy 116 s → 66 s.
+
+## [F-10] Đề cương — dựng mã
+**Date**: 2026-10-19
+**Files changed**: `source/backend/prisma/{schema.prisma,migrations/20261019095730_syllabi}`, `source/backend/src/features/{syllabi,curriculum,courses}/*`, `source/backend/src/shared/{files,rich-text,courses,config,exception}/*`, `source/backend/{src/app.module.ts,src/app.setup.ts,tsconfig.json,package.json,README.md,.gitignore}`, `source/backend/test/*`, `source/frontend/src/features/{syllabi,curriculum,courses}/*`, `source/frontend/src/shared/{components,courses,curriculum,api,auth}/*`, `source/frontend/{package.json,src/router.tsx,src/routes.ts}`, `docs/{implement-report,progress,implementation}/*`
+- Bảng `Syllabus`, `WeeklyContent`, `SyllabusAttachment` (hai chỉ mục duy nhất từng phần "một Nháp, một Ban hành" và bốn `CHECK` viết tay); feature `syllabi`: đọc theo học phần (Nháp chỉ cho người có `program.view` ALL), tạo bản Nháp đầu, lưu từng mục, dòng tuần (thêm, sửa, xóa, sắp xếp), tệp đính kèm trên đĩa (`FILES_ROOT`, kiểm đuôi và chữ ký tệp, 20 MB); `hasSyllabus` ở dòng khung.
+- Dùng chung: `sanitizeRichText` (`sanitize-html`), `FileStorageService`, `sendFile`, `uploadedFileName`, `CourseUsageDto`; frontend: `RichTextEditor` / `RichTextView` (TipTap 3.31.4), `ProgramsUsingList`, `SortableRow`, `sendForm`, `downloadFile`.
+- Giao diện MH-36 (xem, bật VI/EN, "Chưa dịch"), MH-37 (ba tab: Nội dung, Nội dung theo tuần, Đính kèm), liên kết "Đề cương" từ học phần và từng dòng khung kèm thẻ "Chưa có đề cương".
+- Kiểm tra: backend đơn vị 465, đầu-cuối 238; frontend 240; tsc, oxlint, Prettier, build sạch.
+- Còn nợ: đi thử bằng trình duyệt, áp migration lên cơ sở dữ liệu phát triển. Điểm lệch kế hoạch ở báo cáo dựng.

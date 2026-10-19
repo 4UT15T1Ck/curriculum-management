@@ -23,6 +23,7 @@ export function item(
     plannedSemester: 1,
     sortOrder: 1,
     course: course(code, name),
+    hasSyllabus: true,
     blockSymbol: null,
     blockName: null,
     isElective: false,

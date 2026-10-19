@@ -13,6 +13,8 @@ export const ROUTES = {
   courseNew: '/courses/new',
   courseDetail: '/courses/:courseId',
   courseEdit: '/courses/:courseId/edit',
+  syllabus: '/courses/:courseId/syllabus',
+  syllabusEdit: '/courses/:courseId/syllabus/edit',
   equivalenceGroups: '/equivalence-groups',
   programs: '/programs',
   programNew: '/programs/new',

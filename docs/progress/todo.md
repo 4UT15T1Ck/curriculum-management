@@ -43,7 +43,7 @@ Một dòng cho mỗi tính năng; việc chi tiết (CV-xxx) ở `docs/planning
 
 | # | Item | Status | Notes |
 |---|---|---|---|
-| F-10 | Đề cương | ❌ | Một đề cương dùng chung cho một học phần, chuỗi bản |
+| F-10 | Đề cương | 🔄 | Mã xong 2026-10-19; còn nợ: đi thử bằng trình duyệt (kế hoạch §7) và áp migration `20261019095730_syllabi` |
 | F-11 | PLO, CLO, ma trận | ❌ | CLO–PLO theo chương trình, chỉ tới PLO học phần đã gắn; Học phần–PLO nhập trực tiếp kèm trọng số |
 | F-12 | Công thức điểm, đánh giá–CLO | ❌ | Sau MVP |
 

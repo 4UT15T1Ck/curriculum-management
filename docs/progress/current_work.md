@@ -4,13 +4,13 @@
 
 - **Last updated**: 2026-10-19
 - **Active area**: dựng bản MVP (`docs/planning/epics.md` §0)
-- **Start here**: dựng F-10 (`docs/implementation/f-10-syllabus-implementation-plan.md`) — đề cương. F-08 đã xong mã; F-13 và F-15 gọi `ConsistencyChecker.assertPasses(versionId, tx)` sau `lockRequisiteGraph(tx)` (`src/shared/curriculum/`).
+- **Start here**: dựng F-11 (`docs/implementation/f-11-plo-clo-matrices-implementation-plan.md`) — PLO, CLO, ma trận. F-10 đã xong mã (`assertDraftWrite` ở `src/features/syllabi/syllabus-access.ts`, tab thêm vào `EDITOR_TABS`); F-13 và F-15 gọi `ConsistencyChecker.assertPasses(versionId, tx)` sau `lockRequisiteGraph(tx)` (`src/shared/curriculum/`).
 
 ---
 
 ## Active Item: Dựng bản MVP
 
-**Status**: F-01 xong 2026-10-18; F-02..F-07 mã xong 2026-10-19, còn nợ đi thử bằng trình duyệt; 6 tính năng MVP còn lại chưa dựng.
+**Status**: F-01 xong 2026-10-18; F-02..F-08 và F-10 mã xong 2026-10-19, còn nợ đi thử bằng trình duyệt; 6 tính năng MVP còn lại chưa dựng.
 
 ### Còn nợ
 - F-02: người dùng đi thử 6 bước kế hoạch §7 bằng trình duyệt (chọn để sau) — `docs/implement-report/f-02-accounts-roles-permissions-implement-report.md`.
@@ -25,6 +25,7 @@
 
 - F-07: người dùng đi thử 9 bước kế hoạch §7 bằng trình duyệt (khung theo dòng và theo học kỳ, lọc, thêm trùng / học kỳ 9, điều kiện xếp sau và vòng, kéo thả kể cả bàn phím, nhóm tự chọn, "Chương trình đang sử dụng" ở học phần, đăng nhập R4), áp migration `20261019085325_curriculum` (`pnpm prisma:migrate` rồi `pnpm prisma:seed`), nạp danh mục khối kiến thức khi có tệp Excel và thay sáu học phần mẫu DEMO* của 1024034 — `docs/implement-report/f-07-curriculum-elective-groups-implement-report.md`.
 - F-08: người dùng đi thử 8 bước kế hoạch §7 bằng trình duyệt (thẻ credit, chấp nhận chênh lệch kèm lý do, xóa dòng thấy cảnh báo trở lại, vòng danh mục–khung, "Tới chỗ sửa", dòng tổng chương trình, thẻ ở tổng quan, đăng nhập R2) và áp migration `20261019092846_credit_mismatch_acceptance` (`pnpm prisma:migrate`) — `docs/implement-report/f-08-consistency-check-implement-report.md`.
+- F-10: người dùng đi thử 7 bước kế hoạch §7 bằng trình duyệt (tạo Nháp, soạn đậm / danh sách / bảng, dán `<script>`, tuần kéo thả, bật EN và "Chưa dịch", tệp PDF tên tiếng Việt và tệp bị từ chối, hai chương trình cùng đề cương, R5 khác nhóm, R6) và áp migration `20261019095730_syllabi` (`pnpm prisma:migrate`); đặt `FILES_ROOT` vào ổ bền — `docs/implement-report/f-10-syllabus-implement-report.md`.
 
 ### Agreed Approach
 - MVP = F-01..F-08, F-10, F-11, F-13, F-14, F-15 (13 tính năng, 298 điểm); F-09, F-12, F-16, F-26, B5, B6 làm sau.

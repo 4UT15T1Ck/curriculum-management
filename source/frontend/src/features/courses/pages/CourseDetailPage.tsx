@@ -1,18 +1,23 @@
-import { Card, Flex, Result, Skeleton, Space, Typography } from 'antd';
-import { useParams } from 'react-router';
+import { FileTextOutlined } from '@ant-design/icons';
+import { Button, Card, Flex, Result, Skeleton, Space, Typography } from 'antd';
+import { generatePath, Link, useParams } from 'react-router';
+import { ROUTES } from '../../../routes';
 import { ApiError } from '../../../shared/api/client';
+import { PERMISSIONS } from '../../../shared/auth/permissions';
+import { useCan } from '../../../shared/auth/useCan';
 import { CourseEditButton } from '../components/CourseEditButton';
 import { CourseInfoCard } from '../components/CourseInfoCard';
 import { CourseRelationsSection } from '../components/CourseRelationsSection';
 import { CourseStatusActions } from '../components/CourseStatusActions';
 import { EquivalentCoursesCard } from '../components/EquivalentCoursesCard';
-import { ProgramsUsingList } from '../components/ProgramsUsingList';
-import { PROGRAMS_USING_TITLE } from '../constants/courseLabels';
+import { ProgramsUsingList } from '../../../shared/courses/ProgramsUsingList';
+import { PROGRAMS_USING_TITLE, SYLLABUS_LINK } from '../constants/courseLabels';
 import { useCourse } from '../hooks/useCourses';
 
 export function CourseDetailPage() {
   const { courseId = '' } = useParams();
   const { data: course, isPending, error } = useCourse(courseId);
+  const canViewSyllabus = useCan(PERMISSIONS.syllabusView);
   if (isPending) return <Skeleton active />;
   if (!course) {
     if (error instanceof ApiError && error.status === 403)
@@ -28,6 +33,11 @@ export function CourseDetailPage() {
           {course.courseCode} — {course.courseName}
         </Typography.Title>
         <Space>
+          {canViewSyllabus && (
+            <Link to={generatePath(ROUTES.syllabus, { courseId: course.id })}>
+              <Button icon={<FileTextOutlined />}>{SYLLABUS_LINK}</Button>
+            </Link>
+          )}
           <CourseEditButton course={course} />
           {course.canChangeStatus && <CourseStatusActions course={course} />}
         </Space>

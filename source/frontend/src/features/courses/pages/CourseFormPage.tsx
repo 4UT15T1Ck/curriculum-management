@@ -26,7 +26,7 @@ import type {
   CourseType,
   UpdateCourseRequest,
 } from '../api/courses';
-import { ProgramsUsingList } from '../components/ProgramsUsingList';
+import { ProgramsUsingList } from '../../../shared/courses/ProgramsUsingList';
 import { COURSE_TYPE_LABELS } from '../constants/courseLabels';
 import {
   useCourse,

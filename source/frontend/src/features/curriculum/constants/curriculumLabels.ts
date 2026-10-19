@@ -30,3 +30,6 @@ export const REQUISITES_INTRO =
 export const GROUP_BELOW_MINIMUM_LABEL = 'Ít hơn yêu cầu';
 export const GROUP_DELETE_CONFIRM = 'Các học phần trong nhóm vẫn là tự chọn.';
 export const MINIMUM_REQUIRED_MESSAGE = 'Nhập ít nhất một yêu cầu tối thiểu.';
+// Repeated in the syllabi feature's labels: features do not import each other.
+export const SYLLABUS_LINK = 'Đề cương';
+export const NO_SYLLABUS_TAG = 'Chưa có đề cương';

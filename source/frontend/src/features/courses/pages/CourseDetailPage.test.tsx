@@ -147,6 +147,22 @@ describe('CourseDetailPage', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('links to the syllabus only for a caller who may view syllabi (MH-17)', async () => {
+    renderPage(() => json(course), {
+      permissions: [...ME.permissions, 'syllabus.view'],
+    });
+    const link = await screen.findByRole('link', { name: /Đề cương/ });
+    expect(link).toHaveAttribute('href', '/courses/c1/syllabus');
+  });
+
+  it('shows no syllabus link without syllabus.view', async () => {
+    renderPage(() => json(course));
+    await screen.findByText('IT001 — Nhập môn lập trình');
+    expect(
+      screen.queryByRole('link', { name: /Đề cương/ }),
+    ).not.toBeInTheDocument();
+  });
+
   it('says so when no program uses the course (US-028 AC2)', async () => {
     renderPage(() => json(course));
     expect(

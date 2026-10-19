@@ -82,6 +82,16 @@ const ConsistencyPage = lazy(() =>
     default: module.ConsistencyPage,
   })),
 );
+const SyllabusPage = lazy(() =>
+  import('./features/syllabi/pages/SyllabusPage').then((module) => ({
+    default: module.SyllabusPage,
+  })),
+);
+const SyllabusEditorPage = lazy(() =>
+  import('./features/syllabi/pages/SyllabusEditorPage').then((module) => ({
+    default: module.SyllabusEditorPage,
+  })),
+);
 const ProgramFormPage = lazy(() =>
   import('./features/programs/pages/ProgramFormPage').then((module) => ({
     default: module.ProgramFormPage,
@@ -193,6 +203,22 @@ export const router = createBrowserRouter([
             element: (
               <RequirePermission code={PERMISSIONS.courseEdit}>
                 <CourseFormPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.syllabus,
+            element: (
+              <RequirePermission code={PERMISSIONS.syllabusView}>
+                <SyllabusPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.syllabusEdit,
+            element: (
+              <RequirePermission code={PERMISSIONS.syllabusEdit}>
+                <SyllabusEditorPage />
               </RequirePermission>
             ),
           },

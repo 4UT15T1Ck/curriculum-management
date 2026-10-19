@@ -1,9 +1,11 @@
 import { List, Typography } from 'antd';
 import { generatePath, Link } from 'react-router';
-import { ROUTES } from '../../../routes';
-import { versionLabel } from '../../../shared/constants/versionLabels';
-import type { CourseUsage } from '../api/courses';
-import { NOT_USED_BY_PROGRAMS } from '../constants/courseLabels';
+import { ROUTES } from '../../routes';
+import type { components } from '../api/schema';
+import { versionLabel } from '../constants/versionLabels';
+import { NOT_USED_BY_PROGRAMS } from './courseUsageLabels';
+
+type CourseUsage = components['schemas']['CourseUsageDto'];
 
 interface ProgramsUsingListProps {
   programs: CourseUsage[];

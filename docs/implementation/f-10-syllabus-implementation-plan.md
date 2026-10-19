@@ -12,7 +12,7 @@ It deliberately excludes CLOs and the CLOs of a week (F-11, EP-11), the grading 
 > - Builds on: F-01 (`AppException`, `COMMON_ERRORS`, `Env`, `createTestApp`, `client.ts`), F-02 (`AccessContext`, `PERMISSIONS.SYLLABUS_VIEW`, `SYLLABUS_EDIT`, `PROGRAM_VIEW`, `PERMISSION_TABLE`), F-04 (`Course`, `courseTarget`, `edit-path.ts`, `CourseUsageReader`, `HOME_FACULTY_CODE`, `CourseDetailPage`, `CourseEditButton`), F-05 (`course-relations.service.ts` call sites), F-07 (`CurriculumItemDto`, `CurriculumTable`, `ProgramsUsingList`), F-09 (`sendXlsx`, `sendForm`, `downloadFile`, the 413 entry in `ERRORS_BY_STATUS`)
 > - Tests: `docs/planning/test-plan.md:195` (KB-036), `:310-311` (NT-B3-01, NT-B3-02)
 
-**Status**: Not started
+**Status**: Code complete 2026-10-19 (BE-01..BE-07, FE-01..FE-06); browser walkthrough owed — `docs/implement-report/f-10-syllabus-implement-report.md`
 
 ---
 
