@@ -15,6 +15,7 @@ export const PERMISSIONS = {
   programView: 'program.view',
   programEditInfo: 'program.editInfo',
   programClone: 'program.clone',
+  curriculumEdit: 'curriculum.edit',
   directorAssign: 'director.assign',
 } as const satisfies Record<string, PermissionCode>;
 

@@ -2,7 +2,9 @@ import type { components } from './schema';
 
 export const API_BASE_URL = '/api';
 
-type QueryValue = string | number | boolean | null | undefined;
+type QueryScalar = string | number | boolean | null | undefined;
+// An array becomes a repeated key (`status=A&status=B`), the form the server's list filters read.
+type QueryValue = QueryScalar | readonly QueryScalar[];
 
 export function withQuery(
   path: string,
@@ -10,8 +12,10 @@ export function withQuery(
 ): string {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined && value !== null && value !== '') {
-      search.set(key, String(value));
+    for (const entry of Array.isArray(value) ? value : [value]) {
+      if (entry !== undefined && entry !== null && entry !== '') {
+        search.append(key, String(entry));
+      }
     }
   }
   const query = search.toString();

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ApiError, getJson, sendJson } from './client';
+import { ApiError, getJson, sendJson, withQuery } from './client';
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -59,5 +59,31 @@ describe('API client', () => {
       vi.fn().mockResolvedValue(new Response('{"ok":false}', { status: 503 })),
     );
     await expect(getJson('/health', [503])).resolves.toEqual({ ok: false });
+  });
+});
+
+describe('withQuery', () => {
+  it('writes an array as a repeated key', () => {
+    expect(withQuery('/courses', { status: ['ACTIVE', 'DISCONTINUED'] })).toBe(
+      '/courses?status=ACTIVE&status=DISCONTINUED',
+    );
+  });
+
+  it('keeps scalars as they were and skips empty values', () => {
+    expect(
+      withQuery('/courses', {
+        q: 'it',
+        page: 2,
+        foreign: false,
+        empty: '',
+        none: undefined,
+        nothing: null,
+        statuses: [],
+      }),
+    ).toBe('/courses?q=it&page=2&foreign=false');
+  });
+
+  it('returns the bare path when there is nothing to send', () => {
+    expect(withQuery('/courses', { status: [] })).toBe('/courses');
   });
 });

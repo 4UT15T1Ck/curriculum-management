@@ -147,7 +147,14 @@ describe('CourseDetailPage', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('lists the programs using the course only when there are some', async () => {
+  it('says so when no program uses the course (US-028 AC2)', async () => {
+    renderPage(() => json(course));
+    expect(
+      await screen.findByText('Học phần chưa được chương trình nào sử dụng'),
+    ).toBeInTheDocument();
+  });
+
+  it('lists the programs using the course with version and semester (US-028 AC1, AC3)', async () => {
     renderPage(() =>
       json({
         ...course,
@@ -156,14 +163,20 @@ describe('CourseDetailPage', () => {
             programId: 'p',
             programCode: 'CNTT',
             programName: 'Công nghệ thông tin',
-            versionLabel: '1.0',
+            versionLabel: null,
+            plannedSemester: 4,
           },
         ],
       }),
     );
+    const link = await screen.findByRole('link', {
+      name: 'CNTT — Công nghệ thông tin',
+    });
+    expect(link).toHaveAttribute('href', '/programs/p');
+    expect(link.parentElement).toHaveTextContent('(Nháp, học kỳ 4)');
     expect(
-      await screen.findByText('CNTT — Công nghệ thông tin (1.0)'),
-    ).toBeInTheDocument();
+      screen.queryByText('Học phần chưa được chương trình nào sử dụng'),
+    ).not.toBeInTheDocument();
   });
 
   it('asks for confirmation before cancelling and posts only after OK', async () => {

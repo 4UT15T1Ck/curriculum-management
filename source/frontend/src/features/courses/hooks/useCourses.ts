@@ -5,6 +5,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { COURSE_RELATION_ROOT_KEY } from './useCourseRelations';
+import { COURSE_QUERY_ROOT } from '../../../shared/courses/courseQueryKeys';
 import { subjectGroupsQueryKey } from '../../../shared/subject-groups/subjectGroups';
 import {
   changeCourseStatus,
@@ -20,9 +21,10 @@ import {
 } from '../api/courses';
 
 export const COURSE_QUERY_KEYS = {
-  all: ['courses'] as const,
-  list: (query: CourseQuery) => ['courses', 'list', query] as const,
-  detail: (courseId: string) => ['courses', 'detail', courseId] as const,
+  all: COURSE_QUERY_ROOT,
+  list: (query: CourseQuery) => [...COURSE_QUERY_ROOT, 'list', query] as const,
+  detail: (courseId: string) =>
+    [...COURSE_QUERY_ROOT, 'detail', courseId] as const,
 };
 
 export function useCourseList(query: CourseQuery) {

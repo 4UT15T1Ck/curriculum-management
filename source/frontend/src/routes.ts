@@ -18,4 +18,6 @@ export const ROUTES = {
   programNew: '/programs/new',
   programDetail: '/programs/:programId',
   programEdit: '/programs/:programId/edit',
+  curriculum: '/programs/:programId/versions/:versionId/curriculum',
+  electiveGroups: '/programs/:programId/versions/:versionId/elective-groups',
 } as const;

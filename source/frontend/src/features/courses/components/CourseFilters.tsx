@@ -111,11 +111,13 @@ export function CourseFilters({ value, onChange }: CourseFiltersProps) {
         allowClear
         placeholder="Trạng thái"
         style={{ minWidth: 150 }}
-        value={value.status}
+        value={value.status?.[0]}
         options={options<CourseStatus>(
           statuses as Record<CourseStatus, string>,
         )}
-        onChange={(status?: CourseStatus) => onChange({ status })}
+        onChange={(status?: CourseStatus) =>
+          onChange({ status: status ? [status] : undefined })
+        }
       />
       <Segmented<Origin>
         options={ORIGIN_OPTIONS}

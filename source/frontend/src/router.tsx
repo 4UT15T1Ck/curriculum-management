@@ -67,6 +67,16 @@ const ProgramOverviewPage = lazy(() =>
     default: module.ProgramOverviewPage,
   })),
 );
+const CurriculumPage = lazy(() =>
+  import('./features/curriculum/pages/CurriculumPage').then((module) => ({
+    default: module.CurriculumPage,
+  })),
+);
+const ElectiveGroupsPage = lazy(() =>
+  import('./features/curriculum/pages/ElectiveGroupsPage').then((module) => ({
+    default: module.ElectiveGroupsPage,
+  })),
+);
 const ProgramFormPage = lazy(() =>
   import('./features/programs/pages/ProgramFormPage').then((module) => ({
     default: module.ProgramFormPage,
@@ -218,6 +228,22 @@ export const router = createBrowserRouter([
             element: (
               <RequirePermission code={PERMISSIONS.programEditInfo}>
                 <ProgramFormPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.curriculum,
+            element: (
+              <RequirePermission code={PERMISSIONS.programView}>
+                <CurriculumPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: ROUTES.electiveGroups,
+            element: (
+              <RequirePermission code={PERMISSIONS.programView}>
+                <ElectiveGroupsPage />
               </RequirePermission>
             ),
           },

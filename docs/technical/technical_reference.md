@@ -121,7 +121,7 @@ Lý do chọn và bảng phiên bản: `docs/design/tech-stack.md` §2 và §6. 
 
 ## 7. Giao diện
 
-**Library**: React 19.3, Vite 8.3, `antd` 6.6, `@tanstack/react-query` 5, `react-router` 8.4, `openapi-typescript` 7.13
+**Library**: React 19.3, Vite 8.3, `antd` 6.6, `@tanstack/react-query` 5, `react-router` 8.4, `openapi-typescript` 7.13; `@dnd-kit/core` 6.3.1, `@dnd-kit/sortable` 10.0.0, `@dnd-kit/utilities` 3.2.2 (cố định phiên bản; kéo thả dòng khung bằng chuột và bàn phím, AntD 6 `Table` không có sẵn — D15 của F-07)
 
 ### Usage Pattern
 - `getJson<T>(path, acceptedStatuses)` và `sendJson<T>` trong `src/shared/api/client.ts`; mã lỗi khác ném `ApiError` mang `ErrorResponseDto`. 401 `SESSION_REQUIRED` được `queryClient.ts` bắt chung và đặt `me` về `null`.

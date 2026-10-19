@@ -135,14 +135,17 @@ export function CourseFormPage() {
       <Typography.Title level={2} style={{ margin: 0 }}>
         {editing ? `Sửa học phần ${course?.courseCode ?? ''}` : 'Thêm học phần'}
       </Typography.Title>
-      {course && course.programsUsing.length > 0 && (
-        <Alert
-          type="warning"
-          showIcon
-          message="Học phần đang được dùng ở các chương trình sau"
-          description={<ProgramsUsingList programs={course.programsUsing} />}
-        />
-      )}
+      {course &&
+        (course.programsUsing.length > 0 ? (
+          <Alert
+            type="warning"
+            showIcon
+            message="Học phần đang được dùng ở các chương trình sau"
+            description={<ProgramsUsingList programs={course.programsUsing} />}
+          />
+        ) : (
+          <ProgramsUsingList programs={[]} />
+        ))}
       <Form<CourseFormValues>
         form={form}
         layout="vertical"

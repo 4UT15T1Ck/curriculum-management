@@ -1,3 +1,7 @@
+import {
+  DRAFT_VERSION_LABEL,
+  versionLabel,
+} from '../../../shared/constants/versionLabels';
 import type {
   DegreeLevel,
   ProgramStatus,
@@ -22,9 +26,8 @@ export const VERSION_STATUS_LABELS: Record<ProgramVersionStatus, string> = {
   ACTIVE: 'Đang hiệu lực',
   HISTORICAL: 'Lịch sử',
 };
-export const DRAFT_VERSION_LABEL = 'Nháp';
-export const versionLabel = (version: { versionNumber: string | null }) =>
-  version.versionNumber ?? DRAFT_VERSION_LABEL;
+// Moved to shared/ so the curriculum and course screens print the same label; re-exported for the programs screens.
+export { DRAFT_VERSION_LABEL, versionLabel };
 
 export const ALL_STATUSES_LABEL = 'Tất cả';
 export const CLONE_SCOPE_NOTE =
@@ -32,4 +35,4 @@ export const CLONE_SCOPE_NOTE =
 export const REVOKE_DIRECTOR_CONFIRM =
   'Chỉ dùng khi phân công nhập nhầm. Lịch sử vẫn giữ dòng đã thu hồi.';
 export const SECTION_NOT_BUILT_TOOLTIP =
-  'Có từ khi tính năng khung chương trình được dựng';
+  'Có từ khi tính năng kiểm tra nhất quán được dựng';

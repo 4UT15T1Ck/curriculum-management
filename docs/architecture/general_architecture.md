@@ -59,6 +59,7 @@ src/
 │   ├── courses/           danh mục học phần, trạng thái HP-01..HP-04 (F-04); ngừng mở lớp kèm học phần thay thế (F-05)
 │   ├── course-relations/  quan hệ học trước / tiên quyết / song hành / thay thế, chống chu trình (F-05)
 │   ├── equivalence-groups/ nhóm học phần tương đương: tạo, thêm, bớt, gộp, giải thể (F-05)
+│   ├── curriculum/        khung chương trình, nhóm tự chọn, điều kiện riêng của khung (F-07)
 │   ├── programs/          chương trình đào tạo: danh sách, tổng quan, thông tin ở bản Nháp, ngừng/dùng lại, nhân bản; phân công Giám đốc CTĐT có thời hạn (F-06)
 │   └── health/            trạng thái hệ thống
 ├── shared/
@@ -71,6 +72,7 @@ src/
 │   ├── authz/             @RequirePermission, @AnyAuthenticated, @CurrentAccess, PermissionGuard, ScopeService, AccessContext, PERMISSIONS, LOCKED_CELLS, edit-path.ts (editPathFor, resolveEditPath, assertDirectEdit, assertSchoolWideDirect)
 │   ├── pagination/        PageQueryDto + Page<T>
 │   ├── courses/           CourseUsageReader (`hasActiveReplacement` do F-05 điền; F-07, F-15, F-17 điền các hàm còn lại), CoursesSharedModule, courseTarget, courseEditState, RelatedCourseDto, requisite-graph.ts (findRequisiteCycle, khóa đồ thị)
+│   ├── curriculum/        curriculum-warnings.ts (`curriculumWarnings`, F-08 mở rộng), curriculum-facts.reader.ts (`maxPlannedSemester`) + CurriculumSharedModule (F-07)
 │   ├── programs/          active-director.ts (`activeDirectorWhere`), program-target.ts (`programTarget`, `programEditState`), VersionContentCopier + ProgramsSharedModule — chỗ cắm để F-07, F-11 thêm bảng thuộc phiên bản vào phép sao (F-06)
 │   ├── decimal/           CREDITS_PATTERN, GRADE_POINT_PATTERN, toWireDecimal — số thập phân gửi dạng chuỗi
 │   ├── org-units/         home-faculty.ts — HOME_FACULTY_CODE, định nghĩa "khoa khác"
@@ -104,11 +106,11 @@ test/                      đầu-cuối: Testcontainers dựng PostgreSQL + Red
 | Phân quyền | `PermissionGuard` từ chối mặc định: route không `@Public` phải có `@RequirePermission(...codes)` (đủ một trong các mã) hoặc `@AnyAuthenticated()`, thiếu cả hai → 403. Quyền nạp lại mỗi yêu cầu, không cache |
 | Phạm vi | `ScopeService.loadAccess()` dựng `AccessContext` một lần mỗi yêu cầu, gắn vào `request.access`; service lấy bằng `@CurrentAccess()` và kiểm phạm vi đồng bộ trên đó. Vai trò `scopeSource = NONE` lấy từ hàng `RoleAssignment` (`SYSTEM`/`UNIT`); vai trò khác suy ra qua `ScopeSourceReader`: F-03 đã điền `SUBJECT_GROUP_MEMBER` (R5) và `SUBJECT_GROUP_COORDINATOR` (R4) từ hàng đang hiệu lực trong nhóm `ACTIVE`; F-06 điền `PROGRAM_DIRECTOR` (R3) từ `ProgramDirectorAssignment` đang hiệu lực trong chương trình `ACTIVE` qua `activeDirectorWhere`, trả `programIds`; F-17 điền tiếp `OWN_ENROLLMENT` (R6) |
 | Đường sửa | `src/shared/authz/edit-path.ts` quyết định một đối tượng được sửa trực tiếp (`DIRECT`) hay chỉ qua đề xuất (`VIA_REQUEST`) từ chế độ ô quyền và trạng thái đối tượng `{ released, draftOpenToRequestHolders }` (H-4, FR-55): đã ban hành → luôn qua đề xuất; chưa ban hành → ô `DIRECT` sửa thẳng, ô `VIA_REQUEST` sửa thẳng khi dữ liệu mở cho họ (với học phần: của Khoa CNTT). Service ghi gọi `assertDirectEdit`, ném 409 `CHANGE_REQUEST_REQUIRED`. F-06, F-07, F-10, F-11, F-12 dùng lại; F-13 nhận cùng thân yêu cầu làm mục thay đổi |
-| Sự thật của tính năng sau | `CourseUsageReader` (`src/shared/courses/`) trả "không có" cho `inReleasedVersion`, `hasStudyResults`, `programsUsing` đến khi F-15, F-17, F-07 điền; `hasActiveReplacement` đã thật từ F-05 (nhận thêm `tx` để thấy hàng vừa ghi trong cùng giao dịch); tính năng không import nhau |
+| Sự thật của tính năng sau | `CourseUsageReader` (`src/shared/courses/`): `programsUsing` và `inReleasedVersion` đọc từ khung từ F-07; `hasStudyResults` trả "không có" đến khi F-17 điền; `hasActiveReplacement` đã thật từ F-05 (nhận thêm `tx` để thấy hàng vừa ghi trong cùng giao dịch); tính năng không import nhau |
 | Đồ thị tiên quyết | Mọi nơi ghi cạnh `PRIOR`/`PREREQUISITE` (quan hệ học phần F-05, `CurriculumRequisite` F-07, nhập Excel F-09) phải mở giao dịch, gọi `lockRequisiteGraph(tx)` (khóa `pg_advisory_xact_lock(REQUISITE_GRAPH_LOCK_KEY = 5001)`), rồi `findRequisiteCycle(cạnh, cạnhMới)` trên hợp các cạnh cần xét (`CYCLE_CHECKED_TYPES`); dùng đúng hằng khóa, không tự chọn khóa khác. Khóa dùng `$executeRaw` vì `pg_advisory_xact_lock` trả `void`, bộ điều hợp trình điều khiển không đọc được qua `$queryRaw` |
 | Dữ liệu toàn trường | `assertSchoolWideDirect(access, code)`: dữ liệu không thuộc đơn vị hay nhóm nào (nhóm tương đương) chỉ sửa được khi có ô `DIRECT` + `ALL` (R1); ô `Đ` hoặc ô theo phạm vi → 403 `PERMISSION_DENIED` |
 | Chương trình và phiên bản | `programTarget(program)` = `{ programIds: [id], orgUnitIds: [facultyId] }` (phạm vi R3 theo mã chương trình, phạm vi theo đơn vị của gán tay phủ cả khoa); `programEditState`: "đã ban hành" = có phiên bản khác `DRAFT`, `draftOpenToRequestHolders = true`. Thông tin chương trình sửa trên **bản Nháp**; không có Nháp thì 409 `CHANGE_REQUEST_REQUIRED`. Trạng thái chương trình và phân công Giám đốc là việc R1 (`assertSchoolWideDirect`, `director.assign`), luôn trực tiếp, không phải nội dung phiên bản |
-| Sao chép nội dung phiên bản | Mọi nơi sao một phiên bản (nhân bản chương trình F-06; bản Nháp của đề xuất F-13; đính chính F-15) gọi `VersionContentCopier.copy(tx, fromVersionId, toVersionId)` (`src/shared/programs/`) trong giao dịch của người gọi. Bảng thuộc phiên bản thêm bước vào hàm này: F-07 (khung, nhóm tự chọn, điều kiện), F-11 (PLO, ma trận); hiện hàm rỗng nên bản nhân bản mới chỉ có thông tin chương trình |
+| Sao chép nội dung phiên bản | Mọi nơi sao một phiên bản (nhân bản chương trình F-06; bản Nháp của đề xuất F-13; đính chính F-15) gọi `VersionContentCopier.copy(tx, fromVersionId, toVersionId)` (`src/shared/programs/`) trong giao dịch của người gọi. Bảng thuộc phiên bản thêm bước vào hàm này: F-07 đã thêm nhóm tự chọn → dòng khung → điều kiện (ánh xạ lại id, tra ngược qua khóa tự nhiên vì `createMany` không trả hàng); F-11 thêm PLO, ma trận sau điều kiện |
 | Mã quyền | Hằng `PERMISSIONS` (`shared/authz/permission-codes.ts`); không viết cứng mã vai trò trong mã |
 | Người dùng hiện tại | `@CurrentUser()`; không đọc `req.session` trong controller |
 | Kiểm thử | Đơn vị `*.spec.ts` cạnh tệp; đầu-cuối `test/*.e2e-spec.ts` dùng `configureApp` chung với `main.ts` |
@@ -131,7 +133,7 @@ src/
 │   ├── hooks/             useQuery / useMutation
 │   ├── pages/<Name>Page.tsx   một tệp cho mỗi màn hình, test cạnh tệp
 │   └── schema/            `rules` cho AntD Form
-│   (auth, health, home, users, permissions, org-units, subject-groups, courses, equivalence-groups, programs)
+│   (auth, health, home, users, permissions, org-units, subject-groups, courses, equivalence-groups, programs, curriculum)
 ├── shared/
 │   ├── api/               client.ts (getJson, sendJson, ApiError, header CSRF), queryClient.ts, errorCodes.ts, schema.d.ts (sinh từ OpenAPI, có trong git)
 │   ├── auth/              me.ts, useMe, useLogout, RequireAuth, permissions.ts, useCan, RequirePermission

@@ -804,6 +804,134 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/program-versions/{versionId}/curriculum': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ProgramVersionsCurriculumController_read'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/program-versions/{versionId}/curriculum-items': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ProgramVersionsCurriculumController_createItem'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/program-versions/{versionId}/curriculum-order': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['ProgramVersionsCurriculumController_reorder'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/program-versions/{versionId}/elective-groups': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ProgramVersionsCurriculumController_createGroup'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/curriculum-items/{itemId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['CurriculumItemsController_remove'];
+    options?: never;
+    head?: never;
+    patch: operations['CurriculumItemsController_update'];
+    trace?: never;
+  };
+  '/api/curriculum-items/{itemId}/requisites': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['CurriculumItemsController_replaceRequisites'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/elective-groups/{groupId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['ElectiveGroupsController_remove'];
+    options?: never;
+    head?: never;
+    patch: operations['ElectiveGroupsController_update'];
+    trace?: never;
+  };
+  '/api/elective-groups/{groupId}/items': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['ElectiveGroupsController_assignItems'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1223,6 +1351,7 @@ export interface components {
       programCode: string;
       programName: string;
       versionLabel: string | null;
+      plannedSemester: number;
     };
     /** @enum {string} */
     EditPath: 'DIRECT' | 'VIA_REQUEST';
@@ -1446,6 +1575,165 @@ export interface components {
     EndDirectorDto: {
       /** Format: date */
       validTo: string;
+    };
+    CurriculumVersionDto: {
+      id: string;
+      programId: string;
+      programCode: string;
+      programName: string;
+      versionNumber: string | null;
+      status: components['schemas']['ProgramVersionStatus'];
+      semesterCount: number;
+    };
+    CurriculumElectiveGroupRefDto: {
+      id: string;
+      groupCode: string;
+    };
+    /** @enum {string} */
+    CurriculumRequisiteType: 'PRIOR' | 'PREREQUISITE' | 'COREQUISITE';
+    CurriculumRequisiteDto: {
+      id: string;
+      sourceCourse: components['schemas']['RelatedCourseDto'];
+      relationType: components['schemas']['CurriculumRequisiteType'];
+      /** @example 2 */
+      minScore: string | null;
+      /** @description Học kỳ mà học phần điều kiện đang xếp trong khung này; null khi nó không có trong khung. */
+      sourceSemester: number | null;
+    };
+    CurriculumItemDto: {
+      id: string;
+      /** @description TT: vị trí 1-based theo (học kỳ, thứ tự). */
+      displayOrder: number;
+      plannedSemester: number;
+      sortOrder: number;
+      course: components['schemas']['RelatedCourseDto'];
+      blockSymbol: string | null;
+      blockName: string | null;
+      isElective: boolean;
+      electiveGroup:
+        components['schemas']['CurriculumElectiveGroupRefDto'] | null;
+      htDa: boolean;
+      tqDa: boolean;
+      /** @example 2 */
+      minStudiedScore: string | null;
+      /** @example 2 */
+      minTransferScore: string | null;
+      note: string | null;
+      requisites: components['schemas']['CurriculumRequisiteDto'][];
+      canEdit: boolean;
+    };
+    SemesterTotalDto: {
+      semester: number;
+      /** @example 17 */
+      totalCredits: string;
+      /** @example 15 */
+      compulsoryCredits: string;
+      /** @example 2 */
+      electiveCredits: string;
+      itemCount: number;
+    };
+    BlockTotalDto: {
+      symbol: string | null;
+      blockName: string | null;
+      /** @example 30 */
+      totalCredits: string;
+      itemCount: number;
+    };
+    KnowledgeBlockDto: {
+      blockCode: string;
+      blockName: string;
+      /** @example 40 */
+      requiredCredits: string | null;
+    };
+    ElectiveGroupDto: {
+      id: string;
+      groupCode: string;
+      groupName: string;
+      minCredits: string | null;
+      minCourses: number | null;
+      itemIds: string[];
+      /** @example 15 */
+      listedCredits: string;
+      itemCount: number;
+    };
+    /** @enum {string} */
+    CurriculumWarningCode: 'EMPTY_SEMESTER' | 'REQUISITE_NOT_EARLIER';
+    /** @enum {string} */
+    WarningSeverity: 'INFO' | 'HIGH';
+    CurriculumWarningDto: {
+      code: components['schemas']['CurriculumWarningCode'];
+      severity: components['schemas']['WarningSeverity'];
+      message: string;
+      semester: number | null;
+      itemId: string | null;
+    };
+    CurriculumDto: {
+      version: components['schemas']['CurriculumVersionDto'];
+      editPath: components['schemas']['EditPath'] | null;
+      canEditStructure: boolean;
+      canAddItems: boolean;
+      items: components['schemas']['CurriculumItemDto'][];
+      semesters: components['schemas']['SemesterTotalDto'][];
+      blocks: components['schemas']['BlockTotalDto'][];
+      knowledgeBlocks: components['schemas']['KnowledgeBlockDto'][];
+      electiveGroups: components['schemas']['ElectiveGroupDto'][];
+      warnings: components['schemas']['CurriculumWarningDto'][];
+    };
+    CreateCurriculumItemDto: {
+      courseId: string;
+      plannedSemester: number;
+      blockSymbol?: string | null;
+      isElective: boolean;
+      htDa?: boolean;
+      tqDa?: boolean;
+      /** @example 4 */
+      minStudiedScore?: string | null;
+      /** @example 4 */
+      minTransferScore?: string | null;
+      note?: string | null;
+    };
+    ReorderCurriculumDto: {
+      plannedSemester: number;
+      /** @description Mọi dòng của học kỳ, theo thứ tự mới. */
+      itemIds: string[];
+    };
+    CreateElectiveGroupDto: {
+      groupCode: string;
+      groupName: string;
+      /** @example 6 */
+      minCredits?: string | null;
+      minCourses?: number | null;
+    };
+    UpdateCurriculumItemDto: {
+      plannedSemester?: number;
+      blockSymbol?: string | null;
+      isElective?: boolean;
+      htDa?: boolean;
+      tqDa?: boolean;
+      /** @example 4 */
+      minStudiedScore?: string | null;
+      /** @example 4 */
+      minTransferScore?: string | null;
+      note?: string | null;
+    };
+    RequisiteInputDto: {
+      sourceCourseId: string;
+      relationType: components['schemas']['CurriculumRequisiteType'];
+      /** @example 4 */
+      minScore?: string | null;
+    };
+    ReplaceRequisitesDto: {
+      requisites: components['schemas']['RequisiteInputDto'][];
+    };
+    UpdateElectiveGroupDto: {
+      groupCode?: string;
+      groupName?: string;
+      /** @example 6 */
+      minCredits?: string | null;
+      minCourses?: number | null;
+    };
+    AssignGroupItemsDto: {
+      itemIds: string[];
     };
   };
   responses: never;
@@ -2286,7 +2574,7 @@ export interface operations {
         ownerFacultyId?: string;
         ownerGroupId?: string;
         courseType?: components['schemas']['CourseType'];
-        status?: components['schemas']['CourseStatus'];
+        status?: components['schemas']['CourseStatus'][];
         foreign?: boolean;
         sort?: 'courseCode' | 'courseName' | 'credits' | 'updatedAt';
         order?: 'asc' | 'desc';
@@ -2966,6 +3254,238 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['ProgramDirectorDto'];
+        };
+      };
+    };
+  };
+  ProgramVersionsCurriculumController_read: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        versionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CurriculumDto'];
+        };
+      };
+    };
+  };
+  ProgramVersionsCurriculumController_createItem: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        versionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateCurriculumItemDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CurriculumItemDto'];
+        };
+      };
+    };
+  };
+  ProgramVersionsCurriculumController_reorder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        versionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReorderCurriculumDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProgramVersionsCurriculumController_createGroup: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        versionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateElectiveGroupDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ElectiveGroupDto'];
+        };
+      };
+    };
+  };
+  CurriculumItemsController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        itemId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CurriculumItemsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        itemId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateCurriculumItemDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CurriculumItemDto'];
+        };
+      };
+    };
+  };
+  CurriculumItemsController_replaceRequisites: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        itemId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReplaceRequisitesDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CurriculumItemDto'];
+        };
+      };
+    };
+  };
+  ElectiveGroupsController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ElectiveGroupsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateElectiveGroupDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ElectiveGroupDto'];
+        };
+      };
+    };
+  };
+  ElectiveGroupsController_assignItems: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        groupId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AssignGroupItemsDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ElectiveGroupDto'];
         };
       };
     };

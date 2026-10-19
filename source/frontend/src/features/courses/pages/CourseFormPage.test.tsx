@@ -67,6 +67,7 @@ const json = (body: unknown, status = 200) =>
 function renderForm(
   path: string,
   write: () => Response = () => json(course, 201),
+  detail: object = course,
 ) {
   const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input);
@@ -76,7 +77,7 @@ function renderForm(
       url.includes('/subject-groups')
         ? json(groups)
         : url.startsWith('/api/courses/')
-          ? json(course)
+          ? json(detail)
           : json([]),
     );
   });
@@ -216,6 +217,38 @@ describe('CourseFormPage', () => {
     const body = JSON.parse(String(init?.body));
     expect(body).not.toHaveProperty('courseCode');
     expect(body).toMatchObject({ credits: '3', ownerGroupId: 'g1' });
+  });
+
+  it('warns before editing a course that programs use, with their semester (US-028 AC1)', async () => {
+    renderForm('/courses/c1/edit', undefined, {
+      ...course,
+      programsUsing: [
+        {
+          programId: 'p1',
+          programCode: '1024034',
+          programName: 'Kỹ thuật máy tính',
+          versionLabel: null,
+          plannedSemester: 3,
+        },
+      ],
+    });
+    expect(
+      await screen.findByText('Học phần đang được dùng ở các chương trình sau'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: '1024034 — Kỹ thuật máy tính' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Nháp, học kỳ 3/)).toBeInTheDocument();
+  });
+
+  it('says when no program uses the course being edited (US-028 AC2)', async () => {
+    renderForm('/courses/c1/edit');
+    expect(
+      await screen.findByText('Học phần chưa được chương trình nào sử dụng'),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText('Học phần đang được dùng ở các chương trình sau'),
+    ).not.toBeInTheDocument();
   });
 
   it('clears the group when the faculty changes', async () => {

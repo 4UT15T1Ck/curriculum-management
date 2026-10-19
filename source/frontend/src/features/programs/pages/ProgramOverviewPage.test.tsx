@@ -113,10 +113,40 @@ describe('ProgramOverviewPage', () => {
     expect(screen.getByText('Tổng tín chỉ')).toBeInTheDocument();
     expect(screen.getByText('150')).toBeInTheDocument();
     expect(screen.getByText('Khung chương trình')).toBeInTheDocument();
+    expect(screen.getByText('Kiểm tra nhất quán')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sửa thông tin' })).toBeEnabled();
     expect(
       screen.getByRole('button', { name: 'Nhân bản' }),
     ).toBeInTheDocument();
+  });
+
+  it('links the curriculum and elective groups to the Draft version (F-07)', async () => {
+    renderPage();
+    const curriculum = await screen.findByRole('link', {
+      name: 'Khung chương trình',
+    });
+    expect(curriculum).toHaveAttribute(
+      'href',
+      '/programs/p1/versions/v1/curriculum',
+    );
+    expect(screen.getByRole('link', { name: 'Nhóm tự chọn' })).toHaveAttribute(
+      'href',
+      '/programs/p1/versions/v1/elective-groups',
+    );
+    expect(
+      screen.queryByRole('link', { name: 'Kiểm tra nhất quán' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('opens the current version when the program has no Draft', async () => {
+    renderPage({
+      ...PROGRAM,
+      draftVersion: null,
+      currentVersion: { id: 'v9', versionNumber: '1.0', status: 'ACTIVE' },
+    });
+    expect(
+      await screen.findByRole('link', { name: 'Khung chương trình' }),
+    ).toHaveAttribute('href', '/programs/p1/versions/v9/curriculum');
   });
 
   it('shows the disabled request button when the edit must go through a request', async () => {

@@ -1,4 +1,4 @@
-import { Flex, Result, Skeleton, Space, Typography } from 'antd';
+import { Card, Flex, Result, Skeleton, Space, Typography } from 'antd';
 import { useParams } from 'react-router';
 import { ApiError } from '../../../shared/api/client';
 import { CourseEditButton } from '../components/CourseEditButton';
@@ -7,6 +7,7 @@ import { CourseRelationsSection } from '../components/CourseRelationsSection';
 import { CourseStatusActions } from '../components/CourseStatusActions';
 import { EquivalentCoursesCard } from '../components/EquivalentCoursesCard';
 import { ProgramsUsingList } from '../components/ProgramsUsingList';
+import { PROGRAMS_USING_TITLE } from '../constants/courseLabels';
 import { useCourse } from '../hooks/useCourses';
 
 export function CourseDetailPage() {
@@ -34,7 +35,9 @@ export function CourseDetailPage() {
       <CourseInfoCard course={course} />
       <CourseRelationsSection course={course} />
       <EquivalentCoursesCard course={course} />
-      <ProgramsUsingList programs={course.programsUsing} />
+      <Card title={PROGRAMS_USING_TITLE}>
+        <ProgramsUsingList programs={course.programsUsing} />
+      </Card>
     </Flex>
   );
 }

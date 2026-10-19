@@ -71,6 +71,8 @@ Migration `20261019075207_course_relations` (F-05) sinh bằng `prisma migrate d
 
 Migration `20261019082727_programs` (F-06) sinh bằng `prisma migrate dev --create-only --name programs` trên PostgreSQL 18 thật (ICU `vi-VN`, container Docker), rồi nối tay hai chỉ mục duy nhất từng phần ở cuối `migration.sql` và áp bằng `prisma migrate dev`; chạy lại báo "Already in sync". Thêm `Program`, `ProgramVersion`, `ProgramDirectorAssignment` và ba enum `DegreeLevel`, `ProgramStatus`, `ProgramVersionStatus`; chỉ thêm. Đã áp trên PostgreSQL của Testcontainers trong kiểm thử đầu-cuối (6 migration); chưa áp lên cơ sở dữ liệu phát triển của người dùng.
 
+Migration `20261019085325_curriculum` (F-07) sinh bằng `prisma migrate dev --create-only --name curriculum` trên PostgreSQL 18 thật (ICU `vi-VN`, container Docker), rồi nối tay sáu ràng buộc `CHECK` ở cuối `migration.sql` và áp bằng `prisma migrate dev`; chạy lại báo "Already in sync". Thêm `KnowledgeBlock`, `ElectiveGroup`, `CurriculumItem`, `CurriculumRequisite`; chỉ thêm. Đã áp trên PostgreSQL của Testcontainers trong kiểm thử đầu-cuối (7 migration); chưa áp lên cơ sở dữ liệu phát triển của người dùng.
+
 Migration `20261018151319_access_control` (F-02) sinh bằng `prisma migrate dev --create-only --name access_control`; đã áp trên cơ sở dữ liệu phát triển. Thêm `OrgUnit` tối thiểu, `Role`, `Permission`, `RolePermission`, `RoleAssignment` và `User.orgUnitId`.
 
 ### `User` — table `User`
@@ -190,6 +192,19 @@ Quan hệ: `faculty` (`ProgramFaculty`), `clonedFrom` (`ProgramClonedFrom`), `ve
 | `createdAt` / `updatedAt` | `DateTime` | |
 
 Duy nhất `(programId, versionNumber)` (nhiều `NULL` được qua, vì PostgreSQL coi `NULL` là khác nhau) và chỉ mục `(programId, status)`. **Hai chỉ mục duy nhất từng phần viết tay trong `migration.sql`** (Prisma không mô hình hóa và không diff chúng nên giữ qua các migration sau — đừng "dọn" khỏi SQL): `ProgramVersion_one_draft` (`("programId") WHERE "status" = 'DRAFT'`) và `ProgramVersion_one_active` (`WHERE "status" = 'ACTIVE'`) — mỗi chương trình có nhiều nhất một bản Nháp và một bản Đang hiệu lực (BR-22); F-13, F-15 dựa vào. Cột ban hành (`decisionNumber`, `signedDate`, `effectiveSemester`, `publishedBy`, `publishedAt`, `previousVersion`, `correctionOf`, `correctionReason`, `sourceRequest`, `creditMismatchReason`) do F-15 thêm. Quan hệ ngược `clones` (các chương trình nhân bản từ phiên bản này).
+
+### Khung chương trình (F-07)
+
+| Bảng | Cột chính | Ghi chú |
+|---|---|---|
+| `KnowledgeBlock` | `blockCode` (duy nhất), `blockName`, `requiredCredits Decimal(5,2)?` | Danh mục dùng chung, nạp bằng seed (hiện rỗng: chưa có tệp Excel); ký hiệu trên dòng khung là chuỗi tự do, không khóa ngoại (F07-02) |
+| `ElectiveGroup` | `versionId` → `ProgramVersion` (`Cascade`), `groupCode`, `groupName`, `minCredits Decimal(5,2)?`, `minCourses Int?` | Duy nhất `(versionId, groupCode)`; có cả hai mức thì phải đạt cả hai |
+| `CurriculumItem` | `versionId` (`Cascade`), `plannedSemester`, `sortOrder` (trong một học kỳ, TT suy ra), `courseId` (`Restrict`), `blockSymbol?`, `isElective`, `electiveGroupId?` (`SetNull`), `htDa`, `tqDa`, `minStudiedScore`, `minTransferScore` (`Decimal(4,2)?`), `note?` | Duy nhất `(versionId, courseId)`; tên và tín chỉ đọc trực tiếp từ `Course` đến khi F-15 ghi ảnh chụp |
+| `CurriculumRequisite` | `itemId` (`Cascade`), `sourceCourseId` (`Restrict`), `relationType` (dùng lại `CourseRelationType`), `minScore Decimal(4,2)?` | Duy nhất `(itemId, sourceCourseId, relationType)`; chép từ `CourseRelation` lúc thêm dòng, sửa riêng cho khung, đóng băng cùng phiên bản |
+
+Sáu `CHECK` viết tay (Prisma không mô hình hóa; không xóa khi dọn `migration.sql`): `CurriculumItem_group_needs_elective` (có nhóm thì phải tự chọn), `CurriculumItem_semester_positive`, `CurriculumItem_sort_positive`, `ElectiveGroup_has_minimum` (ít nhất một mức tối thiểu), `CurriculumRequisite_not_replacement`, `CurriculumRequisite_min_score_prerequisite` (chỉ `PREREQUISITE` có ngưỡng). Dòng phải cùng phiên bản với nhóm của nó: service kiểm (`ITEM_NOT_IN_VERSION`), SQL không diễn đạt được. Xóa nhóm để dòng còn tự chọn, không nhóm.
+
+Seed (F-07): `seed-data/knowledge-blocks.ts` (danh sách rỗng) và, trong `seed-data/programs.ts`, sáu học phần mẫu `DEMO101..DEMO302`, một quan hệ tiên quyết, nhóm `TC1` và sáu dòng khung cho bản Nháp 1024034 (≤ 10 học kỳ, 140 + 10 tín chỉ); chỉ ghi khi bản Nháp chưa có dòng nào. Là dữ liệu giữ chỗ như phần còn lại của 1024034.
 
 ### `ProgramDirectorAssignment` — table `ProgramDirectorAssignment` (F-06)
 | Column | Type | Notes |
