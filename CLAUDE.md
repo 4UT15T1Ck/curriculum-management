@@ -1,4 +1,4 @@
-# PBL6 — Hệ thống Quản lý Chương trình đào tạo
+﻿# PBL6 — Hệ thống Quản lý Chương trình đào tạo
 
 Quản lý chương trình đào tạo, đề cương, PLO/CLO, đề xuất thay đổi qua ba cấp duyệt, phiên bản ban hành và xét tốt nghiệp cho Khoa CNTT, Trường Đại học Bách khoa – ĐH Đà Nẵng.
 
@@ -67,6 +67,12 @@ Answered in `docs/planning/feature-questions.md` §F-00; the code moves to this 
 | `docs/implementation/` | Building a planned feature — the plan names every file and how to verify it |
 | `docs/progress/todo.md` | Picking up new work |
 | `docs/troubleshooting/error_log.md` | Debugging — check whether the symptom was already diagnosed |
+
+## Design system
+
+Before building any UI screen, read source/frontend/src/shared/design-system/DESIGN_SYSTEM.md.
+The component anatomy, token system, and motion rules are defined there.
+Use components from src/shared/design-system/ before creating new ones.
 
 ## Before building a feature
 
