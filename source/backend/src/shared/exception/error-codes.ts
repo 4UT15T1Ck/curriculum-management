@@ -33,6 +33,11 @@ export const COMMON_ERRORS = {
     code: 'OUT_OF_SCOPE',
     message: 'Đối tượng này nằm ngoài phạm vi được phân công của bạn.',
   },
+  CHANGE_REQUEST_REQUIRED: {
+    status: HttpStatus.CONFLICT,
+    code: 'CHANGE_REQUEST_REQUIRED',
+    message: 'Dữ liệu này chỉ thay đổi được qua đề xuất thay đổi.',
+  },
   CSRF_HEADER_MISSING: {
     status: HttpStatus.FORBIDDEN,
     code: 'CSRF_HEADER_MISSING',
@@ -70,6 +75,11 @@ export const ERRORS_BY_STATUS: Partial<Record<HttpStatus, ErrorDefinition>> = {
     status: HttpStatus.CONFLICT,
     code: 'CONFLICT',
     message: 'Dữ liệu đã bị thay đổi, vui lòng tải lại.',
+  },
+  [HttpStatus.PAYLOAD_TOO_LARGE]: {
+    status: HttpStatus.PAYLOAD_TOO_LARGE,
+    code: 'PAYLOAD_TOO_LARGE',
+    message: 'Tệp hoặc nội dung gửi lên quá lớn.',
   },
 };
 

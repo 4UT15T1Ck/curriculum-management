@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { App } from 'antd';
+import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 import { SubjectGroupListPage } from './SubjectGroupListPage';
 
@@ -31,9 +32,15 @@ describe('SubjectGroupListPage', () => {
       ),
     );
     render(
-      <QueryClientProvider client={new QueryClient()}>
+      <QueryClientProvider
+        client={
+          new QueryClient({ defaultOptions: { queries: { retry: false } } })
+        }
+      >
         <App>
-          <SubjectGroupListPage />
+          <MemoryRouter>
+            <SubjectGroupListPage />
+          </MemoryRouter>
         </App>
       </QueryClientProvider>,
     );
@@ -68,16 +75,24 @@ describe('SubjectGroupListPage', () => {
       }),
     );
     render(
-      <QueryClientProvider client={new QueryClient()}>
+      <QueryClientProvider
+        client={
+          new QueryClient({ defaultOptions: { queries: { retry: false } } })
+        }
+      >
         <App>
-          <SubjectGroupListPage />
+          <MemoryRouter>
+            <SubjectGroupListPage />
+          </MemoryRouter>
         </App>
       </QueryClientProvider>,
     );
     expect(
       await screen.findByRole('button', { name: 'Thêm nhóm' }),
     ).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Ngừng sử dụng' }));
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Ngừng sử dụng' }),
+    );
     expect(
       await screen.findByText('2 thành viên đang hiệu lực'),
     ).toBeInTheDocument();

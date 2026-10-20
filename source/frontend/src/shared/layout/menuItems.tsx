@@ -2,11 +2,18 @@ import { Link } from 'react-router';
 import { ROUTES } from '../../routes';
 import { PERMISSIONS, type PermissionCode } from '../auth/permissions';
 
+// A leaf has a `path`; a group has `children` and no path of its own.
 export interface AppMenuItem {
-  path: string;
+  path?: string;
   label: string;
   permission?: PermissionCode;
+  // Hidden when every role the caller holds is listed (display only; the server refuses anyway).
+  hideForRoles?: readonly string[];
+  children?: readonly AppMenuItem[];
 }
+
+// R6: students see their program through the portal (F-20), not the school-wide list (US-018 AC3).
+export const STUDENT_ROLE_CODE = 'R6';
 
 export const APP_MENU: readonly AppMenuItem[] = [
   { path: ROUTES.home, label: 'Trang chính' },
@@ -26,15 +33,42 @@ export const APP_MENU: readonly AppMenuItem[] = [
     permission: PERMISSIONS.subjectGroupView,
   },
   {
-    path: ROUTES.orgUnits,
-    label: 'Đơn vị',
-    permission: PERMISSIONS.orgUnitManage,
+    label: 'Học phần',
+    children: [
+      {
+        path: ROUTES.courses,
+        label: 'Danh mục học phần',
+        permission: PERMISSIONS.courseView,
+      },
+      {
+        path: ROUTES.equivalenceGroups,
+        label: 'Nhóm tương đương',
+        permission: PERMISSIONS.courseView,
+      },
+    ],
   },
   {
-    path: ROUTES.subjectGroups,
-    label: 'Nhóm chuyên môn',
-    permission: PERMISSIONS.subjectGroupView,
+    path: ROUTES.programs,
+    label: 'Chương trình đào tạo',
+    permission: PERMISSIONS.programView,
+    hideForRoles: [STUDENT_ROLE_CODE],
   },
+  {
+    path: ROUTES.semesters,
+    label: 'Học kỳ và khóa tuyển sinh',
+    permission: PERMISSIONS.semesterManage,
+  },
+  {
+    path: ROUTES.changeRequests,
+    label: 'Đề xuất thay đổi',
+    permission: PERMISSIONS.changeRequestView,
+  },
+  {
+    path: ROUTES.approvalQueue,
+    label: 'Chờ tôi duyệt',
+    permission: PERMISSIONS.changeRequestView,
+  },
+  { path: ROUTES.notifications, label: 'Thông báo' },
   {
     path: ROUTES.permissionMatrix,
     label: 'Ma trận quyền',
@@ -43,14 +77,86 @@ export const APP_MENU: readonly AppMenuItem[] = [
   { path: ROUTES.health, label: 'Trạng thái hệ thống' },
 ];
 
+type MenuEntry =
+  | { key: string; label: React.ReactNode }
+  | { key: string; label: string; children: MenuEntry[] };
+
+const groupKey = (item: AppMenuItem) => `group:${item.label}`;
+
+function isHiddenForRoles(
+  item: AppMenuItem,
+  roleCodes: readonly string[],
+): boolean {
+  return (
+    item.hideForRoles !== undefined &&
+    roleCodes.length > 0 &&
+    roleCodes.every((roleCode) => item.hideForRoles?.includes(roleCode))
+  );
+}
+
+function isVisible(
+  item: AppMenuItem,
+  permissions: readonly PermissionCode[],
+  roleCodes: readonly string[],
+): boolean {
+  if (isHiddenForRoles(item, roleCodes)) return false;
+  return item.children
+    ? item.children.some((child) => isVisible(child, permissions, roleCodes))
+    : !item.permission || permissions.includes(item.permission);
+}
+
 export function toMenuItems(
   items: readonly AppMenuItem[],
   permissions: readonly PermissionCode[],
-) {
+  roleCodes: readonly string[] = [],
+): MenuEntry[] {
   return items
-    .filter((item) => !item.permission || permissions.includes(item.permission))
-    .map((item) => ({
-      key: item.path,
-      label: <Link to={item.path}>{item.label}</Link>,
-    }));
+    .filter((item) => isVisible(item, permissions, roleCodes))
+    .map((item) =>
+      item.children
+        ? {
+            key: groupKey(item),
+            label: item.label,
+            children: toMenuItems(item.children, permissions, roleCodes),
+          }
+        : {
+            key: item.path ?? item.label,
+            label: <Link to={item.path ?? ROUTES.home}>{item.label}</Link>,
+          },
+    );
+}
+
+function leaves(items: readonly AppMenuItem[]): AppMenuItem[] {
+  return items.flatMap((item) =>
+    item.children ? leaves(item.children) : item,
+  );
+}
+
+// The leaf whose path is the current page or the page's parent (`/courses/c1` selects `/courses`).
+export function selectedMenuPath(
+  items: readonly AppMenuItem[],
+  pathname: string,
+): string {
+  return (
+    leaves(items).find(
+      (item) =>
+        item.path !== undefined &&
+        (pathname === item.path ||
+          (item.path !== ROUTES.home && pathname.startsWith(`${item.path}/`))),
+    )?.path ?? pathname
+  );
+}
+
+// Groups that contain the selected leaf, so the submenu is open on arrival.
+export function openMenuGroups(
+  items: readonly AppMenuItem[],
+  selectedPath: string,
+): string[] {
+  return items
+    .filter((item) =>
+      item.children
+        ? leaves(item.children).some((leaf) => leaf.path === selectedPath)
+        : false,
+    )
+    .map(groupKey);
 }

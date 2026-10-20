@@ -12,7 +12,7 @@ It deliberately excludes MH-48 comparison and MH-50 reassignment (F-16), backup/
 > - Builds on: F-02 permissions; F-04/05 course writers; F-06/07 version copier and curriculum; F-08 checker; F-10/11 syllabi and outcomes; F-13 copies and stale check; F-14 recorder and notifier.
 > - Tests: `docs/planning/test-plan.md` KB-037..039, KB-045, KB-055..058, NT-B4-01/05/06/10/12 (`:325-336`).
 
-**Status**: Not started
+**Status**: Code complete 2026-10-19 (browser walkthrough owed) — see `docs/implement-report/f-15-release-version-snapshots-implement-report.md`
 
 ---
 

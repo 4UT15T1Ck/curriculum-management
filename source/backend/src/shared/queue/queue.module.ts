@@ -12,6 +12,7 @@ import type { Env } from '../config/env.validation.js';
           host: config.get('REDIS_HOST', { infer: true }),
           port: config.get('REDIS_PORT', { infer: true }),
         },
+        prefix: config.get('BULLMQ_PREFIX', { infer: true }),
       }),
     }),
   ],

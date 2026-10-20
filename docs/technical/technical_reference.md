@@ -53,7 +53,10 @@ Lý do chọn và bảng phiên bản: `docs/design/tech-stack.md` §2 và §6. 
 | `DATABASE_URL` | — | bắt buộc |
 | `REDIS_HOST`, `REDIS_PORT` | `localhost`, 6379 | |
 | `SESSION_SECRET` | — | bắt buộc, ≥ 32 ký tự (F-01) |
-| `SESSION_IDLE_MINUTES` | 60 | số nguyên ≥ 1 (F-01, NFR-08) |
+| `SESSION_IDLE_MINUTES` | 60 | số nguyên ≥ 1 (F-01, NFR-08); `AuthenticatedGuard` cũng đo `lastActivityAt` trên phiên, tuyến `@PassiveRequest()` (đếm thông báo chưa đọc) không làm mới (F-14) |
+| `FILES_ROOT` | `files` | thư mục tệp đính kèm đề cương và văn bản đề xuất (F-10, F-13); đặt vào ổ bền, sao lưu cùng cơ sở dữ liệu; `/files/` nằm trong `.gitignore` |
+| `ATTACHMENT_MAX_MB` | 20 | giới hạn một tệp đính kèm (F-10) |
+| `BULLMQ_PREFIX` | không đặt (BullMQ dùng `bull`) | tiền tố khóa Redis của hàng đợi; chỉ đặt khi dùng chung Redis (F-15) |
 
 `SEED_ADMIN_USERNAME`, `SEED_ADMIN_PASSWORD` chỉ dành cho `prisma/seed.ts`, đọc trực tiếp từ `process.env`, không có trong `Env`.
 
@@ -116,17 +119,30 @@ Lý do chọn và bảng phiên bản: `docs/design/tech-stack.md` §2 và §6. 
 ### Usage Pattern
 - Redis chỉ chứa hàng đợi; mọi job phải chạy lại được mà không sinh kết quả kép.
 - Tên hàng đợi là hằng số; một processor cho một hàng đợi.
+- `release-activation` (F-15, `src/features/releases/`): `ReleaseActivationScheduler` đăng ký lịch lặp cron `RELEASE_ACTIVATION_CRON` (00:05) theo `APP_TIME_ZONE` (`Asia/Ho_Chi_Minh`) và một tác vụ lúc khởi động; `ReleaseActivationProcessor` gọi `VersionActivator` chuyển phiên bản `PENDING` đến học kỳ hiệu lực thành `ACTIVE` — idempotent, chạy lại không đổi gì. Khi tắt, worker chờ tác vụ đang chạy tối đa 10 giây rồi `close(true)` (đóng nhẹ treo vô hạn khi Redis chết).
 
 ---
 
 ## 7. Giao diện
 
-**Library**: React 19.3, Vite 8.3, `antd` 6.6, `@tanstack/react-query` 5, `react-router` 8.4, `openapi-typescript` 7.13
+**Library**: React 19.3, Vite 8.3, `antd` 6.6, `@tanstack/react-query` 5, `react-router` 8.4, `openapi-typescript` 7.13; `@dnd-kit/core` 6.3.1, `@dnd-kit/sortable` 10.0.0, `@dnd-kit/utilities` 3.2.2 (cố định phiên bản; kéo thả dòng khung bằng chuột và bàn phím, AntD 6 `Table` không có sẵn — D15 của F-07)
 
 ### Usage Pattern
 - `getJson<T>(path, acceptedStatuses)` và `sendJson<T>` trong `src/shared/api/client.ts`; mã lỗi khác ném `ApiError` mang `ErrorResponseDto`. 401 `SESSION_REQUIRED` được `queryClient.ts` bắt chung và đặt `me` về `null`.
 - Sau khi máy chủ đổi DTO: chạy máy chủ, `pnpm api:types` (đọc `http://localhost:3000/api/docs-json`), đưa `src/shared/api/schema.d.ts` vào git.
 - Thông báo, hộp xác nhận: dùng `App.useApp()` của Ant Design (đã bọc `AntApp` ở `main.tsx`).
+- Tệp: `sendForm` (multipart), `downloadFile`, `fileNameFromHeader` trong `client.ts` (F-10; F-09 dùng lại).
+
+---
+
+## 7a. Văn bản định dạng, tệp tải lên (F-10)
+
+**Library**: frontend `@tiptap/react`, `@tiptap/starter-kit`, `@tiptap/extension-table`, `@tiptap/pm` 3.31.4 (cố định); backend `sanitize-html` 2.18.0 (+ `@types/sanitize-html`), `@types/multer` 2.3.0 (khai trong `types` của `tsconfig.json`)
+
+### Usage Pattern
+- Trình soạn thảo dùng chung ở `src/shared/components/rich-text/` (`RichTextEditor`, `RichTextToolbar`, `richTextExtensions`): đậm, nghiêng, danh sách, bảng, liên kết.
+- Máy chủ lọc **mọi** văn bản định dạng bằng `sanitizeRichText` (`src/shared/rich-text/`, chính sách `RICH_TEXT_POLICY`, cho phép `rel`, `target` trên `a`) trước khi ghi; `richTextToPlain` khi cần chữ thuần (so sánh, thông báo). Không ghi HTML chưa lọc.
+- Tải lên: `FileInterceptor` của Multer giữ tệp trong bộ nhớ (không truyền `storage`, vì pnpm không cho import `multer` trực tiếp); `FileStorageService` (`src/shared/files/`) ghi dưới `FILES_ROOT` với đường dẫn tương đối dùng `/`; `uploadedFileName` sửa tên tệp UTF-8; `sendFile` trả tệp kèm `Content-Disposition`. Quá `ATTACHMENT_MAX_MB` → 413 `PAYLOAD_TOO_LARGE`.
 
 ---
 
@@ -140,6 +156,7 @@ Lý do chọn và bảng phiên bản: `docs/design/tech-stack.md` §2 và §6. 
 
 ### Usage Pattern
 - Kiểm thử đầu-cuối tạo cơ sở dữ liệu ICU `vi-VN` qua `test/containers.ts`; kiểm thử mới dùng lại hàm ở đó.
+- Một PostgreSQL và một Redis cho cả lượt chạy (`test/global-setup.ts`, `globalSetup` của Vitest): migrate một lần vào cơ sở dữ liệu mẫu, mỗi tệp spec nhận cơ sở dữ liệu riêng chép từ mẫu; `test/test-env.ts` đặt biến môi trường (kể cả `FILES_ROOT` tạm cho từng tệp). Fixture dùng chung ở `test/fixtures/`; bảng quyền theo tuyến ở `test/permission-table.ts` — thêm dòng cho mỗi tuyến mới.
 - Kiểm thử giao diện giả `fetch` bằng `vi.stubGlobal` và bọc `QueryClientProvider` với `retry: false` (mẫu: `HealthPage.test.tsx`).
 - `src/test/setup.ts` giả `ResizeObserver` (jsdom không có, AntD `Select` cần); kiểm thử mới dùng `Select` không phải tự giả.
 - AntD `Typography.Link` không có `href` thì không mang vai trò `link`; tìm bằng chữ hoặc `td a`, không `getByRole('link')`.

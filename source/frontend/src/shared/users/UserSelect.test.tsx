@@ -54,4 +54,46 @@ describe('UserSelect', () => {
     expect(onChange).toHaveBeenCalledWith('u1');
   });
 });
+
+describe('UserSelect with a search path', () => {
+  it('reads an array of options from the given path and sends only the term', async () => {
+    vi.useFakeTimers();
+    const fetchMock = vi.fn((..._args: [RequestInfo | URL, RequestInit?]) =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify([
+            { id: 'u2', userCode: 'GV02', fullName: 'Trần Bình' },
+          ]),
+        ),
+      ),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const onChange = vi.fn();
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <UserSelect
+          onChange={onChange}
+          searchPath="/change-requests/user-options"
+        />
+      </QueryClientProvider>,
+    );
+    fireEvent.mouseDown(screen.getByRole('combobox'));
+    fireEvent.change(screen.getByRole('combobox'), {
+      target: { value: 'Bình' },
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(USER_SEARCH_DEBOUNCE_MS);
+    });
+    expect(screen.getByText('GV02 — Trần Bình')).toBeInTheDocument();
+    const urls = fetchMock.mock.calls.map(([url]) => String(url));
+    expect(
+      urls.some((url) =>
+        url.startsWith('/api/change-requests/user-options?q='),
+      ),
+    ).toBe(true);
+    expect(urls.some((url) => url.includes('status='))).toBe(false);
+    fireEvent.click(screen.getByText('GV02 — Trần Bình'));
+    expect(onChange).toHaveBeenCalledWith('u2');
+  });
+});
 afterEach(() => vi.useRealTimers());

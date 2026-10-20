@@ -65,13 +65,17 @@ describe('SubjectGroupMembersService', () => {
       .mockImplementation(({ where, data }) =>
         Promise.resolve({ ...MEMBER, id: where.id, ...data }),
       );
-    transaction = vi.fn(async (queries: Promise<unknown>[]) =>
-      Promise.all(queries),
-    );
-    service = new SubjectGroupMembersService({
+    const client = {
       subjectGroup: { findUnique: group },
       user: { findUnique: user },
       subjectGroupMember: { findFirst, findMany, create, update },
+    };
+    // The interactive form: the callback gets the same mocked client as its transaction.
+    transaction = vi.fn(async (run: (tx: typeof client) => Promise<unknown>) =>
+      run(client),
+    );
+    service = new SubjectGroupMembersService({
+      ...client,
       $transaction: transaction,
     } as unknown as PrismaService);
   });

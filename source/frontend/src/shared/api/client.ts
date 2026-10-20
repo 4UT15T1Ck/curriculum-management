@@ -2,7 +2,9 @@ import type { components } from './schema';
 
 export const API_BASE_URL = '/api';
 
-type QueryValue = string | number | boolean | null | undefined;
+type QueryScalar = string | number | boolean | null | undefined;
+// An array becomes a repeated key (`status=A&status=B`), the form the server's list filters read.
+type QueryValue = QueryScalar | readonly QueryScalar[];
 
 export function withQuery(
   path: string,
@@ -10,8 +12,10 @@ export function withQuery(
 ): string {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined && value !== null && value !== '') {
-      search.set(key, String(value));
+    for (const entry of Array.isArray(value) ? value : [value]) {
+      if (entry !== undefined && entry !== null && entry !== '') {
+        search.append(key, String(entry));
+      }
     }
   }
   const query = search.toString();
@@ -84,4 +88,51 @@ export function sendJson<T>(
     },
     [],
   );
+}
+
+// Multipart upload: no Content-Type here, the browser adds it with the boundary.
+export function sendForm<T>(path: string, form: FormData): Promise<T> {
+  return request<T>(path, { method: 'POST', body: form }, []);
+}
+
+const UTF8_FILE_NAME = /filename\*=UTF-8''([^;]+)/i;
+
+// The name the server sent (RFC 5987, so Vietnamese survives), else the caller's fallback.
+export function fileNameFromHeader(
+  header: string | null,
+  fallbackName: string,
+): string {
+  const encoded = header ? UTF8_FILE_NAME.exec(header)?.[1] : undefined;
+  if (!encoded) return fallbackName;
+  try {
+    return decodeURIComponent(encoded);
+  } catch {
+    return fallbackName;
+  }
+}
+
+// Fetches a file with the session cookie and hands it to the browser as a download.
+export async function downloadFile(
+  path: string,
+  fallbackName: string,
+): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: 'GET',
+    headers: CSRF_HEADER,
+  });
+  if (!response.ok) {
+    throw new ApiError(response.status, await readErrorBody(response));
+  }
+  const blob = await response.blob();
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.href = url;
+  link.download = fileNameFromHeader(
+    response.headers.get('Content-Disposition'),
+    fallbackName,
+  );
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }

@@ -13,7 +13,7 @@ It deliberately excludes the program-level credit totals and the full consistenc
 > - Builds on: F-02 (`AccessContext`, `PERMISSIONS.CURRICULUM_EDIT`, `PERMISSION_TABLE`), F-04 (`edit-path.ts`, `CourseUsageReader`, `courseTarget`, `decimal.ts`, `CourseQueryDto`, `ProgramsUsingList`), F-05 (`requisite-graph.ts`, `RelatedCourseDto`, `GRADE_POINT_PATTERN`, `CourseSelect`), F-06 (`ProgramVersion`, `programTarget`, `programEditState`, `VersionContentCopier`, `ProgramsService.update`, `ProgramSectionLinks`)
 > - Tests: `docs/planning/test-plan.md:167-171` (KB-013..KB-017), `:173-174` (KB-019, KB-020), `:180` (KB-026), `:297-300` (NT-B2-04, NT-B2-05, NT-B2-07)
 
-**Status**: Not started
+**Status**: Mã xong 2026-10-19 (BE-01..BE-06, FE-01..FE-06, DOC-01); còn nợ đi thử bằng trình duyệt (§7). Điểm lệch: `docs/implement-report/f-07-curriculum-elective-groups-implement-report.md`.
 
 ---
 

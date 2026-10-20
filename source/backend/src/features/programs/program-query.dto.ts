@@ -1,0 +1,26 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
+import { DegreeLevel, ProgramStatus } from '../../generated/prisma/client.js';
+import { trimString } from '../../shared/dtos/transforms.js';
+import { PageQueryDto } from '../../shared/pagination/page-query.dto.js';
+import { PROGRAM_LIMITS } from './create-program.dto.js';
+
+export class ProgramQueryDto extends PageQueryDto {
+  @ApiPropertyOptional({ maxLength: PROGRAM_LIMITS.QUERY_MAX })
+  @Transform(trimString)
+  @IsOptional()
+  @IsString()
+  @MaxLength(PROGRAM_LIMITS.QUERY_MAX)
+  q?: string;
+
+  @ApiPropertyOptional({ enum: DegreeLevel, enumName: 'DegreeLevel' })
+  @IsOptional()
+  @IsEnum(DegreeLevel)
+  degreeLevel?: DegreeLevel;
+
+  @ApiPropertyOptional({ enum: ProgramStatus, enumName: 'ProgramStatus' })
+  @IsOptional()
+  @IsEnum(ProgramStatus)
+  status?: ProgramStatus;
+}

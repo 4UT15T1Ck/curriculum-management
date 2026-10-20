@@ -3,6 +3,7 @@ import {
   IsIn,
   IsInt,
   IsNotEmpty,
+  IsOptional,
   MinLength,
   IsString,
   Max,
@@ -14,6 +15,8 @@ const NODE_ENVS = ['development', 'test', 'production'] as const;
 const MAX_PORT = 65535;
 const SESSION_SECRET_MIN_LENGTH = 32;
 const DEFAULT_SESSION_IDLE_MINUTES = 60;
+const DEFAULT_FILES_ROOT = 'files';
+const DEFAULT_ATTACHMENT_MAX_MB = 20;
 
 // Keep the explicit types: implicit conversion reads design:type, which is Object for an unannotated property,
 // so a numeric variable would stay a string and fail @IsInt.
@@ -46,6 +49,21 @@ export class Env {
   @IsInt()
   @Min(1)
   SESSION_IDLE_MINUTES: number = DEFAULT_SESSION_IDLE_MINUTES;
+
+  // Attachment folder: relative to the working directory or absolute; back it up with the database.
+  @IsString()
+  @IsNotEmpty()
+  FILES_ROOT: string = DEFAULT_FILES_ROOT;
+
+  @IsInt()
+  @Min(1)
+  ATTACHMENT_MAX_MB: number = DEFAULT_ATTACHMENT_MAX_MB;
+
+  // Redis key prefix of every queue. Unset means BullMQ's own default ("bull"); the e2e specs share one Redis and set a unique one each.
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  BULLMQ_PREFIX?: string;
 }
 
 export function validateEnv(raw: Record<string, unknown>): Env {

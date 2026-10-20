@@ -1,0 +1,56 @@
+.richText table {
+  border-collapse: collapse;
+  margin-block: 8px;
+}
+
+.richText th,
+.richText td {
+  border: 1px solid var(--ant-color-border);
+  padding: 4px 8px;
+  vertical-align: top;
+  min-width: 48px;
+}
+
+.richText th {
+  background: var(--ant-color-fill-tertiary);
+}
+
+.richText blockquote {
+  border-inline-start: 3px solid var(--ant-color-border);
+  margin-inline: 0;
+  padding-inline-start: 12px;
+}
+
+.richText p {
+  margin-block: 0 8px;
+}
+
+.richText ul,
+.richText ol {
+  padding-inline-start: 24px;
+}
+
+.editor {
+  border: 1px solid var(--ant-color-border);
+  border-radius: var(--ant-border-radius);
+  background: var(--ant-color-bg-container);
+}
+
+.editor:focus-within {
+  border-color: var(--ant-color-primary);
+}
+
+.editorBody {
+  padding: 8px 12px;
+  min-height: 160px;
+}
+
+.editorBody :global(.ProseMirror) {
+  outline: none;
+  min-height: 140px;
+}
+
+.toolbar {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--ant-color-border);
+}

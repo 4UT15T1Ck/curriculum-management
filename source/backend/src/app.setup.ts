@@ -11,6 +11,9 @@ import {
   TRUSTED_PROXY_HOPS,
 } from './shared/session/session.constants.js';
 
+// A syllabus section with a table can exceed Express's 100 KB JSON default.
+const JSON_BODY_LIMIT = '1mb';
+
 export const API_PREFIX = 'api';
 // The frontend generates its types from `${API_DOCS_PATH}-json`.
 export const API_DOCS_PATH = `${API_PREFIX}/docs`;
@@ -21,6 +24,7 @@ export function configureApp(app: NestExpressApplication): void {
   if (config.get('NODE_ENV', { infer: true }) === 'production')
     app.set('trust proxy', TRUSTED_PROXY_HOPS);
   app.use(app.get(SessionStoreService).handler);
+  app.useBodyParser('json', { limit: JSON_BODY_LIMIT });
   app.setGlobalPrefix(API_PREFIX);
   app.useGlobalPipes(
     new ValidationPipe({

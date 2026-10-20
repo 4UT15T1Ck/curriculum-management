@@ -8,12 +8,14 @@ import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router/dom';
 import { router } from './router';
 import { queryClient } from './shared/api/queryClient';
+import { appTheme } from './shared/design-system/theme.js';
+import './shared/design-system/motion.css';
 
 dayjs.locale('vi');
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ConfigProvider locale={viVN}>
+    <ConfigProvider locale={viVN} theme={appTheme}>
       <AntApp>
         <QueryClientProvider client={queryClient}>
           <RouterProvider router={router} />

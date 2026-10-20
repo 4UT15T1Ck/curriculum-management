@@ -1,6 +1,5 @@
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import type { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
-import type { StartedRedisContainer } from '@testcontainers/redis';
+import type { TestPostgres, TestRedis } from './containers.js';
 import request from 'supertest';
 import { PrismaService } from '../src/shared/prisma/prisma.service.js';
 import { seedAccessControl } from '../prisma/seed-data/seed-access-control.js';
@@ -10,7 +9,6 @@ import {
   type TestAccount,
 } from './fixtures/accounts.js';
 import { startPostgres, startRedis } from './containers.js';
-import { applyMigrations } from './migrations.js';
 import { setAppEnv } from './test-env.js';
 import { createTestApp } from './test-app.js';
 import { NO_ROLE, PERMISSION_TABLE } from './permission-table.js';
@@ -18,8 +16,8 @@ import { NO_ROLE, PERMISSION_TABLE } from './permission-table.js';
 const CSRF = { 'X-Requested-With': 'XMLHttpRequest' };
 
 describe('permission table', () => {
-  let postgres: StartedPostgreSqlContainer;
-  let redis: StartedRedisContainer;
+  let postgres: TestPostgres;
+  let redis: TestRedis;
   let app: NestExpressApplication;
   let prisma: PrismaService;
   const agents = new Map<string, ReturnType<typeof request.agent>>();
@@ -30,7 +28,6 @@ describe('permission table', () => {
       startRedis(),
     ]);
     setAppEnv(postgres, redis);
-    applyMigrations(postgres.getConnectionUri());
     app = await createTestApp();
     prisma = app.get(PrismaService);
     await seedAccessControl(prisma);
@@ -94,6 +91,52 @@ describe('permission table', () => {
 
   async function countWrites(path: string): Promise<number> {
     if (path.startsWith('/api/org-units')) return prisma.orgUnit.count();
+    if (path.startsWith('/api/semesters')) return prisma.semester.count();
+    if (path.startsWith('/api/cohorts')) return prisma.cohort.count();
+    if (path.includes('/versions')) return prisma.programVersion.count();
+    if (path.endsWith('/comments')) return prisma.comment.count();
+    if (path.startsWith('/api/change-requests')) {
+      return prisma.changeRequest.count();
+    }
+    if (path.startsWith('/api/clos') || path.includes('/clos')) {
+      return prisma.cLO.count();
+    }
+    if (path.startsWith('/api/plos') || path.endsWith('/plos')) {
+      return prisma.pLO.count();
+    }
+    if (path.includes('/plo-weights')) return prisma.coursePLOMapping.count();
+    if (path.endsWith('/clo-plo-links')) return prisma.cLOPLOMapping.count();
+    if (path.includes('/syllabus') || path.startsWith('/api/syllabi')) {
+      return prisma.syllabus.count();
+    }
+    if (path.startsWith('/api/weekly-contents')) {
+      return prisma.weeklyContent.count();
+    }
+    if (path.startsWith('/api/courses')) return prisma.course.count();
+    if (path.startsWith('/api/course-relations')) {
+      return prisma.courseRelation.count();
+    }
+    if (path.startsWith('/api/equivalence-groups')) {
+      return prisma.equivalentCourseGroup.count();
+    }
+    if (path.startsWith('/api/programs')) {
+      return path.includes('/directors')
+        ? prisma.programDirectorAssignment.count()
+        : prisma.program.count();
+    }
+    if (path.startsWith('/api/curriculum-items')) {
+      return path.endsWith('/requisites')
+        ? prisma.curriculumRequisite.count()
+        : prisma.curriculumItem.count();
+    }
+    if (path.startsWith('/api/elective-groups')) {
+      return prisma.electiveGroup.count();
+    }
+    if (path.startsWith('/api/program-versions')) {
+      return path.includes('/elective-groups')
+        ? prisma.electiveGroup.count()
+        : prisma.curriculumItem.count();
+    }
     if (path.startsWith('/api/subject-groups')) {
       return path.includes('/members')
         ? prisma.subjectGroupMember.count()

@@ -1,12 +1,10 @@
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import type { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
-import type { StartedRedisContainer } from '@testcontainers/redis';
+import type { TestPostgres, TestRedis } from './containers.js';
 import request from 'supertest';
 import { UserStatus } from '../src/generated/prisma/client.js';
 import { PrismaService } from '../src/shared/prisma/prisma.service.js';
 import { PasswordService } from '../src/shared/password/password.service.js';
 import { startPostgres, startRedis } from './containers.js';
-import { applyMigrations } from './migrations.js';
 import { setAppEnv } from './test-env.js';
 import { createTestApp } from './test-app.js';
 
@@ -18,8 +16,8 @@ const ACTIVE_IDENTITY = { userCode: 'GV01', fullName: 'Nguyễn Văn A' };
 const DISABLED_IDENTITY = { userCode: 'GV02', fullName: 'Trần Thị B' };
 
 describe('auth endpoints', () => {
-  let postgres: StartedPostgreSqlContainer;
-  let redis: StartedRedisContainer;
+  let postgres: TestPostgres;
+  let redis: TestRedis;
   let app: NestExpressApplication;
   let prisma: PrismaService;
   let agent: ReturnType<typeof request.agent>;
@@ -30,7 +28,6 @@ describe('auth endpoints', () => {
       startRedis(),
     ]);
     setAppEnv(postgres, redis);
-    applyMigrations(postgres.getConnectionUri());
     app = await createTestApp();
     prisma = app.get(PrismaService);
     const passwords = app.get(PasswordService);

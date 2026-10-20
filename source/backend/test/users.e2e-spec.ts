@@ -1,6 +1,5 @@
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import type { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
-import type { StartedRedisContainer } from '@testcontainers/redis';
+import type { TestPostgres, TestRedis } from './containers.js';
 import request from 'supertest';
 import { ScopeType } from '../src/generated/prisma/client.js';
 import { PrismaService } from '../src/shared/prisma/prisma.service.js';
@@ -11,7 +10,6 @@ import {
   type TestAccount,
 } from './fixtures/accounts.js';
 import { startPostgres, startRedis } from './containers.js';
-import { applyMigrations } from './migrations.js';
 import { setAppEnv } from './test-env.js';
 import { createTestApp } from './test-app.js';
 import { PERMISSION_TABLE } from './permission-table.js';
@@ -25,8 +23,8 @@ function isoDayOffset(dayOffset: number): string {
 }
 
 describe('user account management', () => {
-  let postgres: StartedPostgreSqlContainer;
-  let redis: StartedRedisContainer;
+  let postgres: TestPostgres;
+  let redis: TestRedis;
   let app: NestExpressApplication;
   let prisma: PrismaService;
   let admin: TestAccount;
@@ -38,7 +36,6 @@ describe('user account management', () => {
       startRedis(),
     ]);
     setAppEnv(postgres, redis);
-    applyMigrations(postgres.getConnectionUri());
     app = await createTestApp();
     prisma = app.get(PrismaService);
     await seedAccessControl(prisma);
@@ -132,6 +129,13 @@ describe('user account management', () => {
       '/api/auth/me',
       '/api/auth/change-password',
       '/api/org-units',
+      '/api/notifications',
+      '/api/notifications/unread-count',
+      '/api/notifications/read-all',
+      '/api/notifications/:id/read',
+      // Selectors of the release forms: names and dates, no personal data (F-15).
+      '/api/semesters',
+      '/api/cohorts',
     ]);
     for (const [path, operations] of Object.entries(paths)) {
       const normalizedPath = path.replace(

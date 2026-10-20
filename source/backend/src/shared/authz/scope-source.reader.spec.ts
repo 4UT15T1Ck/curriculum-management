@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  ProgramStatus,
   ScopeSource,
   SubjectGroupMemberRole,
   SubjectGroupStatus,
@@ -64,11 +65,38 @@ describe('ScopeSourceReader', () => {
     });
   });
 
-  it.each([ScopeSource.PROGRAM_DIRECTOR, ScopeSource.OWN_ENROLLMENT])(
-    'leaves %s empty',
-    async (source) => {
-      expect(await reader.activeTargets(source, 'lecturer', TODAY)).toEqual({});
-      expect(findMany).not.toHaveBeenCalled();
-    },
-  );
+  it('limits director scope to active, unrevoked rows in active programs', async () => {
+    const directorFindMany = vi
+      .fn()
+      .mockResolvedValue([{ programId: 'p1' }, { programId: 'p2' }]);
+    const directorReader = new ScopeSourceReader({
+      programDirectorAssignment: { findMany: directorFindMany },
+    } as unknown as PrismaService);
+    expect(
+      await directorReader.activeTargets(
+        ScopeSource.PROGRAM_DIRECTOR,
+        'director',
+        TODAY,
+      ),
+    ).toEqual({ programIds: ['p1', 'p2'] });
+    expect(directorFindMany).toHaveBeenCalledWith({
+      where: {
+        directorId: 'director',
+        revokedAt: null,
+        validFrom: { lte: TODAY },
+        OR: [{ validTo: null }, { validTo: { gte: TODAY } }],
+        program: { status: ProgramStatus.ACTIVE },
+      },
+      select: { programId: true },
+      distinct: ['programId'],
+    });
+    expect(findMany).not.toHaveBeenCalled();
+  });
+
+  it('leaves OWN_ENROLLMENT empty', async () => {
+    expect(
+      await reader.activeTargets(ScopeSource.OWN_ENROLLMENT, 'student', TODAY),
+    ).toEqual({});
+    expect(findMany).not.toHaveBeenCalled();
+  });
 });

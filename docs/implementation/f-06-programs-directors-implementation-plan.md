@@ -13,7 +13,7 @@ It deliberately excludes the curriculum itself (F-07), program objectives (F06-0
 > - Builds on: F-02 (`AccessContext`, `ScopeSourceReader`, `PERMISSIONS`, `UserRefDto`, pagination, `PERMISSION_TABLE`), F-03 (`src/shared/time/validity.ts`, `today.ts`, `OrgUnit`, `UserSelect`, member end/revoke pattern), F-04 (`edit-path.ts`, `decimal.ts`, `HOME_FACULTY_CODE`), F-05 (`assertSchoolWideDirect`)
 > - Tests: `docs/planning/test-plan.md:165` (KB-011), `:253` (KB-084, program half), `:301` (NT-B2-08)
 
-**Status**: Not started
+**Status**: Mã xong 2026-10-19 (BE-01..BE-06, FE-01..FE-06, DOC-01); còn nợ đi thử bằng trình duyệt (§7) và áp migration `20261019082727_programs` lên cơ sở dữ liệu phát triển — báo cáo dựng: `docs/implement-report/f-06-programs-directors-implement-report.md`
 
 ---
 

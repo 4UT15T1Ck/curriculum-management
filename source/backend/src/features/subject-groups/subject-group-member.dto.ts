@@ -2,16 +2,18 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   SubjectGroupMemberRole,
   UserStatus,
-  type Prisma,
 } from '../../generated/prisma/client.js';
-import { UserRefDto } from '../../shared/dtos/ref.dto.js';
+import { SubjectGroupRefDto, UserRefDto } from '../../shared/dtos/ref.dto.js';
+import {
+  MEMBER_SELECT,
+  type MemberRow,
+} from '../../shared/subject-groups/membership.writer.js';
 import { toIsoDay } from '../../shared/time/today.js';
 import {
   VALIDITY_STATES,
   validityState,
   type ValidityState,
 } from '../../shared/time/validity.js';
-import { SubjectGroupRefDto } from './subject-group.dto.js';
 
 export class MemberUserDto {
   @ApiProperty() id!: string;
@@ -49,24 +51,6 @@ export class UserSubjectGroupMembershipDto extends SubjectGroupMemberDto {
   subjectGroup!: SubjectGroupReference;
 }
 
-export const MEMBER_SELECT = {
-  id: true,
-  memberRole: true,
-  validFrom: true,
-  validTo: true,
-  createdAt: true,
-  revokedAt: true,
-  lecturer: {
-    select: { id: true, userCode: true, fullName: true, status: true },
-  },
-  assignedBy: { select: { id: true, fullName: true } },
-  revokedBy: { select: { id: true, fullName: true } },
-} as const satisfies Prisma.SubjectGroupMemberSelect;
-
-export type MemberRow = Prisma.SubjectGroupMemberGetPayload<{
-  select: typeof MEMBER_SELECT;
-}>;
-
 export function toSubjectGroupMemberDto(
   row: MemberRow,
   today: Date,
@@ -84,3 +68,5 @@ export function toSubjectGroupMemberDto(
     revokedAt: row.revokedAt?.toISOString() ?? null,
   };
 }
+
+export { MEMBER_SELECT };

@@ -1,17 +1,24 @@
 import { Suspense } from 'react';
 import { UserOutlined } from '@ant-design/icons';
-import { Button, Dropdown, Layout, Menu, Spin, Typography } from 'antd';
+import { Button, Dropdown, Layout, Menu, Space, Spin, Typography } from 'antd';
 import type { MenuProps } from 'antd';
 import { Link, Outlet, useLocation } from 'react-router';
 import { useMe } from '../auth/useMe';
 import { useLogout } from '../auth/useLogout';
+import { NotificationBell } from '../notifications/NotificationBell';
 import { ROUTES } from '../../routes';
-import { APP_MENU, toMenuItems } from './menuItems';
+import {
+  APP_MENU,
+  openMenuGroups,
+  selectedMenuPath,
+  toMenuItems,
+} from './menuItems';
 
 export function AppLayout() {
   const { pathname } = useLocation();
   const { data: me } = useMe();
   const logoutMutation = useLogout();
+  const selectedPath = selectedMenuPath(APP_MENU, pathname);
   const userMenu: MenuProps['items'] = [
     {
       key: ROUTES.account,
@@ -36,25 +43,30 @@ export function AppLayout() {
         <Typography.Title level={4} style={{ color: '#fff', margin: 0 }}>
           Quản lý Chương trình đào tạo
         </Typography.Title>
-        <Dropdown menu={{ items: userMenu }} trigger={['click']}>
-          <Button type="text" icon={<UserOutlined />} style={{ color: '#fff' }}>
-            {me?.fullName}
-          </Button>
-        </Dropdown>
+        <Space>
+          <NotificationBell />
+          <Dropdown menu={{ items: userMenu }} trigger={['click']}>
+            <Button
+              type="text"
+              icon={<UserOutlined />}
+              style={{ color: '#fff' }}
+            >
+              {me?.fullName}
+            </Button>
+          </Dropdown>
+        </Space>
       </Layout.Header>
       <Layout>
         <Layout.Sider breakpoint="lg" collapsedWidth={0} theme="light">
           <Menu
             mode="inline"
-            selectedKeys={[
-              APP_MENU.find(
-                (item) =>
-                  pathname === item.path ||
-                  (item.path !== ROUTES.home &&
-                    pathname.startsWith(`${item.path}/`)),
-              )?.path ?? pathname,
-            ]}
-            items={toMenuItems(APP_MENU, me?.permissions ?? [])}
+            selectedKeys={[selectedPath]}
+            defaultOpenKeys={openMenuGroups(APP_MENU, selectedPath)}
+            items={toMenuItems(
+              APP_MENU,
+              me?.permissions ?? [],
+              me?.roles.map((role) => role.roleCode) ?? [],
+            )}
           />
         </Layout.Sider>
         <Layout.Content style={{ padding: 24 }}>

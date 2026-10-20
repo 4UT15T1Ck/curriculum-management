@@ -21,6 +21,9 @@ Cần Node.js 22 (≥ 22.22), pnpm 10, Docker.
 | `REDIS_PORT`           | `6379`                                       | Không, mặc định `6379`              |
 | `SESSION_SECRET`       | chuỗi ngẫu nhiên ≥ 32 ký tự                  | Có                                  |
 | `SESSION_IDLE_MINUTES` | `60`                                         | Không, mặc định `60`                |
+| `FILES_ROOT`           | `files` (thư mục tệp đính kèm; cần sao lưu)  | Không, mặc định `files`             |
+| `ATTACHMENT_MAX_MB`    | `20`                                         | Không, mặc định `20`                |
+| `BULLMQ_PREFIX`        | `ctdt` (tiền tố khóa Redis của hàng đợi)     | Không, mặc định `bull` của BullMQ   |
 | `SEED_ADMIN_USERNAME`  | `admin`                                      | Chỉ khi chạy seed, mặc định `admin` |
 | `SEED_ADMIN_PASSWORD`  | mật khẩu tạm ≥ 8 ký tự, có chữ và số         | Chỉ khi chạy seed                   |
 
@@ -28,16 +31,19 @@ Biến sai kiểu hoặc thiếu giá trị bắt buộc thì ứng dụng dừn
 
 ## Lệnh
 
-| Lệnh                                      | Việc                                                                                                                |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `pnpm dev`                                | Chạy và tự nạp lại khi sửa mã                                                                                       |
-| `pnpm build` · `pnpm start`               | Biên dịch ra `dist/` · chạy bản đã biên dịch                                                                        |
-| `pnpm test`                               | Kiểm thử đơn vị (`src/**/*.spec.ts`), không cần Docker                                                              |
-| `pnpm test:e2e`                           | Kiểm thử đầu-cuối (`test/**/*.e2e-spec.ts`), tự dựng PostgreSQL và Redis bằng Testcontainers — cần Docker đang chạy |
-| `pnpm lint`                               | oxlint, có kiểm theo kiểu (lời hứa bị bỏ quên là lỗi)                                                               |
-| `pnpm format` · `pnpm format:check`       | Prettier                                                                                                            |
-| `pnpm prisma:migrate`                     | Tạo và áp migration từ `prisma/schema.prisma`                                                                       |
-| `pnpm services:up` · `pnpm services:down` | Bật · tắt PostgreSQL và Redis                                                                                       |
+| Lệnh                                      | Việc                                                                                                                                                                                                                                                                                |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm dev`                                | Chạy và tự nạp lại khi sửa mã. Biên dịch bằng SWC (dưới 1 giây), **không kiểm kiểu** — chạy `pnpm typecheck` hoặc xem lỗi trong trình soạn thảo                                                                                                                                     |
+| `pnpm typecheck`                          | Kiểm kiểu toàn bộ `src` bằng `tsc` (~15 s)                                                                                                                                                                                                                                          |
+| `pnpm dev:tsc`                            | Như `pnpm dev` nhưng biên dịch bằng `tsc` có kiểm kiểu (chậm, 20 s – vài phút)                                                                                                                                                                                                      |
+| `pnpm build` · `pnpm start`               | Biên dịch ra `dist/` · chạy bản đã biên dịch                                                                                                                                                                                                                                        |
+| `pnpm test`                               | Kiểm thử đơn vị (`src/**/*.spec.ts`), không cần Docker                                                                                                                                                                                                                              |
+| `pnpm test:e2e`                           | Kiểm thử đầu-cuối (`test/**/*.e2e-spec.ts`), tự dựng PostgreSQL và Redis bằng Testcontainers — cần Docker đang chạy. Một PostgreSQL + một Redis cho cả lượt chạy (`test/global-setup.ts`): migrate một lần vào cơ sở dữ liệu mẫu, mỗi tệp spec dùng cơ sở dữ liệu riêng chép từ mẫu |
+| `pnpm lint`                               | oxlint, có kiểm theo kiểu (lời hứa bị bỏ quên là lỗi)                                                                                                                                                                                                                               |
+| `pnpm format` · `pnpm format:check`       | Prettier                                                                                                                                                                                                                                                                            |
+| `pnpm prisma:migrate`                     | Tạo và áp migration từ `prisma/schema.prisma`                                                                                                                                                                                                                                       |
+| `pnpm prisma:seed`                        | Nạp tài khoản R1, đơn vị, vai trò, quyền, chương trình mẫu, học kỳ và khóa (chạy lại an toàn)                                                                                                                                                                                       |
+| `pnpm services:up` · `pnpm services:down` | Bật · tắt PostgreSQL và Redis                                                                                                                                                                                                                                                       |
 
 ## Cơ sở dữ liệu phải dùng quy tắc so sánh tiếng Việt
 

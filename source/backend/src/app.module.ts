@@ -16,6 +16,18 @@ import { UsersModule } from './features/users/users.module.js';
 import { PermissionsModule } from './features/permissions/permissions.module.js';
 import { OrgUnitsModule } from './features/org-units/org-units.module.js';
 import { SubjectGroupsModule } from './features/subject-groups/subject-groups.module.js';
+import { CoursesModule } from './features/courses/courses.module.js';
+import { CourseRelationsModule } from './features/course-relations/course-relations.module.js';
+import { EquivalenceGroupsModule } from './features/equivalence-groups/equivalence-groups.module.js';
+import { ProgramsModule } from './features/programs/programs.module.js';
+import { ConsistencyModule } from './features/consistency/consistency.module.js';
+import { CurriculumModule } from './features/curriculum/curriculum.module.js';
+import { OutcomesModule } from './features/outcomes/outcomes.module.js';
+import { SyllabiModule } from './features/syllabi/syllabi.module.js';
+import { ChangeRequestsModule } from './features/change-requests/change-requests.module.js';
+import { NotificationsModule } from './features/notifications/notifications.module.js';
+import { ReleasesModule } from './features/releases/releases.module.js';
+import { SemestersModule } from './features/semesters/semesters.module.js';
 
 @Module({
   imports: [
@@ -31,6 +43,18 @@ import { SubjectGroupsModule } from './features/subject-groups/subject-groups.mo
     PermissionsModule,
     OrgUnitsModule,
     SubjectGroupsModule,
+    CoursesModule,
+    CourseRelationsModule,
+    EquivalenceGroupsModule,
+    ProgramsModule,
+    CurriculumModule,
+    ConsistencyModule,
+    OutcomesModule,
+    SyllabiModule,
+    ChangeRequestsModule,
+    NotificationsModule,
+    SemestersModule,
+    ReleasesModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: CsrfGuard },

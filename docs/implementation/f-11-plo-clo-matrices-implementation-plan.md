@@ -12,7 +12,7 @@ It deliberately excludes performance indicators (PI, F11-06), measuring PLO atta
 > - Builds on: F-01 (`AppException`, `COMMON_ERRORS`, `createTestApp`, `client.ts`), F-02 (`AccessContext`, `PERMISSIONS.OUTCOME_VIEW`, `PLO_EDIT`, `CLO_EDIT`, `PERMISSION_TABLE`), F-04 (`edit-path.ts`, `decimal.ts`, `mapUniqueViolation`), F-06 (`ProgramVersion`, `programTarget`, `programEditState`, `VersionContentCopier`, `ProgramSectionLinks`, `CLONE_SCOPE_NOTE`), F-07 (`CurriculumItem`, `curriculum-access.ts` `itemTarget`, copier steps, `CurriculumSharedModule`), F-09 (item ids kept on import), F-10 (`Syllabus`, `WeeklyContent`, `syllabus-access.ts`, `SyllabiController`, `EDITOR_TABS`, `WeeklyContentTable`, `translated`)
 > - Tests: `docs/planning/test-plan.md:190-194` (KB-031..KB-035), `:312-314` (NT-B3-03..NT-B3-05)
 
-**Status**: Not started
+**Status**: Mã xong 2026-10-19 (BE-01..BE-08, FE-01..FE-07); còn nợ đi thử bằng trình duyệt và áp migration `20261019102707_outcomes` — xem `docs/implement-report/f-11-plo-clo-matrices-implement-report.md`
 
 ---
 

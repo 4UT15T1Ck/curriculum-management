@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
+  CourseStatus,
   OrgUnitStatus,
   OrgUnitType,
   SubjectGroupStatus,
@@ -118,10 +119,16 @@ export class SubjectGroupsService {
     groupId: string,
   ): Promise<SubjectGroupDeactivationImpactDto> {
     const summary = toSubjectGroupSummaryDto(await this.findOrThrow(groupId));
+    // Read through Prisma so this feature does not import the courses feature.
+    const courses = await this.prisma.course.findMany({
+      where: { ownerGroupId: groupId, status: { not: CourseStatus.CANCELLED } },
+      select: { id: true, courseCode: true, courseName: true },
+      orderBy: { courseCode: 'asc' },
+    });
     return {
       activeMemberCount: summary.activeMemberCount,
       activeCoordinators: summary.activeCoordinators,
-      courses: [],
+      courses,
     };
   }
 

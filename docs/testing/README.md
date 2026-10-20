@@ -1,5 +1,7 @@
 # Testing Docs
 
+> Bắt đầu ở [`setup-and-test-guide.md`](./setup-and-test-guide.md): cài đặt, kiểm thử tự động, thứ tự đi thử bằng trình duyệt cho bản MVP.
+
 Per-change test documentation. Each file here covers **one feature** or **one refactor**,
 opens by listing the **automated tests** that already cover it, and then tabulates the
 **manual** cases a human still has to walk — with the exact backend/service action needed to

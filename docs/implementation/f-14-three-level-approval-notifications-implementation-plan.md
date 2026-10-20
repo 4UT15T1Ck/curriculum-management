@@ -12,7 +12,7 @@ It deliberately excludes final approval of data requests — decision number, si
 > - Builds on: F-01 (`AuthenticatedGuard`, `session-lifecycle.ts`, `SessionData`, `SESSION_IDLE_MINUTES`, `AppLayout`), F-02 (`PERMISSIONS.CHANGE_REQUEST_OVERRIDE`, `CHANGE_REQUEST_COMMENT`, `AnyAuthenticated`, `AccessContext`, `ROLE_CODES`, `RoleAssignment`, `APP_MENU`), F-03 (`SubjectGroupMembersService`, `SUBJECT_GROUP_ERRORS`), F-06 (`ProgramDirectorsService`, `PROGRAM_ERRORS`), F-13 (`ApprovalStep`, `ChangeRequest`, `SubmissionService`, `ChangeRequestDetailReader`, `visibleWhere`, `StaleChecker`, `StepProgress`, `DiffView`, `ChangeRequestDetailPage`, `returnForTest`)
 > - Tests: `docs/planning/test-plan.md:211-217` (KB-047..KB-053), `:328-332` (NT-B4-04, NT-B4-05 first half, NT-B4-07, NT-B4-08)
 
-**Status**: Not started
+**Status**: Mã xong 2026-10-19 (BE-01..BE-09, FE-01..FE-07); còn nợ đi thử bằng trình duyệt — `docs/implement-report/f-14-three-level-approval-notifications-implement-report.md`
 
 ---
 

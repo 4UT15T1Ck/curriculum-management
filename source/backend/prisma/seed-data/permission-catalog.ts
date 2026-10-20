@@ -261,6 +261,13 @@ export const PERMISSION_CATALOG: readonly PermissionSeed[] = [
     cells: { R1: X },
   },
   {
+    code: PERMISSIONS.VERSION_CORRECT,
+    name: 'Đính chính phiên bản đã ban hành',
+    group: FunctionGroup.VERSION,
+    source: 'US-076, MH-49',
+    cells: { R1: X },
+  },
+  {
     code: PERMISSIONS.VERSION_VIEW_HISTORY,
     name: 'Xem lịch sử phiên bản',
     group: FunctionGroup.VERSION,
@@ -273,6 +280,13 @@ export const PERMISSION_CATALOG: readonly PermissionSeed[] = [
     group: FunctionGroup.VERSION,
     source: '3.4',
     cells: ALL_STAFF_VIEW,
+  },
+  {
+    code: PERMISSIONS.SEMESTER_MANAGE,
+    name: 'Quản lý học kỳ và khóa tuyển sinh',
+    group: FunctionGroup.VERSION,
+    source: 'US-071, MH-10',
+    cells: { R1: X },
   },
   {
     code: PERMISSIONS.DATA_IMPORT_EXCEL,

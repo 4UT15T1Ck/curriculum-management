@@ -13,7 +13,7 @@ It deliberately excludes the curriculum-level overrides (`CurriculumRequisite`, 
 > - Builds on: `docs/implementation/f-04-course-catalog-implementation-plan.md` (BE-01 `Course`, BE-02 `edit-path.ts`, `CourseUsageReader`, `decimal.ts`, `CourseRefDto`, BE-03 `courseTarget`, `COURSE_TRANSITIONS`, transition route, FE-02 hooks, FE-04 `CourseStatusActions`), F-02 (`AccessContext`, `PERMISSIONS`, pagination, `PERMISSION_TABLE`), F-01 (`AppException`, `FieldErrorDto`)
 > - Tests: `docs/planning/test-plan.md:153-157` (KB-004..KB-008), `:283-284` (NT-B1-04, NT-B1-05), `:546` (T-2)
 
-**Status**: Not started
+**Status**: Mã xong 2026-10-19 (BE-01..BE-06, FE-01..FE-05, DOC-01); còn nợ đi thử bằng trình duyệt (§7). Điểm lệch: `docs/implement-report/f-05-course-relations-equivalence-implement-report.md`
 
 ---
 

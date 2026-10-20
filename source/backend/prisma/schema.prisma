@@ -34,6 +34,39 @@ enum SubjectGroupMemberRole {
   COORDINATOR
 }
 
+enum CourseType {
+  THEORY
+  PRACTICE
+  LAB
+  PROJECT
+  CAPSTONE
+  INTERNSHIP
+  CONDITIONAL
+}
+
+enum CourseStatus {
+  ACTIVE
+  DISCONTINUED
+  CANCELLED
+}
+
+enum DegreeLevel {
+  ENGINEER
+  BACHELOR
+}
+
+enum ProgramStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum ProgramVersionStatus {
+  DRAFT
+  PENDING
+  ACTIVE
+  HISTORICAL
+}
+
 enum ScopeSource {
   NONE
   PROGRAM_DIRECTOR
@@ -70,6 +103,68 @@ enum ScopeType {
   ASSIGNMENT
 }
 
+enum ChangeRequestType {
+  GRADING_FORMULA
+  OUTCOME
+  SYLLABUS_CONTENT
+  CURRICULUM
+  COURSE_RELATION
+  PROGRAM_INFO
+  ORGANIZATION
+}
+
+enum ChangeTargetType {
+  COURSE
+  PROGRAM
+  SUBJECT_GROUP
+}
+
+enum ChangeRequestStatus {
+  DRAFT
+  PENDING_COORDINATOR
+  PENDING_DIRECTOR
+  PENDING_ACADEMIC_OFFICE
+  APPROVED
+  EFFECTIVE
+  REJECTED
+  WITHDRAWN
+}
+
+enum RequestOrigin {
+  UNIVERSITY
+  FACULTY
+}
+
+enum ApprovalAction {
+  PENDING
+  APPROVE
+  RETURN
+  REJECT
+}
+
+enum NotificationType {
+  REQUEST_AWAITING_YOU
+  REQUEST_RETURNED
+  REQUEST_REJECTED
+  REQUEST_APPROVED
+  REQUEST_OVERRIDDEN
+  REQUEST_COMMENTED
+  REQUEST_EFFECTIVE
+}
+
+enum NotificationReadStatus {
+  UNREAD
+  READ
+}
+
+enum ChangeDocumentType {
+  SUBMISSION
+  MINUTES
+  COUNCIL_MINUTES
+  REVIEW_MINUTES
+  OFFICIAL_LETTER
+}
+
 model OrgUnit {
   id              String           @id @default(cuid(2))
   unitCode        String           @unique
@@ -82,6 +177,8 @@ model OrgUnit {
   users           User[]
   roleAssignments RoleAssignment[]
   subjectGroups   SubjectGroup[]
+  ownedCourses    Course[]         @relation("CourseOwnerFaculty")
+  programs        Program[]        @relation("ProgramFaculty")
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 
@@ -89,41 +186,118 @@ model OrgUnit {
 }
 
 model User {
-  id                      String               @id @default(cuid(2))
-  userCode                String               @unique
-  fullName                String
-  email                   String?
-  status                  UserStatus           @default(ACTIVE)
-  username                String               @unique
-  passwordHash            String
-  mustChangePassword      Boolean              @default(false)
-  orgUnitId               String?
-  orgUnit                 OrgUnit?             @relation(fields: [orgUnitId], references: [id], onDelete: Restrict)
-  roleAssignments         RoleAssignment[]     @relation("AssignmentHolder")
-  grantedAssignments      RoleAssignment[]     @relation("AssignmentGrantor")
-  revokedAssignments      RoleAssignment[]     @relation("AssignmentRevoker")
-  subjectGroupMemberships SubjectGroupMember[] @relation("MembershipHolder")
-  grantedMemberships      SubjectGroupMember[] @relation("MembershipGrantor")
-  revokedMemberships      SubjectGroupMember[] @relation("MembershipRevoker")
-  updatedRolePermissions  RolePermission[]
-  createdAt               DateTime             @default(now())
-  updatedAt               DateTime             @updatedAt
+  id                        String                      @id @default(cuid(2))
+  userCode                  String                      @unique
+  fullName                  String
+  email                     String?
+  status                    UserStatus                  @default(ACTIVE)
+  username                  String                      @unique
+  passwordHash              String
+  mustChangePassword        Boolean                     @default(false)
+  orgUnitId                 String?
+  orgUnit                   OrgUnit?                    @relation(fields: [orgUnitId], references: [id], onDelete: Restrict)
+  roleAssignments           RoleAssignment[]            @relation("AssignmentHolder")
+  grantedAssignments        RoleAssignment[]            @relation("AssignmentGrantor")
+  revokedAssignments        RoleAssignment[]            @relation("AssignmentRevoker")
+  subjectGroupMemberships   SubjectGroupMember[]        @relation("MembershipHolder")
+  grantedMemberships        SubjectGroupMember[]        @relation("MembershipGrantor")
+  revokedMemberships        SubjectGroupMember[]        @relation("MembershipRevoker")
+  updatedRolePermissions    RolePermission[]
+  programDirectorships      ProgramDirectorAssignment[] @relation("ProgramDirector")
+  grantedDirectorships      ProgramDirectorAssignment[] @relation("ProgramDirectorAssignedBy")
+  revokedDirectorships      ProgramDirectorAssignment[] @relation("ProgramDirectorRevokedBy")
+  creditMismatchAcceptances ProgramVersion[]            @relation("CreditMismatchAcceptedBy")
+  publishedVersions         ProgramVersion[]            @relation("VersionPublisher")
+  syllabusAttachments       SyllabusAttachment[]        @relation("SyllabusAttachmentUploadedBy")
+  changeRequests            ChangeRequest[]             @relation("ChangeRequestCreator")
+  approvalSteps             ApprovalStep[]              @relation("ApprovalStepApprover")
+  performedApprovalSteps    ApprovalStep[]              @relation("ApprovalStepPerformer")
+  changeRequestDocuments    ChangeRequestDocument[]     @relation("ChangeRequestDocumentUploader")
+  comments                  Comment[]                   @relation("CommentAuthor")
+  notifications             Notification[]              @relation("NotificationRecipient")
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
 
   @@index([orgUnitId])
 }
 
 model SubjectGroup {
-  id        String               @id @default(cuid(2))
-  groupCode String               @unique
-  groupName String
-  facultyId String
-  faculty   OrgUnit              @relation(fields: [facultyId], references: [id], onDelete: Restrict)
-  status    SubjectGroupStatus   @default(ACTIVE)
-  members   SubjectGroupMember[]
-  createdAt DateTime             @default(now())
-  updatedAt DateTime             @updatedAt
+  id             String               @id @default(cuid(2))
+  groupCode      String               @unique
+  groupName      String
+  facultyId      String
+  faculty        OrgUnit              @relation(fields: [facultyId], references: [id], onDelete: Restrict)
+  status         SubjectGroupStatus   @default(ACTIVE)
+  members        SubjectGroupMember[]
+  ownedCourses   Course[]             @relation("CourseOwnerGroup")
+  changeRequests ChangeRequest[]
+  approvalSteps  ApprovalStep[]
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
 
   @@index([facultyId])
+}
+
+model Course {
+  id                   String                 @id @default(cuid(2))
+  courseCode           String                 @unique
+  courseName           String
+  englishName          String?
+  credits              Decimal                @db.Decimal(5, 2)
+  courseType           CourseType
+  status               CourseStatus           @default(ACTIVE)
+  ownerFacultyId       String
+  ownerFaculty         OrgUnit                @relation("CourseOwnerFaculty", fields: [ownerFacultyId], references: [id], onDelete: Restrict)
+  ownerGroupId         String?
+  ownerGroup           SubjectGroup?          @relation("CourseOwnerGroup", fields: [ownerGroupId], references: [id], onDelete: Restrict)
+  equivalenceGroupId   String?
+  equivalenceGroup     EquivalentCourseGroup? @relation("CourseEquivalence", fields: [equivalenceGroupId], references: [id], onDelete: SetNull)
+  relationsAsSource    CourseRelation[]       @relation("RelationSource")
+  relationsAsTarget    CourseRelation[]       @relation("RelationTarget")
+  curriculumItems      CurriculumItem[]       @relation("CurriculumItemCourse")
+  curriculumRequisites CurriculumRequisite[]  @relation("CurriculumRequisiteSource")
+  syllabi              Syllabus[]
+  changeRequests       ChangeRequest[]
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+
+  @@index([ownerFacultyId])
+  @@index([ownerGroupId])
+  @@index([courseName])
+  @@index([equivalenceGroupId])
+}
+
+enum CourseRelationType {
+  PRIOR
+  PREREQUISITE
+  COREQUISITE
+  REPLACEMENT
+}
+
+// sourceCourse = the course studied first (or the discontinued one); targetCourse = the course that has the requirement.
+// Two CHECK constraints are added by hand in the migration (not modelled by Prisma): see database_and_models.md.
+model CourseRelation {
+  id             String             @id @default(cuid(2))
+  sourceCourseId String
+  sourceCourse   Course             @relation("RelationSource", fields: [sourceCourseId], references: [id], onDelete: Restrict)
+  targetCourseId String
+  targetCourse   Course             @relation("RelationTarget", fields: [targetCourseId], references: [id], onDelete: Restrict)
+  relationType   CourseRelationType
+  minScore       Decimal?           @db.Decimal(4, 2)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@unique([sourceCourseId, targetCourseId, relationType])
+  @@index([targetCourseId])
+}
+
+model EquivalentCourseGroup {
+  id        String   @id @default(cuid(2))
+  groupCode String   @unique
+  note      String?
+  members   Course[] @relation("CourseEquivalence")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model SubjectGroupMember {
@@ -147,17 +321,155 @@ model SubjectGroupMember {
   @@index([subjectGroupId])
 }
 
+model Program {
+  id             String                      @id @default(cuid(2))
+  programCode    String                      @unique
+  facultyId      String
+  faculty        OrgUnit                     @relation("ProgramFaculty", fields: [facultyId], references: [id], onDelete: Restrict)
+  degreeLevel    DegreeLevel
+  status         ProgramStatus               @default(ACTIVE)
+  clonedFromId   String?
+  clonedFrom     ProgramVersion?             @relation("ProgramClonedFrom", fields: [clonedFromId], references: [id], onDelete: Restrict)
+  versions       ProgramVersion[]            @relation("ProgramVersions")
+  directors      ProgramDirectorAssignment[]
+  changeRequests ChangeRequest[]
+  approvalSteps  ApprovalStep[]
+  createdAt      DateTime                    @default(now())
+  updatedAt      DateTime                    @updatedAt
+
+  @@index([facultyId])
+}
+
+// Identity lives in Program; the description (name, major, semesters, credits) lives here so a released version keeps its own (M-3).
+// Two partial unique indexes are added by hand in the migration (not modelled by Prisma): see database_and_models.md.
+// A row with sourceRequestId is the working copy of a change request (F-13), not a version of the program.
+model ProgramVersion {
+  id                          String               @id @default(cuid(2))
+  programId                   String
+  program                     Program              @relation("ProgramVersions", fields: [programId], references: [id], onDelete: Restrict)
+  versionNumber               String?
+  status                      ProgramVersionStatus @default(DRAFT)
+  programName                 String
+  majorCode                   String
+  majorName                   String
+  semesterCount               Int
+  totalCredits                Decimal              @db.Decimal(5, 2)
+  compulsoryCredits           Decimal              @db.Decimal(5, 2)
+  electiveCredits             Decimal              @db.Decimal(5, 2)
+  creditMismatchReason        String?
+  creditMismatchCompulsoryGap Decimal?             @db.Decimal(5, 2)
+  creditMismatchElectiveGap   Decimal?             @db.Decimal(5, 2)
+  creditMismatchAcceptedById  String?
+  creditMismatchAcceptedBy    User?                @relation("CreditMismatchAcceptedBy", fields: [creditMismatchAcceptedById], references: [id], onDelete: Restrict)
+  creditMismatchAcceptedAt    DateTime?
+  clones                      Program[]            @relation("ProgramClonedFrom")
+  electiveGroups              ElectiveGroup[]
+  curriculumItems             CurriculumItem[]
+  plos                        PLO[]
+  sourceRequestId             String?              @unique
+  sourceRequest               ChangeRequest?       @relation("ProgramVersionRequestCopy", fields: [sourceRequestId], references: [id], onDelete: Restrict)
+  baseVersionId               String?
+  baseVersion                 ProgramVersion?      @relation("ProgramVersionBase", fields: [baseVersionId], references: [id], onDelete: Restrict)
+  requestCopies               ProgramVersion[]     @relation("ProgramVersionBase")
+  // Release facts (F-15). A request's working copy gets them when the request is finally approved.
+  decisionNumber              String?
+  signedDate                  DateTime?            @db.Date
+  effectiveSemesterId         String?
+  effectiveSemester           Semester?            @relation("EffectiveSemester", fields: [effectiveSemesterId], references: [id], onDelete: Restrict)
+  publishedById               String?
+  publishedBy                 User?                @relation("VersionPublisher", fields: [publishedById], references: [id], onDelete: Restrict)
+  publishedAt                 DateTime?
+  previousVersionId           String?
+  previousVersion             ProgramVersion?      @relation("PreviousProgramVersion", fields: [previousVersionId], references: [id], onDelete: Restrict)
+  nextVersions                ProgramVersion[]     @relation("PreviousProgramVersion")
+  // The request whose approval produced this version; unlike sourceRequestId it is not unique (a syllabus request makes several).
+  originRequestId             String?
+  originRequest               ChangeRequest?       @relation("ProgramVersionOrigin", fields: [originRequestId], references: [id], onDelete: Restrict)
+  // Set on a correction Draft and kept on the issued correction: the version it corrects.
+  correctionOfId              String?              @unique
+  correctionOf                ProgramVersion?      @relation("ProgramVersionCorrection", fields: [correctionOfId], references: [id], onDelete: Restrict)
+  correctedBy                 ProgramVersion?      @relation("ProgramVersionCorrection")
+  correctionReason            String?
+  cohortVersions              CohortVersion[]
+  createdAt                   DateTime             @default(now())
+  updatedAt                   DateTime             @updatedAt
+
+  @@unique([programId, versionNumber])
+  @@index([programId, status])
+  @@index([originRequestId, status])
+  @@index([status, effectiveSemesterId, createdAt])
+}
+
+model Semester {
+  id                     String           @id @default(cuid(2))
+  semesterCode           String           @unique
+  academicYear           String
+  termInYear             Int
+  startDate              DateTime?        @db.Date
+  effectiveVersions      ProgramVersion[] @relation("EffectiveSemester")
+  effectiveRequests      ChangeRequest[]  @relation("RequestEffectiveSemester")
+  startingCohortVersions CohortVersion[]  @relation("CohortStartSemester")
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+
+  @@unique([academicYear, termInYear])
+}
+
+model Cohort {
+  id         String          @id @default(cuid(2))
+  cohortCode String          @unique
+  intakeYear Int
+  versions   CohortVersion[]
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+}
+
+// Which version a cohort studies under, from which semester (F-16 reassigns; F-15 writes at release and correction).
+model CohortVersion {
+  id               String         @id @default(cuid(2))
+  cohortId         String
+  cohort           Cohort         @relation(fields: [cohortId], references: [id], onDelete: Restrict)
+  programVersionId String
+  programVersion   ProgramVersion @relation(fields: [programVersionId], references: [id], onDelete: Restrict)
+  fromSemesterId   String
+  fromSemester     Semester       @relation("CohortStartSemester", fields: [fromSemesterId], references: [id], onDelete: Restrict)
+  createdAt        DateTime       @default(now())
+
+  @@unique([cohortId, programVersionId])
+  @@index([programVersionId])
+}
+
+model ProgramDirectorAssignment {
+  id           String    @id @default(cuid(2))
+  programId    String
+  program      Program   @relation(fields: [programId], references: [id], onDelete: Restrict)
+  directorId   String
+  director     User      @relation("ProgramDirector", fields: [directorId], references: [id], onDelete: Restrict)
+  validFrom    DateTime  @db.Date
+  validTo      DateTime? @db.Date
+  assignedById String?
+  assignedBy   User?     @relation("ProgramDirectorAssignedBy", fields: [assignedById], references: [id], onDelete: Restrict)
+  revokedAt    DateTime?
+  revokedById  String?
+  revokedBy    User?     @relation("ProgramDirectorRevokedBy", fields: [revokedById], references: [id], onDelete: Restrict)
+  createdAt    DateTime  @default(now())
+
+  @@index([directorId])
+  @@index([programId])
+}
+
 model Role {
-  id              String           @id @default(cuid(2))
-  roleCode        String           @unique
+  id              String                @id @default(cuid(2))
+  roleCode        String                @unique
   roleName        String
   description     String?
-  isSystemRole    Boolean          @default(false)
-  scopeSource     ScopeSource      @default(NONE)
+  isSystemRole    Boolean               @default(false)
+  scopeSource     ScopeSource           @default(NONE)
   rolePermissions RolePermission[]
   assignments     RoleAssignment[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  approvalLevels  ApprovalLevelConfig[]
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
 }
 
 model Permission {
@@ -219,4 +531,394 @@ model Session {
 
   @@index([expire], map: "IDX_session_expire")
   @@map("session")
+}
+
+// Global list of knowledge blocks; a row's free-text blockSymbol is matched to blockCode when one exists, not enforced (F07-02).
+model KnowledgeBlock {
+  id              String   @id @default(cuid(2))
+  blockCode       String   @unique
+  blockName       String
+  requiredCredits Decimal? @db.Decimal(5, 2)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// With both minimums set, a student must meet both. Deleting a group leaves its rows elective with no group.
+// A CHECK (at least one minimum) is added by hand in the migration: see database_and_models.md.
+model ElectiveGroup {
+  id         String           @id @default(cuid(2))
+  versionId  String
+  version    ProgramVersion   @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  groupCode  String
+  groupName  String
+  minCredits Decimal?         @db.Decimal(5, 2)
+  minCourses Int?
+  items      CurriculumItem[]
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  @@unique([versionId, groupCode])
+}
+
+// sortOrder orders rows inside one semester; the "TT" number is derived. Credits and names are read live from Course until F-15 snapshots them.
+// Five CHECK constraints are added by hand in the migration (not modelled by Prisma): see database_and_models.md.
+model CurriculumItem {
+  id                 String                @id @default(cuid(2))
+  versionId          String
+  version            ProgramVersion        @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  plannedSemester    Int
+  sortOrder          Int
+  courseId           String
+  course             Course                @relation("CurriculumItemCourse", fields: [courseId], references: [id], onDelete: Restrict)
+  blockSymbol        String?
+  isElective         Boolean
+  electiveGroupId    String?
+  electiveGroup      ElectiveGroup?        @relation(fields: [electiveGroupId], references: [id], onDelete: SetNull)
+  htDa               Boolean               @default(false)
+  tqDa               Boolean               @default(false)
+  minStudiedScore    Decimal?              @db.Decimal(4, 2)
+  minTransferScore   Decimal?              @db.Decimal(4, 2)
+  note               String?
+  // Frozen at release (F-15); null on a Draft, which reads the live course.
+  courseNameSnapshot String?
+  creditsSnapshot    Decimal?              @db.Decimal(5, 2)
+  // The syllabus revision this row is released with; null on a Draft (Published-else-Draft is read instead).
+  syllabusId         String?
+  syllabus           Syllabus?             @relation("CurriculumItemSyllabus", fields: [syllabusId], references: [id], onDelete: Restrict)
+  requisites         CurriculumRequisite[]
+  ploMappings        CoursePLOMapping[]
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+
+  @@unique([versionId, courseId])
+  @@index([versionId, plannedSemester, sortOrder])
+  @@index([courseId])
+  @@index([electiveGroupId])
+  @@index([syllabusId])
+}
+
+// Per-curriculum requisites, seeded from CourseRelation when the row is added and edited for this curriculum only.
+model CurriculumRequisite {
+  id             String             @id @default(cuid(2))
+  itemId         String
+  item           CurriculumItem     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  sourceCourseId String
+  sourceCourse   Course             @relation("CurriculumRequisiteSource", fields: [sourceCourseId], references: [id], onDelete: Restrict)
+  relationType   CourseRelationType
+  minScore       Decimal?           @db.Decimal(4, 2)
+  createdAt      DateTime           @default(now())
+
+  @@unique([itemId, sourceCourseId, relationType])
+  @@index([sourceCourseId])
+}
+
+enum SyllabusStatus {
+  DRAFT
+  PUBLISHED
+  HISTORICAL
+}
+
+enum AttachmentFileType {
+  PDF
+  DOCX
+  XLSX
+  IMAGE
+}
+
+// One syllabus per course, kept as numbered revisions. Section texts are sanitized HTML (null = empty).
+// The partial unique indexes (one Draft, one Published per course) and the CHECKs are added by hand in the migration.
+// revisionNumber is null only on the working copy of a change request (sourceRequestId set, F-13).
+model Syllabus {
+  id                 String               @id @default(cuid(2))
+  courseId           String
+  course             Course               @relation(fields: [courseId], references: [id], onDelete: Restrict)
+  revisionNumber     Int?
+  status             SyllabusStatus       @default(DRAFT)
+  courseDescription  String?
+  englishDescription String?
+  objectives         String?
+  teachingMethods    String?
+  assessmentMethods  String?
+  references         String?
+  previousVersionId  String?              @unique
+  previousVersion    Syllabus?            @relation("SyllabusLineage", fields: [previousVersionId], references: [id], onDelete: Restrict)
+  nextVersion        Syllabus?            @relation("SyllabusLineage")
+  publishedAt        DateTime?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  weeklyContents     WeeklyContent[]
+  attachments        SyllabusAttachment[]
+  clos               CLO[]
+  sourceRequestId    String?              @unique
+  sourceRequest      ChangeRequest?       @relation("SyllabusRequestCopy", fields: [sourceRequestId], references: [id], onDelete: Restrict)
+  baseRevisionId     String?
+  baseRevision       Syllabus?            @relation("SyllabusBase", fields: [baseRevisionId], references: [id], onDelete: Restrict)
+  requestCopies      Syllabus[]           @relation("SyllabusBase")
+  // The request whose final approval published this revision (F-15).
+  originRequestId    String?
+  originRequest      ChangeRequest?       @relation("SyllabusOrigin", fields: [originRequestId], references: [id], onDelete: Restrict)
+  pinnedItems        CurriculumItem[]     @relation("CurriculumItemSyllabus")
+
+  @@unique([courseId, revisionNumber])
+}
+
+model WeeklyContent {
+  id                 String             @id @default(cuid(2))
+  syllabusId         String
+  syllabus           Syllabus           @relation(fields: [syllabusId], references: [id], onDelete: Cascade)
+  weekLabel          String
+  sortOrder          Int
+  content            String
+  teachingActivities String?
+  cloLinks           WeeklyContentCLO[]
+
+  @@index([syllabusId, sortOrder])
+}
+
+// The file lives on disk under FILES_ROOT; filePath is relative with '/' separators.
+model SyllabusAttachment {
+  id           String             @id @default(cuid(2))
+  syllabusId   String
+  syllabus     Syllabus           @relation(fields: [syllabusId], references: [id], onDelete: Restrict)
+  fileName     String
+  fileType     AttachmentFileType
+  filePath     String             @unique
+  sizeBytes    Int
+  uploadedById String
+  uploadedBy   User               @relation("SyllabusAttachmentUploadedBy", fields: [uploadedById], references: [id], onDelete: Restrict)
+  recordedAt   DateTime           @default(now())
+
+  @@index([syllabusId, recordedAt])
+}
+
+model PLO {
+  id                 String             @id @default(cuid(2))
+  versionId          String
+  version            ProgramVersion     @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  ploCode            String
+  description        String
+  englishDescription String?
+  competencyGroup    String?
+  sortOrder          Int
+  courseMappings     CoursePLOMapping[]
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@unique([versionId, ploCode])
+  @@index([versionId, sortOrder])
+}
+
+// A CLO belongs to a syllabus revision, so every program using the course shares it (DEC-03).
+model CLO {
+  id                 String             @id @default(cuid(2))
+  syllabusId         String
+  syllabus           Syllabus           @relation(fields: [syllabusId], references: [id], onDelete: Cascade)
+  cloCode            String
+  description        String
+  englishDescription String?
+  cognitiveLevel     String?
+  sortOrder          Int
+  ploLinks           CLOPLOMapping[]
+  weeklyLinks        WeeklyContentCLO[]
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@unique([syllabusId, cloCode])
+  @@index([syllabusId, sortOrder])
+}
+
+model WeeklyContentCLO {
+  id              String        @id @default(cuid(2))
+  weeklyContentId String
+  weeklyContent   WeeklyContent @relation(fields: [weeklyContentId], references: [id], onDelete: Cascade)
+  cloId           String
+  clo             CLO           @relation(fields: [cloId], references: [id], onDelete: Cascade)
+
+  @@unique([weeklyContentId, cloId])
+  @@index([cloId])
+}
+
+// weight in (0, 1], two decimals: CHECK "CoursePLOMapping_weight_range" is appended to the migration by hand.
+model CoursePLOMapping {
+  id               String          @id @default(cuid(2))
+  curriculumItemId String
+  curriculumItem   CurriculumItem  @relation(fields: [curriculumItemId], references: [id], onDelete: Cascade)
+  ploId            String
+  plo              PLO             @relation(fields: [ploId], references: [id], onDelete: Cascade)
+  weight           Decimal         @db.Decimal(3, 2)
+  cloLinks         CLOPLOMapping[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@unique([curriculumItemId, ploId])
+  @@index([ploId])
+}
+
+// Item and PLO are reached through the course cell: a link cannot outlive the cell it refines.
+model CLOPLOMapping {
+  id               String           @id @default(cuid(2))
+  curriculumItemId String
+  ploId            String
+  coursePlo        CoursePLOMapping @relation(fields: [curriculumItemId, ploId], references: [curriculumItemId, ploId], onDelete: Cascade)
+  cloId            String
+  clo              CLO              @relation(fields: [cloId], references: [id], onDelete: Cascade)
+  createdAt        DateTime         @default(now())
+
+  @@unique([curriculumItemId, cloId, ploId])
+  @@index([cloId])
+}
+
+// A request of one of seven types; workspace types own a working copy (ProgramVersion / Syllabus with sourceRequestId).
+// CHECKs (exactly one target key, basis number for UNIVERSITY origin, round >= 0) and the code sequence are added by hand in the migration.
+model ChangeRequest {
+  id                      String                  @id @default(cuid(2))
+  requestCode             String                  @unique
+  requestType             ChangeRequestType
+  targetType              ChangeTargetType
+  targetCode              String
+  courseId                String?
+  course                  Course?                 @relation(fields: [courseId], references: [id], onDelete: Restrict)
+  programId               String?
+  program                 Program?                @relation(fields: [programId], references: [id], onDelete: Restrict)
+  subjectGroupId          String?
+  subjectGroup            SubjectGroup?           @relation(fields: [subjectGroupId], references: [id], onDelete: Restrict)
+  createdById             String
+  createdBy               User                    @relation("ChangeRequestCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  title                   String
+  reason                  String
+  status                  ChangeRequestStatus     @default(DRAFT)
+  origin                  RequestOrigin
+  basisDocumentNumber     String?
+  submissionRound         Int                     @default(0)
+  // Whether the creator held the academic-office role on the day of creation (F-15 reads it for past-semester releases).
+  createdByAcademicOffice Boolean                 @default(false)
+  // When the request entered its current PENDING_* level; null outside PENDING_* (days waiting, backlog filter).
+  levelEnteredAt          DateTime?
+  items                   ChangeItem[]
+  steps                   ApprovalStep[]
+  documents               ChangeRequestDocument[]
+  comments                Comment[]
+  notifications           Notification[]
+  programCopy             ProgramVersion?         @relation("ProgramVersionRequestCopy")
+  syllabusCopy            Syllabus?               @relation("SyllabusRequestCopy")
+  // Set by the final approval (F-15).
+  decisionNumber          String?
+  signedDate              DateTime?               @db.Date
+  effectiveSemesterId     String?
+  effectiveSemester       Semester?               @relation("RequestEffectiveSemester", fields: [effectiveSemesterId], references: [id], onDelete: Restrict)
+  pastSemesterAllowed     Boolean                 @default(false)
+  originatedVersions      ProgramVersion[]        @relation("ProgramVersionOrigin")
+  originatedSyllabi       Syllabus[]              @relation("SyllabusOrigin")
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+
+  @@index([status])
+  @@index([createdById])
+  @@index([courseId])
+  @@index([programId])
+  @@index([subjectGroupId])
+}
+
+// Stored at submit (workspace types) or authored while Draft (course and organisational types).
+model ChangeItem {
+  id              String        @id @default(cuid(2))
+  changeRequestId String
+  changeRequest   ChangeRequest @relation(fields: [changeRequestId], references: [id], onDelete: Cascade)
+  sortOrder       Int
+  entityType      String
+  itemKey         String
+  label           String
+  recordId        String?
+  oldValue        Json?
+  newValue        Json?
+  baseVersion     String?
+
+  @@unique([changeRequestId, entityType, itemKey])
+  @@index([changeRequestId, sortOrder])
+}
+
+model ApprovalLevelConfig {
+  id            String   @id @default(cuid(2))
+  approvalLevel Int      @unique
+  levelName     String
+  roleId        String
+  role          Role     @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// One row per approver per level per submission round; level 3 has no approver (any other academic-office user acts).
+// CHECKs (level 1..3, a skipped row has a reason) are added by hand in the migration.
+model ApprovalStep {
+  id                String         @id @default(cuid(2))
+  changeRequestId   String
+  changeRequest     ChangeRequest  @relation(fields: [changeRequestId], references: [id], onDelete: Cascade)
+  submissionRound   Int
+  approvalLevel     Int
+  approverId        String?
+  approver          User?          @relation("ApprovalStepApprover", fields: [approverId], references: [id], onDelete: Restrict)
+  forSubjectGroupId String?
+  forSubjectGroup   SubjectGroup?  @relation(fields: [forSubjectGroupId], references: [id], onDelete: Restrict)
+  forProgramId      String?
+  forProgram        Program?       @relation(fields: [forProgramId], references: [id], onDelete: Restrict)
+  action            ApprovalAction @default(PENDING)
+  remark            String?
+  recordedAt        DateTime?
+  isSkipped         Boolean        @default(false)
+  skipReason        String?
+  performedById     String?
+  performedBy       User?          @relation("ApprovalStepPerformer", fields: [performedById], references: [id], onDelete: Restrict)
+  isOverride        Boolean        @default(false)
+  createdAt         DateTime       @default(now())
+
+  @@index([changeRequestId, submissionRound, approvalLevel])
+  @@index([approverId, action])
+}
+
+// No updatedAt on purpose: comments are never edited or deleted (US-067 AC3).
+model Comment {
+  id              String        @id @default(cuid(2))
+  changeRequestId String
+  changeRequest   ChangeRequest @relation(fields: [changeRequestId], references: [id], onDelete: Cascade)
+  authorId        String
+  author          User          @relation("CommentAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  content         String
+  createdAt       DateTime      @default(now())
+
+  @@index([changeRequestId, createdAt])
+}
+
+// In-app only; content is the Vietnamese sentence rendered when the event happened.
+model Notification {
+  id               String                 @id @default(cuid(2))
+  recipientId      String
+  recipient        User                   @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  notificationType NotificationType
+  content          String
+  changeRequestId  String?
+  changeRequest    ChangeRequest?         @relation(fields: [changeRequestId], references: [id], onDelete: Cascade)
+  readStatus       NotificationReadStatus @default(UNREAD)
+  readAt           DateTime?
+  createdAt        DateTime               @default(now())
+
+  @@index([recipientId, readStatus, createdAt])
+  @@index([changeRequestId])
+}
+
+// Scanned supporting documents; the file lives on disk under FILES_ROOT (relative path, '/' separators).
+model ChangeRequestDocument {
+  id              String             @id @default(cuid(2))
+  changeRequestId String
+  changeRequest   ChangeRequest      @relation(fields: [changeRequestId], references: [id], onDelete: Restrict)
+  documentType    ChangeDocumentType
+  fileName        String
+  fileType        AttachmentFileType
+  filePath        String             @unique
+  sizeBytes       Int
+  uploadedById    String
+  uploadedBy      User               @relation("ChangeRequestDocumentUploader", fields: [uploadedById], references: [id], onDelete: Restrict)
+  seenInRound     Int?
+  createdAt       DateTime           @default(now())
+
+  @@index([changeRequestId, createdAt])
 }
