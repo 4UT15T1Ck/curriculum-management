@@ -121,6 +121,7 @@ export function WeeklyContentModal({
             mode="multiple"
             allowClear
             aria-label={LABELS.cloIds}
+            optionFilterProp="label"
             placeholder={clos.length === 0 ? NO_CLOS : undefined}
             options={clos.map((clo) => ({
               value: clo.id,

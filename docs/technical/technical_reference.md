@@ -153,6 +153,9 @@ Lý do chọn và bảng phiên bản: `docs/design/tech-stack.md` §2 và §6. 
 | backend, đơn vị | Vitest | `pnpm test` |
 | backend, đầu-cuối | Vitest + Supertest + Testcontainers (`postgres:18`, `redis:8`) | `pnpm test:e2e` — cần Docker |
 | frontend | Vitest + React Testing Library, jsdom | `pnpm test` |
+| `source/e2e`, trình duyệt | Playwright; dự án pnpm độc lập thứ ba, `package.json`, lockfile, `node_modules` riêng | Tại `source/e2e`: `pnpm typecheck`; chạy một spec: `pnpm exec playwright test specs/<file>.spec.ts --reporter=list` |
+
+Playwright chạy trên app dev đang hoạt động, có demo seed: backend `http://localhost:3000/api`, frontend `http://localhost:5173`; không thay thế kiểm thử Testcontainers. Auth setup một lần cho mỗi vai R1..R6 (+R3b, R4b, R5b), lưu phiên qua `storageState`. Chỉ mục ca kiểm thử: `docs/testing/test-cases/README.md`; cài đặt và cách chạy: `docs/testing/playwright-guide.md`.
 
 ### Usage Pattern
 - Kiểm thử đầu-cuối tạo cơ sở dữ liệu ICU `vi-VN` qua `test/containers.ts`; kiểm thử mới dùng lại hàm ở đó.

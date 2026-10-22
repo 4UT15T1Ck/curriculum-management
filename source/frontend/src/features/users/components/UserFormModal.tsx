@@ -1,6 +1,9 @@
 import { useEffect } from 'react';
-import { Form, Input, Modal } from 'antd';
-import { ApiError } from '../../../shared/api/client';
+import { App, Form, Input, Modal } from 'antd';
+import {
+  applyFieldErrors,
+  errorMessage,
+} from '../../../shared/forms/applyFieldErrors';
 import { OrgUnitSelect } from '../../../shared/org-units/OrgUnitSelect';
 import { useCreateUser, useUpdateUser } from '../hooks/useUsers';
 import type { CreatedUser, UserDetail } from '../api/users';
@@ -27,6 +30,7 @@ export function UserFormModal({
   onSaved,
 }: UserFormModalProps) {
   const [form] = Form.useForm();
+  const { message } = App.useApp();
   const create = useCreateUser();
   const update = useUpdateUser();
   useEffect(() => {
@@ -62,13 +66,8 @@ export function UserFormModal({
             });
       onSaved(result);
     } catch (error) {
-      if (error instanceof ApiError && error.details)
-        form.setFields(
-          error.details.map((detail) => ({
-            name: detail.field,
-            errors: [detail.constraints.join(', ')],
-          })),
-        );
+      if (!applyFieldErrors(form, error))
+        void message.error(errorMessage(error, 'Không lưu được tài khoản.'));
     }
   }
   return (

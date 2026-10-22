@@ -203,3 +203,23 @@ Format:
 - `general_architecture.md`: module, thư mục `shared/` mới ở cả hai phía; quy tắc đề xuất/duyệt, ban hành, `@PassiveRequest()`; e2e dùng `global-setup.ts`.
 - `technical_reference.md`: Tiptap, `sanitize-html`, `@types/multer` (§7a), hàng đợi `release-activation`, biến `FILES_ROOT`, `ATTACHMENT_MAX_MB`, `BULLMQ_PREFIX`.
 - `implementation/README.md`: F-08..F-15 vào mục Active. `source/backend/README.md`: ghi chú e2e, lệnh `prisma:seed`.
+
+## [TEST] Kiểm tra chức năng MVP — tài liệu ca kiểm thử và Playwright
+**Date**: 2026-10-22
+**Files changed**: `docs/testing/{README.md,playwright-guide.md,test-cases/*}`, `source/e2e/`, `docs/progress/{todo,current_work,handoff,progress_log}.md`, `docs/architecture/general_architecture.md`, `docs/technical/technical_reference.md`
+- Phạm vi đợt kiểm tra: tài liệu ca kiểm thử đủ 13 tính năng MVP (bảng 14 cột) và suite Playwright độc lập tại `source/e2e/`; F-01..F-11 (không gồm F-09) chạy ngày 2026-10-21, F-13..F-15 ngày 2026-10-22. Lượt đồng bộ này chỉ sửa sáu tài liệu tiến độ/kiến trúc/tham chiếu nêu trên, không sửa suite hay tài liệu kiểm thử.
+
+| Phạm vi | Ca | Tự động | Passed | Failed | Thủ công chưa chạy |
+|---|---|---|---|---|---|
+| 13 tính năng MVP | 759 | 381 | 378 | 3 | 378 |
+
+- Lỗi: `UserFormModal.tsx` hiện thô `unique` đã sửa trước lượt đồng bộ, đã ghi `docs/troubleshooting/error_log.md`. Ba lỗi nghi vấn chưa sửa, chờ phê duyệt: F11-TC_063 (tìm CLO thiếu `optionFilterProp`), F11-TC_026 (xác nhận xóa trọng số không bấm được; nghi `commit` hai lần, chưa chứng minh), F15-TC_001 (`SYLLABUS_INCOMPLETE` hiện thô thay vì nhãn). Ba ca là `test.fixme`, dòng ca kiểm thử giữ Failed.
+- Để sau: `source/e2e/specs/mvp-flow.spec.ts` (CTĐT → khung → nhất quán → đề xuất → duyệt ba cấp → ban hành → kích hoạt), 378 ca thủ công; chờ người dùng chốt F-06 US-021 AC3 và F-14 xóa/giữ bản làm việc khi Từ chối/Thu hồi. F-09/F-12/F-16 vẫn sau MVP; không coi phần tự động đã chạy là toàn bộ MVP đạt.
+
+## [FIX] Sửa ba lỗi ứng dụng từ suite Playwright
+**Date**: 2026-10-22
+**Files changed**: `source/frontend/src/features/{syllabi/components/WeeklyContentModal.tsx,change-requests/components/FinalApprovalPreview.tsx,outcomes/components/WeightCell.tsx}`, `source/e2e/specs/{f-11-plo-clo-matrices,f-15-release-version-snapshots}.spec.ts`, `docs/testing/{playwright-guide.md,test-cases/f-11-plo-clo-matrices-test-cases.md,test-cases/f-15-release-version-snapshots-test-cases.md}`, `docs/troubleshooting/error_log.md`, `docs/progress/{todo,current_work,handoff,progress_log}.md`
+- F11-TC_063: ô “CLO đạt được” thêm `optionFilterProp="label"`, tìm theo mã CLO thay vì cuid.
+- F15-TC_001: “Phê duyệt cuối” hiện nhãn tiếng Việt cho `MISSING_SYLLABUS`/`SYLLABUS_INCOMPLETE` kèm điều kiện thiếu, thay mã thô.
+- F11-TC_026: `onPressEnter` của ô trọng số gọi `preventDefault()`; trước đó Enter bấm luôn nút “Hủy” mà xác nhận vừa focus. Giả thuyết Enter + blur gọi `commit` hai lần đã bị loại bằng ghi sự kiện DOM.
+- Bỏ `test.fixme` ba ca; suite F-11 (49) và F15-TC_001 Passed; Vitest outcomes/change-requests/syllabi 156/156; `tsc -b` sạch. Tổng tự động: 381/381 Passed.

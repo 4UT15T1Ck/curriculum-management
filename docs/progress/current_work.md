@@ -1,51 +1,42 @@
 # Current Work — In Progress
 
+**Start here**: người dùng chốt F-06 US-021 AC3 và F-14 xóa/giữ bản làm việc (bên dưới), vì hai quyết định này đổi mã và ca kiểm thử của hai tính năng trước khi chạy chuỗi xuyên tính năng.
+
 ## Session Context
 
-- **Last updated**: 2026-10-19
-- **Active area**: dựng bản MVP (`docs/planning/epics.md` §0)
-- **Start here**: đọc `docs/progress/handoff.md` — MVP đã dựng xong mã; tiếp theo là kiểm tra chức năng xuyên tính năng và đồng bộ tài liệu.
+- **Last updated**: 2026-10-22
+- **Active area**: kiểm tra chức năng MVP và phần còn nợ — `docs/progress/handoff.md`.
+- Mã đủ 13 tính năng MVP: F-01..F-08, F-10, F-11, F-13, F-14, F-15; F-09/F-12/F-16/F-26, B5, B6 vẫn sau MVP.
 
----
+## Kết quả hiện tại
 
-## Active Item: Dựng bản MVP
+- Đã có tài liệu ca kiểm thử 13 tính năng, bảng 14 cột — `docs/testing/README.md`, `docs/testing/test-cases/README.md`.
+- Playwright chạy F-01..F-11 ngày 2026-10-21 (không gồm F-09), F-13..F-15 ngày 2026-10-22: **759 ca = 381 tự động + 378 thủ công; 381 Passed trong phần tự động**. 378 ca thủ công chưa chạy.
+- Dự án pnpm độc lập thứ ba `source/e2e/` chạy trên app dev có demo seed, backend `:3000/api`, frontend `:5173` — `docs/testing/playwright-guide.md`.
+- Bốn lỗi ứng dụng tìm ra khi chạy suite đã sửa và ghi `docs/troubleshooting/error_log.md`: `UserFormModal.tsx` hiện `unique`; F11-TC_063, F11-TC_026, F15-TC_001 (2026-10-22).
 
-**Status**: F-01 xong 2026-10-18; F-02..F-08, F-10, F-11, F-13, F-14 và F-15 mã xong 2026-10-19, còn nợ đi thử bằng trình duyệt; mã MVP đã đủ.
+## Chờ người dùng quyết định
 
-### Còn nợ
-- F-02: người dùng đi thử 6 bước kế hoạch §7 bằng trình duyệt (chọn để sau) — `docs/implement-report/f-02-accounts-roles-permissions-implement-report.md`.
+- **F-06 — US-021 AC3**: chọn sửa ma trận quyền hay tiêu chí “học phần ngoài nhóm → 403” (R3 đang có `course.edit` Đ trên mọi học phần trước ban hành) — `docs/progress/handoff.md` §3.2.
+- **F-14**: chọn xóa hay giữ bản làm việc khi Từ chối/Thu hồi; mã hiện xóa, so sánh vẫn giữ trong `ChangeItem` — `docs/implement-report/f-14-three-level-approval-notifications-implement-report.md:28`, `docs/implement-report/f-14-three-level-approval-notifications-implement-report.md:53`.
+- **F-15**: xác nhận `ChangeRequest.createdByAcademicOffice` cho phép chỉ đề xuất do Phòng Đào tạo tạo được ban hành vào học kỳ đã bắt đầu — `docs/implementation/f-15-release-version-snapshots-implementation-plan.md` §8.
 
-- F-03: người dùng đi thử bằng trình duyệt (kế hoạch §7) và áp migration `20261019024639_subject_groups` lên cơ sở dữ liệu phát triển (`pnpm prisma:migrate`) — `docs/implement-report/f-03-org-units-subject-groups-implement-report.md`.
+## Còn nợ
 
-- F-04: người dùng đi thử bằng trình duyệt (kế hoạch §7) và áp migration `20261019072717_courses` lên cơ sở dữ liệu phát triển (`pnpm prisma:migrate`) — `docs/implement-report/f-04-course-catalog-implement-report.md`.
-
-- F-05: người dùng đi thử 6 bước kế hoạch §7 bằng trình duyệt (A–B tiên quyết kèm ngưỡng, vòng A → B → C → A, song hành hai chiều, ngừng mở lớp kèm học phần thay thế, nhóm tương đương và gộp nhóm) và áp migration `20261019075207_course_relations` lên cơ sở dữ liệu phát triển (`pnpm prisma:migrate`) — `docs/implement-report/f-05-course-relations-equivalence-implement-report.md`.
-
-- F-06: người dùng đi thử 6 bước kế hoạch §7 bằng trình duyệt (danh sách 1024034 với "Nháp", thêm chương trình lệch tín chỉ thấy chênh lệch rồi sửa, phân công Giám đốc rồi đăng nhập bằng người đó, kết thúc phân công hôm qua, nhân bản, ngừng sử dụng), áp migration `20261019082727_programs` lên cơ sở dữ liệu phát triển (`pnpm prisma:migrate` rồi `pnpm prisma:seed`), và thay giá trị giữ chỗ của 1024034 bằng số liệu từ tệp Excel khung của Khoa — `docs/implement-report/f-06-programs-directors-implement-report.md`.
-
-- F-07: người dùng đi thử 9 bước kế hoạch §7 bằng trình duyệt (khung theo dòng và theo học kỳ, lọc, thêm trùng / học kỳ 9, điều kiện xếp sau và vòng, kéo thả kể cả bàn phím, nhóm tự chọn, "Chương trình đang sử dụng" ở học phần, đăng nhập R4), áp migration `20261019085325_curriculum` (`pnpm prisma:migrate` rồi `pnpm prisma:seed`), nạp danh mục khối kiến thức khi có tệp Excel và thay sáu học phần mẫu DEMO* của 1024034 — `docs/implement-report/f-07-curriculum-elective-groups-implement-report.md`.
-- F-08: người dùng đi thử 8 bước kế hoạch §7 bằng trình duyệt (thẻ credit, chấp nhận chênh lệch kèm lý do, xóa dòng thấy cảnh báo trở lại, vòng danh mục–khung, "Tới chỗ sửa", dòng tổng chương trình, thẻ ở tổng quan, đăng nhập R2) và áp migration `20261019092846_credit_mismatch_acceptance` (`pnpm prisma:migrate`) — `docs/implement-report/f-08-consistency-check-implement-report.md`.
-- F-11: người dùng đi thử bằng trình duyệt (PLO thêm / trùng mã / xóa có đếm, ma trận học phần–PLO nhập `0,5` và `1,5`, xóa ô có liên kết CLO, ma trận CLO–PLO cột bị khóa, kiểm tra phủ đăng nhập R4, tab CLO và bật EN, nhân bản chương trình, R6) và áp migration `20261019102707_outcomes` (`pnpm prisma:migrate`) — `docs/implement-report/f-11-plo-clo-matrices-implement-report.md`.
-- F-13: người dùng đi thử bằng trình duyệt NT-B4-01/03/09 với R1–R5 (tạo đề xuất từng loại, sửa bản nháp làm việc, so sánh, gửi duyệt, rút) và áp migration `20261019110535_change_requests` (`pnpm prisma:migrate` rồi `pnpm prisma:seed`) — `docs/implement-report/f-13-change-requests-implement-report.md`.
-- F-14: người dùng đi thử NT-B4-04 bằng trình duyệt (R5 gửi, R4 và R3 đồng ý, R1 Trả lại ở cấp 3, gửi lại, Duyệt thay, bình luận, chuông, MH-42, đề xuất tổ chức, tab mở 61 phút); migration `20261019122753_approval_comments_notifications` đã áp lên `ctdt-dev-pg` — `docs/implement-report/f-14-three-level-approval-notifications-implement-report.md`.
-- F-10: người dùng đi thử 7 bước kế hoạch §7 bằng trình duyệt (tạo Nháp, soạn đậm / danh sách / bảng, dán `<script>`, tuần kéo thả, bật EN và "Chưa dịch", tệp PDF tên tiếng Việt và tệp bị từ chối, hai chương trình cùng đề cương, R5 khác nhóm, R6) và áp migration `20261019095730_syllabi` (`pnpm prisma:migrate`); đặt `FILES_ROOT` vào ổ bền — `docs/implement-report/f-10-syllabus-implement-report.md`.
-
-### Agreed Approach
-- MVP = F-01..F-08, F-10, F-11, F-13, F-14, F-15 (13 tính năng, 298 điểm); F-09, F-12, F-16, F-26, B5, B6 làm sau.
-- F-08 trong MVP vì gửi đề xuất và ban hành phải chặn khung còn lỗi.
-- F-13 không mở đường nhập Excel vào bản Nháp của đề xuất (F-09 sau MVP).
-- Dựng theo thứ tự phụ thuộc ở `docs/implementation/README.md`; mỗi kế hoạch ghi ràng buộc cho tính năng sau ở §8.
+- Migration trên máy người dùng: F-03 `subject_groups`, F-04 `courses`, F-05 `course_relations`, F-06 `programs`, F-07 `curriculum`, F-08 `credit_mismatch_acceptance`, F-10 `syllabi`, F-11 `outcomes`, F-13 `change_requests`; chạy `pnpm prisma:migrate`, không suy từ máy chạy suite ra máy khác — `docs/progress/handoff.md` §3.3.
+- Seed trên máy người dùng: sau migration F-06/F-07/F-13 và học kỳ/khóa F-15, chạy `pnpm prisma:seed`; migration F-14/F-15 đã áp trên `ctdt-dev-pg`, không đồng nghĩa đã áp mọi máy — `docs/progress/handoff.md` §3.3.
+- Thay dữ liệu giữ chỗ từ Excel của Khoa: CTĐT 1024034, DEMO101..DEMO302, `KnowledgeBlock`, học kỳ/khóa — `docs/progress/handoff.md` §3.3.
+- Đặt `FILES_ROOT` trên ổ bền và sao lưu cùng cơ sở dữ liệu — `docs/implement-report/f-10-syllabus-implement-report.md`.
+- Thực hiện 378 ca thủ công chưa chạy, không coi 381 Passed tự động là thay thế phần này — `docs/testing/test-cases/README.md`.
+- Viết và chạy `source/e2e/specs/mvp-flow.spec.ts`: CTĐT → khung → nhất quán → đề xuất → duyệt ba cấp → ban hành → kích hoạt — `docs/progress/todo.md`.
 
 ### Lưu ý khi chạy trên máy
+
 - Cổng 6379 đang bị container valkey của dự án khác giữ: `docker compose up` cần đặt `REDIS_PORT` khác.
 - Seed cần `SEED_ADMIN_PASSWORD` (≥ 8 ký tự, có chữ và số): `pnpm prisma:migrate` rồi `pnpm prisma:seed` trong `source/backend`.
 
-### Cần người dùng xem khi duyệt F-15
-- F-15 thêm cột `ChangeRequest.createdByAcademicOffice` (sửa mô hình của F-13) để chỉ đề xuất do Phòng Đào tạo tạo mới được ban hành vào học kỳ đã bắt đầu — `f-15-release-version-snapshots-implementation-plan.md` §8.
-
 ## Up Next
 
-1. **Kiểm tra chức năng xuyên tính năng bằng trình duyệt** — tài liệu kiến trúc đã đồng bộ tới F-15 (2026-10-19).
+1. **Xử lý phần còn nợ MVP** — chốt hai quyết định F-06/F-14, rồi chạy lại ca liên quan; tiếp tục chuỗi xuyên tính năng và ca thủ công.
 2. **Template** — sửa bốn lỗi của `E:\claude-code-templates` đã ghi ở báo cáo khởi tạo (hook chỉ dùng jq, sai đường dẫn migration, agent dùng npm/Biome, trùng tên agent giữa hai stack); cần người dùng đồng ý.
 3. **Volta** — `volta install pnpm@10.23.0` để pnpm chạy trên Node 22; cần người dùng đồng ý.
-- F-15: người dùng chạy `pnpm prisma:seed` (học kỳ, khóa giữ chỗ), đi thử NT-B4-01/05/06/10/12 bằng trình duyệt với R1 và R3; migration `20261019131021_release_versions` đã áp lên `ctdt-dev-pg` — `docs/implement-report/f-15-release-version-snapshots-implement-report.md`.

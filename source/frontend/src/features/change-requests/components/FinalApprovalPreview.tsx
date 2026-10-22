@@ -13,6 +13,22 @@ const CONDITION_LABELS: Record<string, string> = {
   COURSE_DESCRIPTION_EMPTY: 'chưa có mô tả học phần',
   OBJECTIVES_EMPTY: 'chưa có mục tiêu học phần',
 };
+const SYLLABUS_ISSUE_LABELS: Record<
+  FinalApprovalProgram['syllabusIssues'][number]['code'],
+  string
+> = {
+  MISSING_SYLLABUS: 'Chưa có đề cương',
+  SYLLABUS_INCOMPLETE: 'Đề cương chưa đủ điều kiện ban hành',
+};
+
+function syllabusIssueText(
+  issue: FinalApprovalProgram['syllabusIssues'][number],
+) {
+  const details = issue.details
+    .map((code) => CONDITION_LABELS[code] ?? code)
+    .join('; ');
+  return `${issue.courseCode}: ${SYLLABUS_ISSUE_LABELS[issue.code]}${details && ` — ${details}`}`;
+}
 
 // MH-43 preview: what the approval will do, program by program. Advisory; the approval recomputes it all.
 export function FinalApprovalPreview({ preview }: FinalApprovalPreviewProps) {
@@ -62,9 +78,7 @@ export function FinalApprovalPreview({ preview }: FinalApprovalPreviewProps) {
                     size="small"
                     dataSource={[
                       ...errors.map((issue) => issue.message),
-                      ...program.syllabusIssues.map(
-                        (issue) => `${issue.courseCode}: ${issue.code}`,
-                      ),
+                      ...program.syllabusIssues.map(syllabusIssueText),
                     ]}
                     renderItem={(text) => (
                       <List.Item>

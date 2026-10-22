@@ -76,7 +76,11 @@ export function WeightCell({ itemId, ploId, cell, canEdit }: WeightCellProps) {
             setDraft(event.target.value);
             setInvalid(false);
           }}
-          onPressEnter={commit}
+          onPressEnter={(event) => {
+            // The confirm focuses its Hủy button while this keydown is still live; Enter's default action would click it.
+            event.preventDefault();
+            commit();
+          }}
           onBlur={commit}
           onKeyDown={(event) => {
             if (event.key === 'Escape') close();

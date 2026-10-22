@@ -26,3 +26,27 @@ Format:
 **Possible cause**: `plainToInstance(..., { enableImplicitConversion: true })` đổi kiểu theo metadata `design:type`. Thuộc tính có giá trị mặc định nhưng không ghi kiểu (`REDIS_PORT = 6379`) được TypeScript phát metadata là `Object`, nên chuỗi `"6379"` không được đổi sang số và `@IsInt` thất bại. Không đặt biến thì giá trị mặc định là số nên lỗi chỉ hiện khi có biến.
 **Resolution**: `source/backend/src/config/env.validation.ts` ghi kiểu tường minh cho mọi thuộc tính (`PORT: number = 3000`, `REDIS_PORT: number = 6379`); thêm chú thích giải thích tại chỗ.
 **How to avoid**: Với class-transformer, mọi thuộc tính cần đổi kiểu ngầm phải có chú thích kiểu tường minh — kể cả khi đã có giá trị mặc định. Áp dụng cho DTO truy vấn (`?page=2`) như với lớp biến môi trường; kiểm thử phải đi qua nhánh có giá trị chuỗi, không chỉ nhánh mặc định.
+
+## [2026-10-21] Form tài khoản hiện mã constraint thay vì thông báo lỗi tiếng Việt
+**Symptom**: Khi tạo hoặc sửa tài khoản bị trùng tên đăng nhập hoặc mã người dùng, dưới trường hiện “unique” thay vì thông báo tiếng Việt; lỗi không có chi tiết trường bị bỏ qua, không có phản hồi cho người dùng.
+**Possible cause**: `UserFormModal` ghép `details[].constraints` làm nội dung lỗi, dù máy chủ gửi câu tiếng Việt trong `message`. Mock unit test đặt câu tiếng Việt vào constraints nên che lỗi; nhánh catch không xử lý lỗi thiếu chi tiết trường.
+**Resolution**: Dùng `applyFieldErrors(form, error)` để hiển thị message của máy chủ dưới trường; nếu không ánh xạ được thì hiện toast qua `errorMessage` với dự phòng “Không lưu được tài khoản.”. Sửa mock tên đăng nhập trùng cho đúng phản hồi thật, kiểm không hiện “unique”, bổ sung test toast dự phòng và cập nhật hai assertion Playwright cùng Expected Result tương ứng.
+**How to avoid**: Lỗi gắn trường phải hiển thị `message` của máy chủ, không hiển thị mã `constraints`. Mock unit test phải khớp phản hồi thực tế của backend; nếu thay mã kỹ thuật bằng câu hiển thị, test có thể đạt ngay trên hành vi lỗi. Kiểm cả phản hồi nghiệp vụ có chi tiết trường và lỗi không thể gắn trường để tránh thất bại im lặng.
+
+## [2026-10-22] Ô “CLO đạt được” không tìm được CLO theo mã
+**Symptom**: Trong hộp thoại thêm/sửa tuần của đề cương, gõ `CLO1` vào ô đa chọn “CLO đạt được” thì danh sách hiện “Trống”, dù đề cương có CLO1.
+**Possible cause**: `Select` của AntD mặc định lọc theo `value`. Lựa chọn dùng `value` là cuid của CLO và `label` là mã CLO, nên chuỗi gõ được so với cuid và không bao giờ khớp.
+**Resolution**: `source/frontend/src/features/syllabi/components/WeeklyContentModal.tsx` thêm `optionFilterProp="label"` cho ô chọn CLO, giống `shared/org-units/OrgUnitSelect.tsx`.
+**How to avoid**: Mọi `Select` có `value` là id và `label` là chữ người đọc phải đặt `optionFilterProp="label"` (hoặc `filterOption` riêng). Rà các `Select` dùng `options={...map((x) => ({ value: x.id, label: ... }))}` mà không có thuộc tính này.
+
+## [2026-10-22] Phê duyệt cuối hiện mã thô `SYLLABUS_INCOMPLETE` ở cột Vấn đề
+**Symptom**: Màn hình “Phê duyệt cuối và ban hành” liệt kê vấn đề đề cương dạng `<mã học phần>: SYLLABUS_INCOMPLETE` thay vì câu tiếng Việt và không nói thiếu gì.
+**Possible cause**: `FinalApprovalPreview.tsx` ghép thẳng `issue.code` vào nội dung. Bảng nhãn `SYLLABUS_ISSUE_LABELS` chỉ có ở tính năng releases (`ReleaseCheckPanel.tsx`), và quy tắc cấm import chéo tính năng nên màn hình đề xuất không dùng lại được; `details` (điều kiện còn thiếu) bị bỏ qua.
+**Resolution**: `source/frontend/src/features/change-requests/components/FinalApprovalPreview.tsx` thêm `SYLLABUS_ISSUE_LABELS` cục bộ và hàm `syllabusIssueText` hiển thị “mã học phần: nhãn — chi tiết”, dịch `details` qua `CONDITION_LABELS` sẵn có, giống `ReleaseCheckPanel.tsx`.
+**How to avoid**: Mã lỗi từ API (`code`, `details`) không bao giờ được đưa thẳng ra giao diện. Khi hai tính năng cùng hiển thị một loại mã, rà cả hai chỗ hiển thị; nếu bảng nhãn bị nhân bản vì quy tắc import, cân nhắc đưa nó vào `src/shared/`.
+
+## [2026-10-22] Xác nhận xóa ô trọng số tự đóng, không bấm được “Xóa”
+**Symptom**: Ở ma trận học phần–PLO, xóa trắng ô có liên kết CLO rồi nhấn Enter: hộp xác nhận “Xóa ô học phần–PLO?” hiện lên rồi tự đóng ngay, ô vẫn giữ trọng số, không có yêu cầu DELETE.
+**Possible cause**: `WeightCell` mở `modal.confirm` ngay trong trình xử lý keydown của Enter. Confirm lấy focus cho nút “Hủy” trước khi sự kiện phím kết thúc, nên hành động mặc định của Enter (kích hoạt nút đang focus) rơi vào “Hủy” và đóng hộp thoại. Ghi sự kiện DOM trên trình duyệt thấy `keydown Enter` ở input → `focusin` nút Hủy → `click` nút Hủy → modal bị gỡ. Giả thuyết Enter + blur gọi `commit` hai lần đã bị loại: khi chặn hành động mặc định mà không thêm chốt chống gọi lại, chỉ có một hộp thoại và nó ở lại.
+**Resolution**: `source/frontend/src/features/outcomes/components/WeightCell.tsx` gọi `event.preventDefault()` trong `onPressEnter` trước `commit()`.
+**How to avoid**: Không mở hộp thoại hoặc dời focus trong trình xử lý keydown của Enter/Space mà không `preventDefault()` — hành động mặc định của phím sẽ chạy trên phần tử vừa nhận focus. Test Playwright báo “element is not stable” rồi “detached” trên nút trong modal là dấu hiệu modal bị đóng ngoài ý muốn, không phải test chậm.

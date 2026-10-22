@@ -27,14 +27,15 @@ Ghi những gì **đã dựng** trong `source/`. Lựa chọn công nghệ và l
 
 ## 1. Bố cục repo
 
-Hai dự án pnpm **độc lập**, không có workspace và không có gói dùng chung. Giao diện lấy kiểu dữ liệu từ đặc tả OpenAPI của máy chủ.
+Ba dự án pnpm **độc lập**: `source/backend`, `source/frontend` và `source/e2e`; mỗi dự án có `package.json`, lockfile và `node_modules` riêng, không có workspace và không có gói dùng chung. Giao diện lấy kiểu dữ liệu từ đặc tả OpenAPI của máy chủ.
 
 ```
 curriculum-management/
 ├── docs/                  tài liệu (tiếng Việt, định danh tiếng Anh)
 ├── source/
 │   ├── backend/           NestJS — package.json, pnpm-lock.yaml, node_modules riêng
-│   └── frontend/          React + Vite — package.json, pnpm-lock.yaml, node_modules riêng
+ │   ├── frontend/          React + Vite — package.json, pnpm-lock.yaml, node_modules riêng
+ │   └── e2e/               Playwright — package.json, pnpm-lock.yaml, node_modules riêng
 ├── .claude/               cấu hình Claude Code (rules, agents, hooks)
 └── CLAUDE.md
 ```
@@ -130,7 +131,7 @@ test/                      đầu-cuối: global-setup.ts dựng một PostgreSQ
 | Ban hành | Ban hành khởi tạo (H-1) và phê duyệt cuối gọi `ConsistencyChecker.assertPasses` + `StaleChecker` trong giao dịch, rồi `VersionPublisher` đánh số `major.minor`, ghi ảnh chụp tên và tín chỉ (chỉ khi còn null) và ghim đề cương (`CurriculumItem.syllabusId`); bản sao làm việc được nâng (`sourceRequestId` → `originRequestId`). Phiên bản `PENDING` thành `ACTIVE` khi tới học kỳ hiệu lực qua hàng đợi `release-activation` (cron 00:05 giờ Việt Nam + lúc khởi động). Đính chính là Nháp riêng (`correctionOfId`), chỉ R1 |
 | Mã quyền | Hằng `PERMISSIONS` (`shared/authz/permission-codes.ts`); không viết cứng mã vai trò trong mã |
 | Người dùng hiện tại | `@CurrentUser()`; không đọc `req.session` trong controller |
-| Kiểm thử | Đơn vị `*.spec.ts` cạnh tệp; đầu-cuối `test/*.e2e-spec.ts` dùng `configureApp` chung với `main.ts` |
+| Kiểm thử | Đơn vị `*.spec.ts` cạnh tệp; đầu-cuối `test/*.e2e-spec.ts` dùng `configureApp` chung với `main.ts`; Playwright tại `source/e2e/` (dự án pnpm độc lập thứ ba), chạy trên app dev có demo seed: backend `:3000/api`, frontend `:5173`; auth setup một lần/vai R1..R6 (+R3b/R4b/R5b) qua `storageState`. Tại `source/e2e`: `pnpm typecheck`, `pnpm exec playwright test specs/<file>.spec.ts --reporter=list`; xem `docs/testing/playwright-guide.md` |
 
 ### Chưa dựng
 

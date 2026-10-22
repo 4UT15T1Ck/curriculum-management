@@ -20,40 +20,51 @@ Một dòng cho mỗi tính năng; việc chi tiết (CV-xxx) ở `docs/planning
 | C-04 | Kế hoạch triển khai tính năng | ✅ | F-01..F-11, F-13, F-14, F-15 — đủ 13 kế hoạch MVP; tính năng sau MVP viết kế hoạch khi tới lượt |
 | C-03 | Sửa lỗi mẫu `claude-code-templates` | ❌ | Bốn lỗi; sửa ở mẫu và bản đang dùng cùng lúc; cần đồng ý |
 
+## Kiểm tra chức năng MVP
+
+| Hạng mục | Trạng thái | Ghi chú |
+|---|---|---|
+| Tài liệu ca kiểm thử và kiểm tra chức năng tự động theo tính năng | ✅ | Đủ 13 tính năng, bảng 14 cột; đã chạy 2026-10-21/22: 759 ca = 381 tự động (381 Passed) + 378 thủ công chưa chạy; không đồng nghĩa toàn MVP đạt — `docs/testing/README.md`, `docs/testing/test-cases/README.md` |
+| Ba lỗi ứng dụng từ suite (F11-TC_063, F11-TC_026, F15-TC_001) | ✅ | Đã sửa 2026-10-22, ghi `docs/troubleshooting/error_log.md`; ba test bỏ `test.fixme`, Passed |
+| F-06 — quyết định US-021 AC3 | ❌ | Người dùng chọn sửa ma trận quyền hay tiêu chí “học phần ngoài nhóm → 403” — `docs/progress/handoff.md` §3.2 |
+| F-14 — quyết định bản làm việc | ❌ | Người dùng chọn xóa hay giữ khi Từ chối/Thu hồi; mã hiện xóa — `docs/implement-report/f-14-three-level-approval-notifications-implement-report.md:28`, `docs/implement-report/f-14-three-level-approval-notifications-implement-report.md:53` |
+| Chuỗi `mvp-flow.spec.ts` | ❌ | Chưa viết/chạy: CTĐT → khung → nhất quán → đề xuất → duyệt ba cấp → ban hành → kích hoạt; dự kiến `source/e2e/specs/mvp-flow.spec.ts` |
+| 378 ca thủ công | ❌ | Chưa thực hiện — `docs/testing/test-cases/README.md`; không gộp với 381 Passed tự động |
+
 ## B1 — Nền tảng và danh mục học phần
 
 | # | Item | Status | Notes |
 |---|---|---|---|
 | F-01 | Đăng nhập, phiên | ✅ | Dựng 2026-10-18; kiểm thử xanh, seed đã chạy, người dùng đi thử 6 bước bằng trình duyệt đạt |
-| F-02 | Tài khoản, vai trò, phạm vi quyền | 🔄 | Mã xong 2026-10-19, kiểm thử xanh, migration `access_control` + seed đã chạy; còn nợ đi thử bằng trình duyệt (kế hoạch §7) |
-| F-03 | Đơn vị và nhóm chuyên môn | 🔄 | Mã xong 2026-10-19, kiểm thử xanh (backend đơn vị 101, đầu-cuối 69; frontend 44); còn nợ đi thử bằng trình duyệt và áp migration `subject_groups` lên cơ sở dữ liệu phát triển — `docs/implement-report/f-03-org-units-subject-groups-implement-report.md` |
-| F-04 | Danh mục học phần | 🔄 | Mã xong 2026-10-19, kiểm thử xanh (backend đơn vị 149, đầu-cuối 97; frontend 65); còn nợ đi thử bằng trình duyệt (kế hoạch §7) và áp migration `courses` lên cơ sở dữ liệu phát triển — `docs/implement-report/f-04-course-catalog-implement-report.md` |
-| F-05 | Quan hệ học phần, nhóm tương đương | 🔄 | Mã xong 2026-10-19, kiểm thử xanh (backend đơn vị 223, đầu-cuối 130; frontend 93); chống chu trình (BR-11), nhóm tương đương (DEC-06), ngừng mở lớp đi được đường thành công (KB-008); còn nợ đi thử bằng trình duyệt (kế hoạch §7) và áp migration `course_relations` lên cơ sở dữ liệu phát triển — `docs/implement-report/f-05-course-relations-equivalence-implement-report.md` |
+| F-02 | Tài khoản, vai trò, phạm vi quyền | 🔄 | Mã xong; Playwright 22/22 Passed. Migration và seed đã chạy; còn ca thủ công. — `docs/implement-report/f-02-accounts-roles-permissions-implement-report.md` |
+| F-03 | Đơn vị và nhóm chuyên môn | 🔄 | Mã xong; Playwright 20/20 Passed. Còn migration `subject_groups` trên máy người dùng và ca thủ công. — `docs/implement-report/f-03-org-units-subject-groups-implement-report.md` |
+| F-04 | Danh mục học phần | 🔄 | Mã xong; Playwright 58/58 Passed. Còn migration `courses` trên máy người dùng và ca thủ công. — `docs/implement-report/f-04-course-catalog-implement-report.md` |
+| F-05 | Quan hệ học phần, nhóm tương đương | 🔄 | Mã xong; Playwright 26/26 Passed. Còn migration `course_relations` trên máy người dùng và ca thủ công. — `docs/implement-report/f-05-course-relations-equivalence-implement-report.md` |
 
 ## B2 — Chương trình đào tạo và khung
 
 | # | Item | Status | Notes |
 |---|---|---|---|
-| F-06 | Thông tin chương trình, Giám đốc CTĐT | 🔄 | Mã xong 2026-10-19, kiểm thử xanh (backend đơn vị 269, đầu-cuối 158; frontend 119); `Program`/`ProgramVersion` ở Nháp, Giám đốc CTĐT có thời hạn và lịch sử, phạm vi R3 thật, nhân bản qua `VersionContentCopier`; còn nợ đi thử bằng trình duyệt (kế hoạch §7), áp migration `programs` lên cơ sở dữ liệu phát triển và thay giá trị giữ chỗ của 1024034 — `docs/implement-report/f-06-programs-directors-implement-report.md` |
-| F-07 | Khung chương trình, nhóm tự chọn | 🔄 | Mã xong 2026-10-19, kiểm thử xanh (backend đơn vị 358, đầu-cuối 193; frontend 173); khung có điều kiện riêng, nhóm tự chọn, kéo thả, nhân bản chép khung, chặn giảm số học kỳ; còn nợ đi thử bằng trình duyệt (kế hoạch §7, 9 bước), áp migration `curriculum` lên cơ sở dữ liệu phát triển, nạp danh mục khối kiến thức và thay dữ liệu mẫu DEMO* của 1024034 — `docs/implement-report/f-07-curriculum-elective-groups-implement-report.md` |
-| F-08 | Kiểm tra nhất quán | 🔄 | Mã xong 2026-10-19, kiểm thử xanh (backend đơn vị 391, đầu-cuối 207; frontend 190); tổng tín chỉ theo mức tối thiểu của nhóm, chấp nhận chênh lệch kèm lý do, `ConsistencyChecker.assertPasses` cho F-13/F-15; còn nợ đi thử bằng trình duyệt (kế hoạch §7, 8 bước) và áp migration `credit_mismatch_acceptance` — `docs/implement-report/f-08-consistency-check-implement-report.md` |
+| F-06 | Thông tin chương trình, Giám đốc CTĐT | 🔄 | Mã xong; Playwright 21/21 Passed. Còn migration `programs` + seed, thay dữ liệu 1024034, quyết định US-021 AC3 và ca thủ công. — `docs/implement-report/f-06-programs-directors-implement-report.md` |
+| F-07 | Khung chương trình, nhóm tự chọn | 🔄 | Mã xong; Playwright 26/26 Passed. Còn migration `curriculum` + seed, dữ liệu Excel/DEMO* và ca thủ công. — `docs/implement-report/f-07-curriculum-elective-groups-implement-report.md` |
+| F-08 | Kiểm tra nhất quán | 🔄 | Mã xong; Playwright 13/13 Passed. Còn migration `credit_mismatch_acceptance` trên máy người dùng và ca thủ công. — `docs/implement-report/f-08-consistency-check-implement-report.md` |
 | F-09 | Nhập, xuất Excel | ❌ | Sau MVP. ExcelJS trong worker; chạy thử → xác nhận |
 
 ## B3 — Đề cương và chuẩn đầu ra
 
 | # | Item | Status | Notes |
 |---|---|---|---|
-| F-10 | Đề cương | 🔄 | Mã xong 2026-10-19; còn nợ: đi thử bằng trình duyệt (kế hoạch §7) và áp migration `20261019095730_syllabi` |
-| F-11 | PLO, CLO, ma trận | 🔄 | Mã xong 2026-10-19; còn nợ: đi thử bằng trình duyệt (báo cáo dựng) và áp migration `20261019102707_outcomes` lên cơ sở dữ liệu phát triển |
+| F-10 | Đề cương | 🔄 | Mã xong; Playwright 37/37 Passed. Còn migration `syllabi`, `FILES_ROOT` bền vững và ca thủ công. — `docs/implement-report/f-10-syllabus-implement-report.md` |
+| F-11 | PLO, CLO, ma trận | 🔄 | Mã xong; Playwright 49/49 Passed (F11-TC_063/F11-TC_026 sửa 2026-10-22); còn migration `outcomes` và ca thủ công. — `docs/implement-report/f-11-plo-clo-matrices-implement-report.md` |
 | F-12 | Công thức điểm, đánh giá–CLO | ❌ | Sau MVP |
 
 ## B4 — Đề xuất thay đổi và phiên bản
 
 | # | Item | Status | Notes |
 |---|---|---|---|
-| F-13 | Đề xuất thay đổi | 🔄 | Mã xong 2026-10-19 (bản nháp làm việc, so sánh, định tuyến ba cấp, gửi duyệt); còn nợ: đi thử bằng trình duyệt NT-B4-01/03/09 với R1–R5 và áp migration `20261019110535_change_requests` (`pnpm prisma:migrate` rồi `pnpm prisma:seed`) — `docs/implement-report/f-13-change-requests-implement-report.md` |
-| F-14 | Duyệt ba cấp, thông báo | 🔄 | Mã xong 2026-10-19, kiểm thử xanh (backend đơn vị 707, đầu-cuối 330; frontend 376); Đồng ý / Trả lại / Từ chối / Duyệt thay, hàng chờ, thông báo trong ứng dụng, bình luận, lịch sử; còn nợ: đi thử bằng trình duyệt NT-B4-04 (migration đã áp lên `ctdt-dev-pg`) — `docs/implement-report/f-14-three-level-approval-notifications-implement-report.md` |
-| F-15 | Ban hành, ảnh chụp phiên bản | 🔄 | Mã xong 2026-10-19, kiểm thử xanh (backend đơn vị 853, đầu-cuối 391; frontend 411); ban hành khởi tạo, phê duyệt cuối, kích hoạt đầu học kỳ, đính chính; còn nợ: đi thử bằng trình duyệt NT-B4-01/05/06/10/12 (migration đã áp lên `ctdt-dev-pg`) — `docs/implement-report/f-15-release-version-snapshots-implement-report.md` |
+| F-13 | Đề xuất thay đổi | 🔄 | Mã xong; Playwright 28/28 Passed. Còn migration `change_requests` + seed trên máy người dùng và ca thủ công. — `docs/implement-report/f-13-change-requests-implement-report.md` |
+| F-14 | Duyệt ba cấp, thông báo | 🔄 | Mã xong; Playwright 31/31 Passed. Migration đã áp trên `ctdt-dev-pg`; còn quyết định xóa/giữ bản làm việc và ca thủ công. — `docs/implement-report/f-14-three-level-approval-notifications-implement-report.md` |
+| F-15 | Ban hành, ảnh chụp phiên bản | 🔄 | Mã xong; Playwright 33/33 Passed (F15-TC_001 sửa 2026-10-22); migration đã áp trên `ctdt-dev-pg`; còn seed học kỳ/khóa và ca thủ công. — `docs/implement-report/f-15-release-version-snapshots-implement-report.md` |
 | F-16 | So sánh phiên bản, gán khóa | ❌ | Sau MVP |
 | F-26 | Sao lưu, diễn tập phục hồi | ❌ | Sau MVP. `pg_dump` hằng ngày + thư mục tệp |
 

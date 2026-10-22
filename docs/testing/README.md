@@ -78,6 +78,21 @@ Device-side states (airplane mode, low storage) need no backend action.
 <!-- List each test-doc here, grouped Features / Refactors, one line each. -->
 
 ### Features
+- [Test case theo tính năng — quy ước và chỉ mục](./test-cases/README.md)
+- [F-01 Đăng nhập, phiên — Test Cases](./test-cases/f-01-auth-session-test-cases.md)
+- [F-02 Tài khoản, vai trò, phạm vi quyền — Test Cases](./test-cases/f-02-accounts-roles-permissions-test-cases.md)
+- [F-03 Đơn vị và nhóm chuyên môn — Test Cases](./test-cases/f-03-org-units-subject-groups-test-cases.md)
+- [F-04 Danh mục học phần — Test Cases](./test-cases/f-04-course-catalog-test-cases.md)
+- [F-05 Quan hệ học phần, nhóm tương đương — Test Cases](./test-cases/f-05-course-relations-equivalence-test-cases.md)
+- [F-06 Thông tin chương trình, Giám đốc CTĐT — Test Cases](./test-cases/f-06-programs-directors-test-cases.md)
+- [F-07 Khung chương trình, nhóm tự chọn — Test Cases](./test-cases/f-07-curriculum-elective-groups-test-cases.md)
+- [F-08 Kiểm tra nhất quán — Test Cases](./test-cases/f-08-consistency-check-test-cases.md)
+- [F-10 Đề cương — Test Cases](./test-cases/f-10-syllabus-test-cases.md)
+- [F-11 PLO, CLO, ma trận — Test Cases](./test-cases/f-11-plo-clo-matrices-test-cases.md)
+- [F-13 Đề xuất thay đổi — Test Cases](./test-cases/f-13-change-requests-test-cases.md)
+- [F-14 Duyệt ba cấp, bình luận, thông báo — Test Cases](./test-cases/f-14-three-level-approval-notifications-test-cases.md)
+- [F-15 Ban hành phiên bản — Test Cases](./test-cases/f-15-release-version-snapshots-test-cases.md)
+- [Playwright — hướng dẫn chạy và mở rộng pilot](./playwright-guide.md)
 - …
 
 ### Refactors

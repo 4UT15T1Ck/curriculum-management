@@ -1,0 +1,115 @@
+# F-06 Thông tin chương trình, Giám đốc CTĐT — Test Cases
+
+| Mục | Nội dung |
+|---|---|
+| User stories | US-018 (3 AC), US-019 (5 AC), US-020 (3 AC), US-021 (3 AC), US-022 (4 AC); tổng 18 AC |
+| Màn hình | MH-21 `/programs`; MH-22 `/programs/:programId`; MH-23 `/programs/new`, `/programs/:programId/edit`; MH-24 dialog nhân bản |
+| Vai trò/tài khoản | R1 admin; R2, R3/R3b, R4/R4b, R5/R5b, R6 theo `source/e2e/fixtures/accounts.ts`. |
+| Môi trường | Frontend `http://localhost:5173`, proxy `/api` tới backend `http://localhost:3000`; seed nền rồi demo. |
+| Dữ liệu demo | Chương trình 1024034 chỉ đọc; không sửa, ngừng, nhân bản đè hoặc đổi khung chương trình seed. Không đổi vai trò của demo. |
+| Dữ liệu tự tạo | `<suffix>` là 16 ký tự hex ngẫu nhiên; mã EP<suffix>, bản sao EC<suffix>, đều dưới 20 ký tự; tên và tài khoản riêng. Mỗi ca ghi tự tạo chương trình và phân công riêng. |
+| Nguồn nghiệp vụ | `docs/planning/user-stories.md` US-018..022; `docs/planning/test-plan.md` §6.2 KB-011, §6.5 KB-084, §7.2 NT-B2-08, §8 NFR-09/18, §9 EC-50; `docs/requirement/REQUIREMENTS.md` FR-07/08/23/24/25/26, BR-03, EC-50, M-7. |
+| Nguồn thiết kế/triển khai | `docs/design/screen-inventory.md` MH-21..24; `docs/design/data-dictionary.md` §9; `docs/implementation/f-06-programs-directors-implementation-plan.md` §7/§8; `docs/implement-report/f-06-programs-directors-implement-report.md` Lệch 6/7/10, Còn nợ; báo cáo F-11 dòng 23 cho mở rộng nhân bản. |
+| Nguồn mã | `source/frontend/src/features/programs/`, `shared/forms/credits.ts`; `source/backend/src/features/programs/`, `shared/programs/`, `shared/authz/`; `source/backend/prisma/seed-data/permission-catalog.ts`, `programs.ts`, `demo/accounts.ts`, `demo/programs.ts`. |
+| Playwright spec | `source/e2e/specs/f-06-programs-directors.spec.ts`; [hướng dẫn](../playwright-guide.md) |
+| Trạng thái | 21 ca tự động đã chạy bằng Playwright ngày 10/21/26, tất cả Passed; 31 ca thủ công chưa thực thi. |
+
+## Truy vết
+
+AC1 là dòng Cho/Khi/Thì đầu tiên dưới story, AC2 dòng thứ hai, …; không tính mục Vai trò/Bao phủ.
+| AC | TC |
+|---|---|
+| US-018 AC1 | F06-TC_001; F06-TC_019; F06-TC_046; F06-TC_047; F06-TC_048 |
+| US-018 AC2 | F06-TC_002 |
+| US-018 AC3 | F06-TC_003; F06-TC_045 |
+| US-019 AC1 | F06-TC_004 |
+| US-019 AC2 | F06-TC_005 |
+| KB-011 | F06-TC_005 |
+| BR-03 | F06-TC_005 |
+| US-019 AC3 | F06-TC_006 |
+| US-019 AC4 | F06-TC_007 |
+| US-021 AC1 | F06-TC_007; F06-TC_012 |
+| NFR-09 | F06-TC_007; F06-TC_041; F06-TC_042; F06-TC_043; F06-TC_045 |
+| US-019 AC5 | F06-TC_008; F06-TC_038; F06-TC_050 |
+| EC-50 | F06-TC_008; F06-TC_050 |
+| US-020 AC1 | F06-TC_009 |
+| NT-B2-08 | F06-TC_009; F06-TC_015 |
+| US-020 AC2 | F06-TC_010 |
+| US-020 AC3 | F06-TC_011 |
+| US-021 AC2 | F06-TC_013 |
+| US-021 AC3 | F06-TC_014 |
+| US-022 AC1 | F06-TC_015 |
+| US-022 AC2 | F06-TC_016 |
+| US-022 AC3 | F06-TC_017 |
+| NFR-18 | F06-TC_049 |
+| KB-084 | F06-TC_050 |
+| US-022 AC4 | F06-TC_051 |
+
+## Test cases
+
+Năm cột cuối thuộc nhóm **Developer**; để No và trống kết quả cho đến khi người dùng thực thi.
+
+| TC_ID | Target item | Sub-target item | AC | Test summary | Pre-Condition | Steps | Test Data | Expected Result | Is Test? | Test Result | Executed On | Executed By | Note |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| F06-TC_001 | Danh sách (MH-21) | Tra cứu | US-018 AC1 | Kiểm tra tìm chương trình riêng | R1; chương trình riêng Đang sử dụng | 1. Tạo chương trình riêng; 2. Tìm theo mã | EP<suffix> | Dòng đúng mã/tên, “Kỹ sư”, “Đang sử dụng”; có cột phiên bản hiện hành | Yes | Passed | 10/21/26 | Playwright (auto) | Tự động: F06-TC_001 trong specs/f-06-programs-directors.spec.ts. |
+| F06-TC_002 | Tổng quan (MH-22) | Thông tin | US-018 AC2 | Kiểm tra tổng quan và chưa phân công | R1; chương trình riêng mới tạo | 1. Mở tổng quan | EP<suffix> | Thông tin đúng tên; “Chưa phân công Giám đốc CTĐT”; có link “Khung chương trình” | Yes | Passed | 10/21/26 | Playwright (auto) | Tự động: F06-TC_002 trong specs/f-06-programs-directors.spec.ts. |
+| F06-TC_003 | Danh sách (MH-21) | Phân quyền | US-018 AC3 | Kiểm tra R6 bị từ chối danh sách | Phiên R6 có phạm vi seed ở Phòng Đào tạo | 1. Mở `/programs` | R6 | “Không thể tải danh sách chương trình” | Yes | Passed | 10/21/26 | Playwright (auto) | Tự động: F06-TC_003 trong specs/f-06-programs-directors.spec.ts. Không đổi phạm vi R6; báo cáo F-06 dòng 63 (Lệch 6) mô tả phạm vi thử. |
+| F06-TC_004 | Thông tin (MH-23) | Tạo | US-019 AC1 | Kiểm tra tạo chương trình kèm Nháp | R1 | 1. Thêm chương trình; 2. Nhập đủ dữ liệu; 3. Lưu | EP<suffix>; Kỹ sư; 8 kỳ; 10=5+5 | Mở tổng quan đúng mã; thông tin phiên bản “Nháp”; có “Sửa thông tin” | Yes | Passed | 10/21/26 | Playwright (auto) | Tự động: F06-TC_004 trong specs/f-06-programs-directors.spec.ts. |
+| F06-TC_005 | Thông tin (MH-23) | Tổng tín chỉ | US-019 AC2; KB-011; BR-03 | Kiểm tra chặn lệch tín chỉ | R1 đang thêm chương trình riêng | 1. Nhập các tổng; 2. Lưu | 150; 120; 25 | “Chênh lệch 5 tín chỉ.”; báo “Tín chỉ bắt buộc cộng tín chỉ tự chọn phải bằng tổng tín chỉ (chênh lệch 5 tín chỉ).”; vẫn ở form | Yes | Passed | 10/21/26 | Playwright (auto) | Tự động: F06-TC_005 trong specs/f-06-programs-directors.spec.ts. Form chặn trước khi gửi, báo lỗi ngay dưới Tổng số tín chỉ. |
+| F06-TC_006 | Thông tin (MH-23) | Trình độ | US-019 AC3 | Kiểm tra Kỹ sư và Cử nhân cùng tồn tại | R1 | 1. Tạo hai chương trình riêng; 2. Mở lại từng chương trình | Kỹ sư 150=120+30/10 kỳ; Cử nhân 120=100+20/8 kỳ | Hai chương trình vẫn mở được, trình độ và tổng riêng không bị ghi đè | Yes | Passed | 10/21/26 | Playwright (auto) | Tự động: F06-TC_006 trong specs/f-06-programs-directors.spec.ts. |
+| F06-TC_007 | Thông tin (MH-23) | Phạm vi | US-019 AC4; US-021 AC1; NFR-09 | Kiểm tra R3 không sửa chương trình ngoài phân công | R1 tạo chương trình riêng B không phân công R3 | 1. R3 mở B; 2. Thử mở route sửa; 3. Gửi lại yêu cầu lưu trong DevTools với header X-Requested-With | B riêng | Không có “Sửa thông tin”; route quay về tổng quan; máy chủ 403 OUT_OF_SCOPE | No | | | | Thủ công với B riêng; không sửa phân công hoặc phạm vi demo. |
+| F06-TC_008 | Tổng quan (MH-22) | Không xóa | US-019 AC5; EC-50 | Kiểm tra không có chức năng xóa chương trình | R1 mở chương trình riêng | 1. Kiểm thao tác | EP<suffix> | Chỉ có “Ngừng sử dụng”, không có “Xóa” | No | | | | Thủ công; nhánh có sinh viên kiểm ở ca 050. |
+| F06-TC_009 | Giám đốc (MH-22) | Phân công | US-020 AC1; NT-B2-08 | Kiểm tra một người phụ trách hai chương trình | R1; một tài khoản và hai chương trình tự tạo | 1. Phân công cùng người từ hôm nay ở cả hai; 2. Mở lại nguồn thứ nhất | Tài khoản e2e.<suffix> | Cả hai chương trình hiện người đó “Đang hiệu lực” | Yes | Passed | 10/21/26 | Playwright (auto) | Tự động: F06-TC_009 trong specs/f-06-programs-directors.spec.ts. |
+| F06-TC_010 | Giám đốc (MH-22) | Lịch sử | US-020 AC2 | Kiểm tra phân công hết hạn còn trong lịch sử | R1; chương trình và tài khoản riêng, validTo hôm qua | 1. Mở tổng quan; 2. Xem danh sách và lịch sử phân công | Phân công riêng đã hết hạn | Dòng ghi “Đã hết hạn”; người đó không còn trong cột Giám đốc hiện tại của danh sách | No | | | | Thủ công; không kết thúc phân công trên chương trình seed. |
+| F06-TC_011 | Giám đốc (MH-22) | Đồng thời | US-020 AC3 | Kiểm tra hai Giám đốc cùng thời gian | R1; hai tài khoản riêng; một chương trình riêng | 1. Phân công lần lượt cả hai từ hôm nay | Hai người; không thời hạn | Hai dòng đều “Đang hiệu lực”; đủ hai người phụ trách | Yes | Passed | 10/21/26 | Playwright (auto) | Tự động: F06-TC_011 trong specs/f-06-programs-directors.spec.ts. Chỉ kiểm phân công; không tự gửi duyệt để thử F-14. |
+| F06-TC_012 | Thông tin (MH-23) | Phạm vi | US-021 AC1 | Kiểm tra R3 sửa chương trình mình phụ trách | R1 tạo A riêng và phân công accounts.R3 chỉ trên A | 1. R3 mở A; 2. Sửa tên; 3. Lưu | A riêng; tên mới có suffix | Hiện tên mới ở tổng quan A | No | | | | Thủ công: không đổi seed; được thêm phân công demo trên chương trình riêng, không khẳng định toàn bộ danh sách R3 thấy. |
+| F06-TC_013 | Thông tin (MH-23) | Hết hạn | US-021 AC2 | Kiểm tra từ chối lưu ngay sau hết phân công | A và tài khoản riêng; form sửa đã mở trước hết hạn | 1. R1 kết thúc phân công riêng; 2. Người đó bấm Lưu | Thay đổi tên A | Máy chủ từ chối 403; tên A không đổi | No | | | | Thủ công: không kết thúc phân công demo hoặc phiên .auth; dùng tài khoản riêng và thời hạn thật. |
+| F06-TC_014 | Thông tin (MH-23) | Đa vai trò | US-021 AC3 | Kiểm tra quyền cộng dồn R3 và R5 theo mã hiện tại | Tài khoản riêng vừa là Giám đốc A vừa thành viên nhóm G | 1. Sửa học phần trong G; 2. Sửa học phần ngoài G chưa ban hành; 3. Thử sửa chương trình B không phân công | A/B/nhóm/học phần riêng | Sửa học phần trong và ngoài G được theo course.edit R3 toàn trường; sửa B bị 403 | No | | | | Lệch US-021 AC3: báo cáo F-06 dòng 64, Lệch 7. Quyết định người dùng còn mở; không thay ma trận. Thủ công vì cần tài khoản đa vai riêng. |
+| F06-TC_015 | Nhân bản (MH-24) | Nội dung | US-022 AC1; NT-B2-08 | Kiểm tra sao chép khung và nhóm tự chọn | R1; nguồn riêng có dòng, nhóm, ngưỡng và ràng buộc riêng | 1. Nhân bản sang mã mới; 2. Mở khung và nhóm của bản sao | EP<suffix> → EC<suffix> | Bản mới Nháp; đủ thông tin, dòng, ký hiệu, nhóm, ngưỡng, ràng buộc như nguồn | No | | | | Thủ công: dựng nguồn riêng, tuyệt đối không thay khung 1024034. VersionContentCopier hiện đã có phần F-07. |
+| F06-TC_016 | Nhân bản (MH-24) | Độc lập | US-022 AC2 | Kiểm tra sửa bản sao không đổi nguồn | R1; tự tạo nguồn và bản sao | 1. Sửa tên bản sao; 2. Lưu; 3. Mở nguồn | Tên bản sao + “sửa” | Bản sao có tên mới, nguồn vẫn giữ tên cũ | Yes | Passed | 10/21/26 | Playwright (auto) | Tự động: F06-TC_016 trong specs/f-06-programs-directors.spec.ts. |
+| F06-TC_017 | Nhân bản (MH-24) | Truy nguồn | US-022 AC3 | Kiểm tra hiển thị nguồn nhân bản | R1; nguồn riêng | 1. Nhân bản; 2. Xem thông tin | EC<suffix> | Mục “Nhân bản từ” có link đúng mã nguồn và phiên bản nguồn | Yes | Passed | 10/21/26 | Playwright (auto) | Tự động: F06-TC_017 trong specs/f-06-programs-directors.spec.ts. |
+| F06-TC_018 | Danh sách (MH-21) | Rỗng | Bổ sung | Kiểm tra tìm không có kết quả | R1; dữ liệu tích lũy | 1. Tìm mã không tồn tại | NONE<suffix> | “Chưa có chương trình” | Yes | Passed | 10/21/26 | Playwright (auto) | Tự động: F06-TC_018 trong specs/f-06-programs-directors.spec.ts. Không đòi danh sách toàn hệ thống rỗng. |
+| F06-TC_019 | Danh sách (MH-21) | Lọc | US-018 AC1 | Kiểm tra lọc trình độ | R1; hai chương trình riêng khác trình độ | 1. Tìm mã Cử nhân riêng; 2. Lọc Kỹ sư; 3. Đổi sang Cử nhân | Mã riêng | Kỹ sư không hiện bản ghi Cử nhân; Cử nhân hiện đúng dòng | No | | | | Thủ công; không kiểm tổng bản ghi cố định. |
+| F06-TC_020 | Thông tin (MH-23) | Trùng | Bổ sung | Kiểm tra trùng mã chương trình | R1; chương trình riêng đã tạo | 1. Thêm mới dùng lại mã; 2. Lưu | EP<suffix> | Lỗi trường mã “Mã chương trình đã tồn tại.”; không rời form | Yes | Passed | 10/21/26 | Playwright (auto) | Tự động: F06-TC_020 trong specs/f-06-programs-directors.spec.ts. Form hiện message tiếng Việt của backend dưới trường mã. |
+| F06-TC_021 | Thông tin (MH-23) | Bắt buộc | Bổ sung | Kiểm tra mã chương trình trống | R1; form đủ trường khác | 1. Xóa mã; 2. Lưu | Trống | “Nhập mã chương trình.” | Yes | Passed | 10/21/26 | Playwright (auto) | Tự động: F06-TC_021 trong specs/f-06-programs-directors.spec.ts. |
+| F06-TC_022 | Thông tin (MH-23) | Giới hạn | Bổ sung | Kiểm tra mã chương trình dài 21 ký tự | R1; form đủ trường khác | 1. Nhập mã vượt giới hạn; 2. Lưu | P lặp 21 lần | “Mã chương trình tối đa 20 ký tự.” | Yes | Passed | 10/21/26 | Playwright (auto) | Tự động: F06-TC_022 trong specs/f-06-programs-directors.spec.ts. |
+| F06-TC_023 | Thông tin (MH-23) | Bắt buộc | Bổ sung | Kiểm tra tên chương trình trống | R1; form đủ trường khác | 1. Xóa tên; 2. Lưu | Trống | “Nhập tên chương trình.” | Yes | Passed | 10/21/26 | Playwright (auto) | Tự động: F06-TC_023 trong specs/f-06-programs-directors.spec.ts. |
+| F06-TC_024 | Thông tin (MH-23) | Giới hạn | Bổ sung | Kiểm tra tên chương trình dài 201 ký tự | R1; form đủ trường khác | 1. Nhập tên; 2. Lưu | N lặp 201 lần | “Tên chương trình tối đa 200 ký tự.” | Yes | Passed | 10/21/26 | Playwright (auto) | Tự động: F06-TC_024 trong specs/f-06-programs-directors.spec.ts. |
+| F06-TC_025 | Thông tin (MH-23) | Bắt buộc | Bổ sung | Kiểm tra mã ngành trống | R1; form đủ trường khác | 1. Xóa mã ngành; 2. Lưu | Trống | “Nhập mã ngành.” | No | | | | Thủ công. |
+| F06-TC_026 | Thông tin (MH-23) | Giới hạn | Bổ sung | Kiểm tra mã ngành dài 21 ký tự | R1; form đủ trường khác | 1. Nhập mã ngành; 2. Lưu | M lặp 21 lần | “Mã ngành tối đa 20 ký tự.” | No | | | | Thủ công. |
+| F06-TC_027 | Thông tin (MH-23) | Bắt buộc | Bổ sung | Kiểm tra tên ngành trống | R1; form đủ trường khác | 1. Xóa tên ngành; 2. Lưu | Trống | “Nhập tên ngành.” | No | | | | Thủ công. |
+| F06-TC_028 | Thông tin (MH-23) | Giới hạn | Bổ sung | Kiểm tra tên ngành dài 201 ký tự | R1; form đủ trường khác | 1. Nhập tên ngành; 2. Lưu | N lặp 201 lần | “Tên ngành tối đa 200 ký tự.” | No | | | | Thủ công. |
+| F06-TC_029 | Thông tin (MH-23) | Học kỳ | Bổ sung | Kiểm tra chặn học kỳ 0 | R1; form mới | 1. Nhập 0 vào Số học kỳ; 2. Lưu | 0 | Không lưu số học kỳ ngoài 1–12; ô InputNumber giới hạn hoặc báo “Số học kỳ từ 1 đến 12.” | No | | | | Thủ công; phân biệt clamp của InputNumber và kiểm máy chủ. |
+| F06-TC_030 |  |  | Bổ sung | Kiểm tra chặn học kỳ 13 | R1; form mới | 1. Nhập 13; 2. Lưu | 13 | Không lưu số học kỳ ngoài 1–12 | No | | | | Thủ công; không ép DOM để vượt clamp. |
+| F06-TC_031 | Thông tin (MH-23) | Tín chỉ | Bổ sung | Kiểm tra tín chỉ âm | R1; form đủ trường khác | 1. Nhập tổng âm; 2. Lưu | -1 | “Số tín chỉ phải là số từ 0 đến 999.99, tối đa 2 chữ số thập phân (ví dụ 3, 2.5 hoặc 0).” | Yes | Passed | 10/21/26 | Playwright (auto) | Tự động: F06-TC_031 trong specs/f-06-programs-directors.spec.ts. |
+| F06-TC_032 |  |  | Bổ sung | Kiểm tra tín chỉ có ba số thập phân | R1; form đủ trường khác | 1. Nhập tổng; 2. Lưu | 2.555 | “Số tín chỉ phải là số từ 0 đến 999.99, tối đa 2 chữ số thập phân (ví dụ 3, 2.5 hoặc 0).” | No | | | | Thủ công. |
+| F06-TC_033 |  |  | Bổ sung | Kiểm tra tổng tín chỉ bằng 0 | R1 | 1. Nhập chương trình riêng có ba tổng bằng 0; 2. Lưu | 0=0+0 | Mở tổng quan đúng chương trình, có “Sửa thông tin” | Yes | Passed | 10/21/26 | Playwright (auto) | Tự động: F06-TC_033 trong specs/f-06-programs-directors.spec.ts. |
+| F06-TC_034 | Giám đốc (MH-22) | Bắt buộc | Bổ sung | Kiểm tra bỏ trống người được phân công | R1; chương trình riêng | 1. Phân công; 2. Không chọn người; 3. Phân công | Trống | “Chọn người được phân công.” | Yes | Passed | 10/21/26 | Playwright (auto) | Tự động: F06-TC_034 trong specs/f-06-programs-directors.spec.ts. |
+| F06-TC_035 | Giám đốc (MH-22) | Thời hạn | Bổ sung | Kiểm tra ngày kết thúc trước bắt đầu | R1; chương trình và người riêng | 1. Chọn người; 2. Chọn kết thúc trước bắt đầu; 3. Phân công | Hôm qua < hôm nay | “Ngày kết thúc không được trước ngày bắt đầu.” | No | | | | Thủ công. |
+| F06-TC_036 | Giám đốc (MH-22) | Chồng thời gian | Bổ sung | Kiểm tra cùng người có phân công chồng | R1; người và chương trình riêng; đã phân công từ hôm nay | 1. Phân công lại cùng người từ hôm nay | Cùng người/cùng chương trình | “Người này đã được phân công cho chương trình trong khoảng thời gian chồng lên.” | Yes | Passed | 10/21/26 | Playwright (auto) | Tự động: F06-TC_036 trong specs/f-06-programs-directors.spec.ts. |
+| F06-TC_037 | Giám đốc (MH-22) | Thu hồi | Bổ sung | Kiểm tra thu hồi vẫn giữ lịch sử | R1; phân công trên chương trình riêng | 1. Thu hồi đúng dòng; 2. Xác nhận | Phân công riêng | Dòng “Đã thu hồi” vẫn còn; không còn quyền Giám đốc theo dòng đó | No | | | | Thủ công; tuyệt đối không thu hồi phân công seed. |
+| F06-TC_038 | Tổng quan (MH-22) | Trạng thái | US-019 AC5 | Kiểm tra ngừng sử dụng và ẩn khỏi lọc mặc định | R1; chương trình riêng | 1. Ngừng sử dụng; 2. Xác nhận; 3. Tìm mã ở danh sách mặc định | EP<suffix> | “Đã ngừng sử dụng chương trình.”; tìm mặc định hiện “Chưa có chương trình” | Yes | Passed | 10/21/26 | Playwright (auto) | Tự động: F06-TC_038 trong specs/f-06-programs-directors.spec.ts. Automation còn kiểm lại đúng dòng khi chuyển Tất cả; không đổi seed. |
+| F06-TC_039 | Danh sách (MH-21) | Trạng thái | Bổ sung | Kiểm tra tìm chương trình ngừng dưới Tất cả | R1; chương trình riêng Ngừng sử dụng | 1. Tìm đúng mã; 2. Lọc Tất cả | EP<suffix> | Dòng riêng hiện “Ngừng sử dụng” | No | | | | Thủ công; không yêu cầu danh sách chung rỗng. |
+| F06-TC_040 | Tổng quan (MH-22) | Trạng thái | Bổ sung | Kiểm tra dùng lại chương trình riêng | R1; chương trình riêng Ngừng sử dụng | 1. Dùng lại; 2. Xác nhận | EP<suffix> | “Đã dùng lại chương trình.”; trạng thái “Đang sử dụng” | No | | | | Thủ công, không dùng chương trình seed. |
+| F06-TC_041 | Tổng quan (MH-22) | Phân quyền | NFR-09 | Kiểm tra R2 không quản trị chương trình | R1 chuẩn bị chương trình riêng | 1. R2 mở tổng quan; 2. Thử PATCH thông tin/POST director/clone trên chương trình đó trong DevTools | R2; header X-Requested-With: XMLHttpRequest | Không có Sửa thông tin/Phân công/Nhân bản/Ngừng sử dụng; yêu cầu ghi 403 PERMISSION_DENIED | No | | | | Thủ công; không thay ma trận quyền. |
+| F06-TC_042 |  |  | NFR-09 | Kiểm tra R4 không sửa thông tin hay phân công | Chương trình riêng | 1. R4 mở tổng quan; 2. Thử lưu thông tin/phân công/nhân bản qua DevTools | R4 và R4b; header chống CSRF đúng | Không có các thao tác quản trị đó; máy chủ 403 PERMISSION_DENIED | No | | | | Thủ công; quyền sửa khung là chuyện riêng, không suy từ program.editInfo. |
+| F06-TC_043 |  |  | NFR-09 | Kiểm tra R5 không sửa thông tin hay phân công | Chương trình riêng | 1. R5 mở tổng quan; 2. Thử yêu cầu ghi như ca 042 | R5 và R5b | Các yêu cầu quản trị bị 403 PERMISSION_DENIED | No | | | | Thủ công; không thay nhóm demo. |
+| F06-TC_044 | Danh sách (MH-21) | Phân quyền | Bổ sung | Kiểm tra R3 không tạo chương trình mới | Phiên R3; form với mã riêng | 1. Thêm chương trình; 2. Điền hợp lệ; 3. Lưu | EP<suffix> | Nút có thể hiện nhưng máy chủ từ chối 403 PERMISSION_DENIED; không tạo mới | No | | | | Lệch khả năng hiển thị: báo cáo F-06 dòng 67, Lệch 10; thủ công. |
+| F06-TC_045 | Tổng quan (MH-22) | Phân quyền | US-018 AC3; NFR-09 | Kiểm tra R6 không xem chương trình ngoài phạm vi | R1 cung cấp URL chương trình riêng | 1. R6 mở URL trực tiếp | R6 seed ở Phòng Đào tạo | “Bạn không có quyền xem chương trình này”; máy chủ 403 | No | | | | Thủ công; không mở rộng scope R6. |
+| F06-TC_046 | Danh sách (MH-21) | Chỉ xem | US-018 AC1 | Kiểm tra R2 xem danh sách chương trình | R2; chương trình riêng hoạt động | 1. Tìm mã riêng; 2. Mở tổng quan | EP<suffix> | Đọc được thông tin đúng chương trình | No | | | | Thủ công. |
+| F06-TC_047 |  |  | US-018 AC1 | Kiểm tra R4 xem danh sách chương trình | R4; chương trình riêng hoạt động | 1. Tìm mã riêng; 2. Mở tổng quan | EP<suffix> | Đọc được thông tin đúng chương trình | No | | | | Thủ công. |
+| F06-TC_048 |  |  | US-018 AC1 | Kiểm tra R5 xem danh sách chương trình | R5; chương trình riêng hoạt động | 1. Tìm mã riêng; 2. Mở tổng quan | EP<suffix> | Đọc được thông tin đúng chương trình | No | | | | Thủ công. |
+| F06-TC_049 | Danh sách (MH-21) | Phân trang | NFR-18 | Kiểm tra phân trang và tìm tên | R1; dữ liệu nhiều hơn một trang | 1. Chuyển trang; 2. Tìm tên duy nhất; 3. Đối chiếu cột có hỗ trợ sắp xếp | Tên riêng | Phân trang và tìm đúng bản ghi; bảng hiện tại không có sorter ở cột | No | | | | Thủ công/rà soát; code-wins cho giới hạn NFR-18, không tự thêm UI sắp xếp. |
+| F06-TC_050 | Tổng quan (MH-22) | Có sinh viên | US-019 AC5; KB-084; EC-50 | Kiểm tra không xóa chương trình có sinh viên | Người kiểm dựng chương trình và sinh viên riêng | 1. Mở tổng quan; 2. Ngừng sử dụng | Chương trình riêng có sinh viên | Chỉ ngừng sử dụng, không xóa cứng hoặc mất lịch sử sinh viên | No | | | | Thủ công: không gắn hoặc sửa sinh viên trên chương trình seed chỉ để kiểm ca này. |
+| F06-TC_051 | Nhân bản (MH-24) | Phạm vi sao chép | US-022 AC4 | Kiểm tra nhân bản theo phạm vi hiện đã mở rộng | R1; nguồn riêng có PLO và ma trận riêng | 1. Nhân bản; 2. Đối chiếu PLO và ma trận của bản sao | Nguồn riêng có dữ liệu đầu ra | PLO và hai ma trận được sao chép với liên kết sang dòng/PLO mới | No | | | | Lệch US-022 AC4 đợt 1: hiện đã triển khai US-048/F-11; source/backend/src/shared/programs/version-content.copier.ts:37; báo cáo F-11 dòng 23 ghi ca nhân bản outcomes. Thủ công, không sửa PLO seed. |
+| F06-TC_052 | Thông tin (MH-23) | Biên hợp lệ | Bổ sung | Kiểm tra lưu các giới hạn tối đa hợp lệ | R1; chương trình riêng | 1. Nhập mã/ngành 20 ký tự, tên/ngành 200 ký tự, 12 học kỳ, tổng hợp lệ; 2. Lưu | 20/200/12; 999.99=999.99+0 | Lưu được và mở tổng quan đúng thông tin | No | | | | Thủ công; các giá trị có suffix riêng ở cuối, không trùng dữ liệu cũ. |
+
+## Ghi chú
+
+- US-021 AC3 là quyết định người dùng còn mở: ca 014 giữ hành vi hiện tại, không chốt lại thiết kế. `program.editInfo` R3 P, nhưng `course.edit` R3 D toàn trường và học phần chưa ban hành sửa trực tiếp. Nguồn: báo cáo F-06 dòng 64 (Lệch 7).
+- US-022 AC4 là tiêu chí đợt 1; mã hiện có US-048/F-11 nên nhân bản PLO và ma trận. Ca 051 ghi lệch có nguồn, không phải nghi lỗi mới. Ca 015 bao phủ phần F-07 đã bổ sung vào VersionContentCopier; không khẳng định copier còn rỗng như báo cáo F-06 ban đầu.
+- NFR-18: danh sách có tìm kiếm và phân trang nhưng cột hiện không có sorter. Ca 049 ghi giới hạn mã hiện tại; không tuyên bố đủ cả ba cơ chế.
+- US-019 AC2: gợi ý hiển thị chênh lệch đúng 5; Expected Result của ca 005 và 020 trích thông báo tiếng Việt thực tế. Các mã creditsSum/unique trong mock kiểm thử không phải nội dung UI.
+- Ca 013–014, 030 nếu cần thay phân công/đa vai dùng tài khoản riêng; không kết thúc phân công hay đổi vai của demo. Ca 010/037 chỉ thay phân công riêng; ca 050/051 cần dữ liệu sinh viên/PLO riêng, giữ thủ công để không chạm dữ liệu dùng tay.
+- Seed 1024034 có giá trị giữ chỗ (báo cáo Lệch 1/Còn nợ). Không dùng tổng của nó làm chuẩn hoặc chỉnh lại trong suite. Không khẳng định tổng số chương trình R3 thấy, vì các ca khác được thêm phân công trên chương trình riêng.
+- Mỗi test độc lập, không xóa dọn, không reset DB. Chưa chạy trình duyệt; mọi cột thực thi để trống.

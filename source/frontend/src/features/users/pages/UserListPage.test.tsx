@@ -129,11 +129,11 @@ describe('UserListPage', () => {
               : init?.method === 'POST'
                 ? {
                     code: 'USERNAME_TAKEN',
-                    message: 'Tên đăng nhập đã tồn tại',
+                    message: 'Tên đăng nhập đã được dùng.',
                     details: [
                       {
                         field: 'username',
-                        constraints: ['Tên đăng nhập đã tồn tại'],
+                        constraints: ['unique'],
                       },
                     ],
                   }
@@ -158,7 +158,40 @@ describe('UserListPage', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: 'OK' }));
     expect(
-      await screen.findByText('Tên đăng nhập đã tồn tại'),
+      await screen.findByText('Tên đăng nhập đã được dùng.'),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('unique')).not.toBeInTheDocument();
+  });
+
+  it('shows a fallback toast when saving fails without API field errors', async () => {
+    const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) =>
+      init?.method === 'POST'
+        ? Promise.reject(new Error('Network unavailable'))
+        : Promise.resolve(
+            new Response(
+              JSON.stringify(
+                String(input).includes('org-units') ? [] : users,
+              ),
+              { status: 200 },
+            ),
+          ),
+    );
+    renderPage(fetchMock);
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Thêm tài khoản' }),
+    );
+    fireEvent.change(await screen.findByLabelText('Tên đăng nhập'), {
+      target: { value: 'gv01' },
+    });
+    fireEvent.change(screen.getByLabelText('Mã người dùng'), {
+      target: { value: 'GV01' },
+    });
+    fireEvent.change(screen.getByLabelText('Họ tên'), {
+      target: { value: 'Nguyễn An' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'OK' }));
+    expect(
+      await screen.findByText('Không lưu được tài khoản.'),
     ).toBeInTheDocument();
   });
 });
